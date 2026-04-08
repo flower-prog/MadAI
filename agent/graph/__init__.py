@@ -1,10 +1,10 @@
 from typing import TYPE_CHECKING
 
-__all__ = ["build_graph", "build_graph_with_memory"]
+__all__ = ["build_graph", "build_graph_with_memory", "SimpleAgentGraph"]
 
 # Avoid importing builder at package import time to prevent circular imports.
 if TYPE_CHECKING:
-    from .builder import build_graph, build_graph_with_memory
+    from .builder import SimpleAgentGraph, build_graph, build_graph_with_memory
 
 
 def __getattr__(name: str):

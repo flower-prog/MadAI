@@ -1,0 +1,10 @@
+# Core runtime
+openai>=2.28.0
+python-dotenv>=1.0.1
+
+# Hybrid retrieval stack
+# Keep these here so a single `pip install -r requirements.txt`
+# prepares the local MedAI workflow end-to-end.
+faiss-cpu>=1.8.0
+torch>=2.6.0
+transformers>=4.51.0

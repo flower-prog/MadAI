@@ -1,48 +1,100 @@
-from langgraph.graph import StateGraph, START
-from langgraph.checkpoint.memory import InMemorySaver
+from __future__ import annotations
 
-from .types import State
+from typing import Any, Callable
+
 from .nodes import (
-    supervisor_node,
-    research_node,
-    code_node,
-    coordinator_node,
-    browser_node,
+    clinical_assisstment_node,
+    orchestrator_node,
+    protocol_node,
     reporter_node,
-    planner_node,
-    expert_node,
-    human_feedback_node,
 )
+from .types import AgentName, GraphState, ensure_state, state_to_dict
 
 
-def _build_base_graph():
-    """Build and return the agent workflow graph."""
-    builder = StateGraph(State)
-    builder.add_edge(START, "coordinator")
-    builder.add_node("coordinator", coordinator_node)
-    builder.add_node("expert", expert_node)
-    builder.add_node("planner", planner_node)
-    builder.add_node("human_feedback", human_feedback_node)
-    builder.add_node("supervisor", supervisor_node)
-    builder.add_node("researcher", research_node)
-    builder.add_node("coder", code_node)
-    builder.add_node("browser", browser_node)
-    builder.add_node("reporter", reporter_node)
-    return builder
+class SimpleAgentGraph:
+    """MedAI 的轻量路由图。
+
+    当前流程遵循固定主链路：
+    `orchestrator -> clinical_assisstment -> protocol -> reporter`
+
+    其中 calculator 仍然作为 `clinical_assisstment` 节点下的子执行器。
+    `reporter` 节点负责判断本轮结果是否通过，并在需要时回退到
+    `orchestrator`，最多执行三轮总迭代。
+    """
+
+    def __init__(self) -> None:
+        """注册这个轻量图中可用的 MedAI 路由节点。"""
+        self.node_map: dict[AgentName, Callable[[GraphState], GraphState]] = {
+            "orchestrator": orchestrator_node,
+            "clinical_assisstment": clinical_assisstment_node,
+            "protocol": protocol_node,
+            "reporter": reporter_node,
+        }
+
+    def compile(self, checkpointer: Any | None = None) -> "SimpleAgentGraph":
+        """兼容 LangGraph 的 compile 接口，但当前直接返回图本身。"""
+        return self
+
+    def invoke(self, input: GraphState | dict[str, Any], config: dict[str, Any] | None = None) -> dict[str, Any]:
+        """按路由顺序执行节点，直到结束、失败或触发防死循环保护。"""
+        state = ensure_state(input)
+        current_agent: AgentName | str = cast_agent_name(state.next_agent or "orchestrator")
+        max_steps = max(
+            14,
+            (state.max_reporter_attempts * len(self.node_map)) + 2,
+        )
+
+        step_count = 0
+        while current_agent != "FINISH":
+            step_count += 1
+            if step_count > max_steps:
+                state.status = "failed"
+                state.errors.append(
+                    f"Graph exceeded the maximum routed steps ({max_steps}) and was stopped to avoid a loop."
+                )
+                state.next_agent = "FINISH"
+                break
+
+            node = self.node_map.get(cast_agent_name(current_agent))
+            if node is None:
+                state.status = "failed"
+                state.errors.append(f"Unknown graph node requested: {current_agent}")
+                state.next_agent = "FINISH"
+                break
+
+            state.next_agent = None
+            state = node(state)
+            if state.next_agent is None:
+                if state.status in {"completed", "failed"}:
+                    break
+                state.status = "failed"
+                state.errors.append(f"Node {current_agent} did not set `next_agent`.")
+                state.next_agent = "FINISH"
+                break
+
+            current_agent = state.next_agent
+
+        return state_to_dict(state)
 
 
-def build_graph_with_memory():
-    """Build and return the agent workflow graph with memory."""
-    # use persistent memory to save conversation history
-    # TODO: be compatible with SQLite / PostgreSQL
-    memory = InMemorySaver()
-    # memory = MemorySaver()
-
-    # build state graph
-    builder = _build_base_graph()
-    return builder.compile(checkpointer=memory)
+def cast_agent_name(value: AgentName | str) -> AgentName | str:
+    """规范化 agent 名称，同时保留未知值供后续报错使用。"""
+    return str(value).strip() or "orchestrator"
 
 
-def build_graph():
-    """Backward-compatible alias: all entry points use memory-enabled graph."""
-    return build_graph_with_memory()
+def _build_base_graph() -> SimpleAgentGraph:
+    """创建公开构建函数共用的基础图实例。"""
+    return SimpleAgentGraph()
+
+
+def build_graph() -> SimpleAgentGraph:
+    """构建默认的 MedAI 工作流图。"""
+    return _build_base_graph()
+
+
+def build_graph_with_memory() -> SimpleAgentGraph:
+    """保留向后兼容的别名接口。
+
+    当前脚手架暂未实现 memory 能力，因此仍返回基础图实例。
+    """
+    return _build_base_graph()

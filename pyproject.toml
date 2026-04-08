@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "medai"
+version = "0.1.0"
+description = "Clinical calculator workflow for case parsing, retrieval, calculator selection, and execution."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "openai>=2.28.0",
+    "python-dotenv>=1.0.1",
+]
+
+[project.optional-dependencies]
+hybrid = [
+    "faiss-cpu>=1.8.0",
+    "torch>=2.6.0",
+    "transformers>=4.51.0",
+]
+
+[project.scripts]
+medai = "main:main"
+
+[tool.setuptools]
+py-modules = ["main"]
+
+[tool.setuptools.packages.find]
+include = ["agent*"]
