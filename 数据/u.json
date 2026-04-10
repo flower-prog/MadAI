@@ -1,0 +1,908 @@
+﻿{
+    "__field_annotations__":  {
+                                  "__self__":  "这是对当前 u.json 字段的中文标注说明。JSON 标准不支持真正注释，因此这里使用额外字段承载说明；以 __ 开头的键都是给人看的，不属于 MedAI 原始运行结果。",
+                                  "__convention__":  {
+                                                         "__self__":  "标注约定。",
+                                                         "__item__":  "表示“数组中每个元素”的结构说明。",
+                                                         "\u003cagent_name\u003e":  "表示以 agent 名称作为动态键的对象，例如 orchestrator、clinical_assisstment、protocol、reporter。"
+                                                     },
+                                  "__reading_order__":  [
+                                                            "先看 structured_case_json、orchestrator_result、department、department_tags，理解病例被整理成什么样。",
+                                                            "再看 next_agent 和 status，判断当前 workflow 跑到哪一步。",
+                                                            "只有需要调试时，再看 final_output.execution_trace 和 final_output.agent_prompts。"
+                                                        ],
+                                  "request":  "工作流主入口请求文本。你这次没有单独传 --request，所以这里基本等于病例全文。",
+                                  "patient_case":  {
+                                                       "__self__":  "结构化病例输入。只有显式传 --patient-case-file 时才会有值。当前为 null，表示本次没有走结构化病例入口。",
+                                                       "patient_id":  "患者 ID。",
+                                                       "structured_inputs":  "结构化标量输入，例如年龄、性别、实验室值。",
+                                                       "interval_inputs":  "区间型输入，例如数值上下界。",
+                                                       "multimodal_inputs":  "多模态输入，例如图像、附件或其他复杂内容。",
+                                                       "counterfactual_scenarios":  {
+                                                                                        "__self__":  "反事实场景列表，用于假设性分析。",
+                                                                                        "__item__":  {
+                                                                                                         "feature_name":  "要调整的特征名。",
+                                                                                                         "current_value":  "当前值。",
+                                                                                                         "target_value":  "目标值。",
+                                                                                                         "direction":  "变化方向。",
+                                                                                                         "note":  "补充说明。"
+                                                                                                     }
+                                                                                    }
+                                                   },
+                                  "clinical_tool_job":  {
+                                                            "__self__":  "临床工具任务配置。只有显式传 --clinical-tool-job-file 或完整 workflow 进入计算阶段时才会有内容。",
+                                                            "mode":  "运行模式，例如 patient_note、question、baseline。",
+                                                            "text":  "提供给临床工具链的原始文本。",
+                                                            "case_summary":  "病例压缩摘要。",
+                                                            "risk_hints":  "风险提示语列表。",
+                                                            "retrieval_queries":  {
+                                                                                      "__self__":  "给检索系统使用的查询列表。",
+                                                                                      "__item__":  {
+                                                                                                       "stage":  "检索阶段名，例如 case_summary_dense、problem_anchor_1、risk_hint_1。",
+                                                                                                       "text":  "真正送去检索的文本内容。",
+                                                                                                       "intent":  "这条检索语句的用途标签。",
+                                                                                                       "rationale":  "为什么需要这条查询。",
+                                                                                                       "priority":  "优先级，数字越小通常越先处理。"
+                                                                                                   }
+                                                                                  },
+                                                            "top_k":  "检索返回候选数量。",
+                                                            "risk_count":  "风险提示数量上限。",
+                                                            "max_selected_tools":  "最多选择多少个候选工具。",
+                                                            "retriever_backend":  "检索后端，例如 hybrid、vector。",
+                                                            "riskcalcs_path":  "风险计算器元数据文件路径。",
+                                                            "pmid_metadata_path":  "PMID 元数据文件路径。",
+                                                            "llm_model":  "该任务覆盖使用的模型名。",
+                                                            "temperature":  "采样温度。",
+                                                            "max_rounds":  "临床工具子流程的最大轮数。"
+                                                        },
+                                  "plan":  {
+                                               "__self__":  "当前图工作流的步骤计划。",
+                                               "__item__":  {
+                                                                "step_id":  "步骤序号。",
+                                                                "agent_name":  "负责这一阶段的节点名称。",
+                                                                "title":  "人类可读标题。",
+                                                                "description":  "这一步要做什么。",
+                                                                "status":  "步骤状态，例如 pending、in_progress、completed。",
+                                                                "note":  "补充说明。",
+                                                                "result":  "该步骤的结果摘要；未完成时通常为空。"
+                                                            }
+                                           },
+                                  "tools":  {
+                                                "__self__":  "当前工作流暴露给节点/子 agent 的工具契约说明。",
+                                                "__item__":  {
+                                                                 "name":  "工具名。",
+                                                                 "description":  "工具用途说明。",
+                                                                 "required":  "是否为该阶段必需工具。",
+                                                                 "input_schema":  "工具输入字段与类型说明，不是实际输入值。"
+                                                             }
+                                            },
+                                  "tool_registry":  {
+                                                        "__self__":  "运行时工具注册表。序列化时只保留 registered_tools，避免把真实函数对象写进 JSON。",
+                                                        "registered_tools":  "已注册工具名列表。"
+                                                    },
+                                  "messages":  {
+                                                   "__self__":  "消息历史。当前通常包含一条用户病例文本。",
+                                                   "__item__":  {
+                                                                    "role":  "消息角色，例如 user、assistant、system。",
+                                                                    "content":  "消息内容正文。"
+                                                                }
+                                               },
+                                  "problem_list":  "从病例里提炼出的核心问题列表。当前为空通常表示还没跑到 clinical_assisstment。",
+                                  "retrieval_queries":  {
+                                                            "__self__":  "顶层检索查询列表；通常由 clinical_assisstment 生成。",
+                                                            "__item__":  {
+                                                                             "stage":  "检索阶段名，例如 case_summary_dense、problem_anchor_1、risk_hint_1。",
+                                                                             "text":  "真正送去检索的文本内容。",
+                                                                             "intent":  "这条检索语句的用途标签。",
+                                                                             "rationale":  "为什么需要这条查询。",
+                                                                             "priority":  "优先级，数字越小通常越先处理。"
+                                                                         }
+                                                        },
+                                  "calculator_matches":  {
+                                                             "__self__":  "候选计算器或文献匹配结果。",
+                                                             "__item__":  {
+                                                                              "pmid":  "候选文献或计算器的 PMID 标识。",
+                                                                              "title":  "候选条目标题。",
+                                                                              "category":  "候选条目类别，例如 risk_score。",
+                                                                              "rationale":  "为什么匹配到这个候选。",
+                                                                              "applicability":  "当前病例对这个候选的适用性判断。",
+                                                                              "missing_inputs":  "如果无法直接执行，缺哪些关键输入。",
+                                                                              "execution_status":  "执行状态摘要。"
+                                                                          }
+                                                         },
+                                  "protocol_recommendations":  {
+                                                                   "__self__":  "protocol 节点产出的协议化推荐结果。",
+                                                                   "__item__":  {
+                                                                                    "name":  "推荐项名称。",
+                                                                                    "category":  "推荐类别，例如 care_pathway。",
+                                                                                    "status":  "推荐当前状态，例如 matched、insufficient_data、needs_revision。",
+                                                                                    "rationale":  "推荐理由。",
+                                                                                    "linked_calculators":  "支撑该推荐的计算器或工具列表。",
+                                                                                    "corrections":  "需要修正或建议补充的动作。"
+                                                                                }
+                                                               },
+                                  "safety_issues":  {
+                                                        "__self__":  "安全提醒、证据不足提示或阻断项。",
+                                                        "__item__":  {
+                                                                         "severity":  "严重程度，例如 info、warning、critical。",
+                                                                         "message":  "问题描述。",
+                                                                         "source":  "问题来源字段或检查项。",
+                                                                         "blocking":  "是否为阻断性问题；为 true 时通常会触发重跑。"
+                                                                     }
+                                                    },
+                                  "final_output":  {
+                                                       "__self__":  "面向外部调用方的汇总输出容器。不同节点会把适合对外展示或审计的结果逐步写到这里。",
+                                                       "agent_prompts":  {
+                                                                             "__self__":  "各 agent 实际使用的 prompt 规格。这里很大，因为 system_prompt 会完整展开。",
+                                                                             "\u003cagent_name\u003e":  {
+                                                                                                            "agent_name":  "agent 名称。",
+                                                                                                            "llm_type":  "该 agent 绑定的 LLM 通道类型。",
+                                                                                                            "prompt_path":  "prompt 文件路径。",
+                                                                                                            "system_prompt":  "渲染后的完整 system prompt；通常很长，是文件变大的主要原因之一。"
+                                                                                                        }
+                                                                         },
+                                                       "execution_trace":  {
+                                                                               "__self__":  "执行轨迹与审计信息。",
+                                                                               "workflow":  "工作流节点顺序列表。",
+                                                                               "workflow_roles":  "节点名到角色说明的映射。",
+                                                                               "mode":  "当前运行模式。",
+                                                                               "request":  {
+                                                                                               "char_count":  "请求文本字符数。",
+                                                                                               "excerpt":  "请求摘要片段，用于快速查看。"
+                                                                                           },
+                                                                               "agents":  {
+                                                                                              "__self__":  "各 agent 的执行轨迹列表。",
+                                                                                              "__item__":  {
+                                                                                                               "agent_name":  "执行该步的 agent 名称。",
+                                                                                                               "status":  "该 agent 的执行状态。",
+                                                                                                               "summary":  "该 agent 的简要结论。",
+                                                                                                               "output":  "该 agent 的输出摘要或完整输出。",
+                                                                                                               "tool_calls":  {
+                                                                                                                                  "__self__":  "该 agent 内部触发的工具调用列表。",
+                                                                                                                                  "__item__":  {
+                                                                                                                                                   "tool_name":  "工具调用名称。",
+                                                                                                                                                   "status":  "调用状态。",
+                                                                                                                                                   "input":  "工具输入摘要。",
+                                                                                                                                                   "output":  "工具输出摘要。",
+                                                                                                                                                   "metadata":  "可选附加元数据。",
+                                                                                                                                                   "agent_name":  "在 execution_trace.tool_calls 中展平后附带的 agent 名称。"
+                                                                                                                                               }
+                                                                                                                              }
+                                                                                                           }
+                                                                                          },
+                                                                               "tool_calls":  {
+                                                                                                  "__self__":  "从 agents[].tool_calls 展平后的全局工具调用列表。",
+                                                                                                  "__item__":  {
+                                                                                                                   "tool_name":  "工具调用名称。",
+                                                                                                                   "status":  "调用状态。",
+                                                                                                                   "input":  "工具输入摘要。",
+                                                                                                                   "output":  "工具输出摘要。",
+                                                                                                                   "metadata":  "可选附加元数据。",
+                                                                                                                   "agent_name":  "在 execution_trace.tool_calls 中展平后附带的 agent 名称。"
+                                                                                                               }
+                                                                                              }
+                                                                           },
+                                                       "department":  "对外汇总的主科室。",
+                                                       "department_tags":  "对外汇总的科室标签列表。",
+                                                       "orchestrator_result":  "对外汇总的 orchestrator 输出。",
+                                                       "structured_case":  "后续阶段可能补充写入的结构化病例。",
+                                                       "assessment_bundle":  "后续阶段可能补充写入的评估产物包。",
+                                                       "calculation_bundle":  "后续阶段可能补充写入的计算结果包。",
+                                                       "treatment_bundle":  "后续阶段可能补充写入的治疗决策包。",
+                                                       "review_report":  "后续阶段可能补充写入的 reporter 审阅结果。",
+                                                       "clinical_report":  "后续阶段可能补充写入的完整医生报告。",
+                                                       "clinical_answer":  "后续阶段可能补充写入的简化答案列表。"
+                                                   },
+                                  "orchestrator_result":  {
+                                                              "__self__":  "orchestrator 节点的直接输出，也是当前文件最值得先看的部分之一。",
+                                                              "structured_case":  {
+                                                                                      "__self__":  "结构化病例主体。通常是 orchestrator 或 clinical_assisstment 对原始病例做标准化整理后的结果。",
+                                                                                      "raw_request":  "原始请求文本；通常等于用户输入或病例全文。",
+                                                                                      "raw_text":  "去噪、规范化后的病例正文，便于下游继续处理。",
+                                                                                      "case_summary":  "对病例的压缩摘要，适合下游检索、计算和报告节点复用。",
+                                                                                      "problem_list":  "从病例里提炼出的核心问题列表。",
+                                                                                      "known_facts":  "从输入中可以直接确认的已知事实。",
+                                                                                      "missing_information":  "当前缺失、但下游可能需要的重要信息。",
+                                                                                      "data_readiness":  "可选字段；表示该病例对后续计算/决策是否已经准备充分。",
+                                                                                      "department_tags":  "可选字段；病例被归入的科室标签。"
+                                                                                  },
+                                                              "department":  "主科室；必须来自预定义标签库。",
+                                                              "department_tags":  "科室标签列表；第一个通常就是主科室。",
+                                                              "workflow":  "工作流主链路字符串。",
+                                                              "workflow_roles":  "各节点角色说明。",
+                                                              "mode":  "当前模式；如果没有 clinical_tool_job，通常为 baseline。",
+                                                              "notes":  "本轮工作流说明。",
+                                                              "department_tag_library":  "允许使用的科室标签全集。"
+                                                          },
+                                  "assessment_bundle":  {
+                                                            "__self__":  "clinical_assisstment 阶段的汇总产物包。当前为空表示还没跑到该阶段。",
+                                                            "case_summary":  "评估阶段生成的摘要。",
+                                                            "structured_case":  "评估阶段标准化后的结构化病例。",
+                                                            "problem_list":  "评估阶段提炼的问题列表。",
+                                                            "department_tags":  "沿用 orchestrator 的科室标签。",
+                                                            "progressive_queries":  "分阶段检索查询列表。",
+                                                            "reporter_feedback":  "来自上一轮 reporter 的反馈。",
+                                                            "calculation_bundle":  "为计算阶段整理好的任务与结果包。"
+                                                        },
+                                  "calculation_bundle":  {
+                                                             "__self__":  "calculator 阶段的汇总结果。当前为空表示尚未执行计算。",
+                                                             "calculator_matches":  "候选计算器匹配结果。",
+                                                             "calculation_tasks":  "规划出的计算任务。",
+                                                             "calculation_results":  "实际产出的计算结果。",
+                                                             "status":  "该计算包整体状态。",
+                                                             "error":  "如果计算阶段失败，这里通常会记录错误摘要。",
+                                                             "mode":  "计算阶段模式。"
+                                                         },
+                                  "treatment_bundle":  {
+                                                           "__self__":  "protocol 节点产出的治疗决策包。当前为空表示尚未进入 protocol。",
+                                                           "recommendations":  "治疗/处置建议列表。",
+                                                           "trial_candidates":  "从建议中提炼出的试验候选列表。",
+                                                           "note":  "治疗节点说明。"
+                                                       },
+                                  "reporter_result":  {
+                                                          "__self__":  "reporter 节点输出的完整报告包。当前文件里为空时，表示尚未跑到 reporter。",
+                                                          "workflow":  "工作流拓扑字符串。",
+                                                          "workflow_roles":  "各节点的角色说明。",
+                                                          "iteration_attempt":  "当前审阅轮次。",
+                                                          "max_iterations":  "最多允许轮次。",
+                                                          "outcome":  "本轮 reporter 判定，例如 review_pending、completed、iteration_requested。",
+                                                          "summary":  "本轮结论摘要。",
+                                                          "structured_case":  "结构化病例。",
+                                                          "problem_list":  "问题列表。",
+                                                          "calculation_bundle":  "计算结果包。",
+                                                          "treatment_bundle":  "治疗决策包。",
+                                                          "calculation_highlights":  "从 calculation_results 提炼出的简版亮点。",
+                                                          "recommendation_summary":  "对治疗建议的简版摘要。",
+                                                          "incoming_feedback":  "进入 reporter 前收到的历史反馈。",
+                                                          "errors":  "本轮累计错误。",
+                                                          "review_report":  "嵌套的审查结果。"
+                                                      },
+                                  "review_report":  {
+                                                        "__self__":  "reporter 节点给出的审阅结果；决定当前轮是否通过、是否重跑。",
+                                                        "attempt":  "当前是第几次 reporter 审阅。",
+                                                        "max_attempts":  "最多允许审阅多少次。",
+                                                        "passed":  "本轮是否通过。",
+                                                        "checks":  {
+                                                                       "__self__":  "本轮执行的检查项列表。",
+                                                                       "__item__":  {
+                                                                                        "name":  "检查项名称。",
+                                                                                        "passed":  "该检查是否通过。",
+                                                                                        "detail":  "检查项说明。"
+                                                                                    }
+                                                                   },
+                                                        "issues":  {
+                                                                       "__self__":  "本轮发现的问题列表。",
+                                                                       "__item__":  {
+                                                                                        "severity":  "严重程度，例如 info、warning、critical。",
+                                                                                        "message":  "问题描述。",
+                                                                                        "source":  "问题来源字段或检查项。",
+                                                                                        "blocking":  "是否为阻断性问题；为 true 时通常会触发重跑。"
+                                                                                    }
+                                                                   },
+                                                        "report_outcome":  "report_payload 在生成 review_report 时的 outcome。"
+                                                    },
+                                  "clinical_answer":  {
+                                                          "__self__":  "给外层调用方的简化答案列表。当前为空表示还没跑到 reporter 总结阶段。",
+                                                          "__item__":  {
+                                                                           "name":  "建议名称。",
+                                                                           "status":  "建议状态。",
+                                                                           "strategy":  "建议策略类型。",
+                                                                           "actions":  "建议动作列表。"
+                                                                       }
+                                                      },
+                                  "deep_thinking_mode":  "是否启用更深入的规划/推理模式。",
+                                  "search_before_planning":  "是否在规划前先做检索。",
+                                  "pass_through_expert":  "是否走 expert 直通路径。",
+                                  "auto_accepted_plan":  "是否自动接受计划而不等待额外确认。",
+                                  "next_agent":  "下一跳节点名称；当前是 clinical_assisstment 时，表示 orchestrator 已完成并准备进入评估阶段。",
+                                  "status":  "整个图的当前状态，例如 pending、running、completed。",
+                                  "errors":  "运行过程中累计的错误信息列表。",
+                                  "department":  "orchestrator 选出的主科室。",
+                                  "department_tags":  "病例所属科室标签列表。",
+                                  "structured_case_json":  {
+                                                               "__self__":  "结构化病例主体。通常是 orchestrator 或 clinical_assisstment 对原始病例做标准化整理后的结果。",
+                                                               "raw_request":  "原始请求文本；通常等于用户输入或病例全文。",
+                                                               "raw_text":  "去噪、规范化后的病例正文，便于下游继续处理。",
+                                                               "case_summary":  "对病例的压缩摘要，适合下游检索、计算和报告节点复用。",
+                                                               "problem_list":  "从病例里提炼出的核心问题列表。",
+                                                               "known_facts":  "从输入中可以直接确认的已知事实。",
+                                                               "missing_information":  "当前缺失、但下游可能需要的重要信息。",
+                                                               "data_readiness":  "可选字段；表示该病例对后续计算/决策是否已经准备充分。",
+                                                               "department_tags":  "可选字段；病例被归入的科室标签。"
+                                                           },
+                                  "reporter_feedback":  "reporter 给 orchestrator 的阻塞反馈列表；为空表示还没进入回路审阅或当前无反馈。",
+                                  "reporter_attempts":  "reporter 已经执行过多少轮审阅。",
+                                  "max_reporter_attempts":  "允许的最大审阅轮数。",
+                                  "review_passed":  "当前结果是否已通过 reporter 审阅。",
+                                  "abandoned":  "是否已经放弃继续推进本轮 workflow。",
+                                  "calculation_tasks":  {
+                                                            "__self__":  "待执行或已规划的计算任务列表。",
+                                                            "__item__":  {
+                                                                             "task_id":  "计算任务唯一标识。",
+                                                                             "label":  "任务标题或展示名。",
+                                                                             "category":  "任务所属类别。",
+                                                                             "decision":  "当前决策，例如 compute、estimate、skip。",
+                                                                             "required_inputs":  "该任务所需输入字段。",
+                                                                             "available_inputs":  "当前已经具备的输入字段。",
+                                                                             "missing_inputs":  "当前缺失的输入字段。",
+                                                                             "rationale":  "为什么这么决策。",
+                                                                             "executor":  "执行该任务的执行器名称。"
+                                                                         }
+                                                        },
+                                  "calculation_results":  {
+                                                              "__self__":  "计算阶段产出的结果制品列表。",
+                                                              "__item__":  {
+                                                                               "name":  "结果名称。",
+                                                                               "category":  "结果所属类别。",
+                                                                               "status":  "结果状态，例如 completed、estimated、skipped、failed。",
+                                                                               "value":  "计算结果值。",
+                                                                               "unit":  "结果单位。",
+                                                                               "source":  "结果来源。",
+                                                                               "rationale":  "结果说明或理由。",
+                                                                               "linked_task_id":  "对应的计算任务 ID。",
+                                                                               "linked_calculator":  "对应使用的计算器名称。",
+                                                                               "missing_inputs":  "如果结果不完整，缺失了哪些输入。"
+                                                                           }
+                                                          },
+                                  "treatment_recommendations":  {
+                                                                    "__self__":  "最终治疗/处置建议列表。",
+                                                                    "__item__":  {
+                                                                                     "name":  "治疗或处置建议名称。",
+                                                                                     "strategy":  "策略类型，例如 protocol_match、trial_match、advice_only。",
+                                                                                     "source":  "建议来源。",
+                                                                                     "status":  "建议状态，例如 manual_review、advice_only、abandoned。",
+                                                                                     "rationale":  "建议理由。",
+                                                                                     "linked_calculators":  "支撑建议的计算器列表。",
+                                                                                     "linked_trials":  "支撑建议的试验列表。",
+                                                                                     "actions":  "下一步建议动作。"
+                                                                                 }
+                                                                }
+                              },
+    "request":  "病史摘要患者诊断胼胝体梗死后失用症伴失语34 d。 症状体征右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。 诊断方法依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。 治疗方法康复训练治疗和经颅直流电刺激（tDCS）定位治疗。 临床转归经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。 适合阅读人群神经科；康复科\",\"resolved_detail_abstract_en\":null,\"resolved_detail_abstract_zh_sections\":[{\"label\":\"病史摘要\",\"text\":\"患者诊断胼胝体梗死后失用症伴失语34 d。\"},{\"label\":\"症状体征\",\"text\":\"右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。\"},{\"label\":\"诊断方法\",\"text\":\"依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。\"},{\"label\":\"治疗方法\",\"text\":\"康复训练治疗和经颅直流电刺激（tDCS）定位治疗。\"},{\"label\":\"临床转归\",\"text\":\"经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。",
+    "patient_case":  null,
+    "clinical_tool_job":  null,
+    "plan":  [
+                 {
+                     "step_id":  1,
+                     "agent_name":  "orchestrator",
+                     "title":  "Initialize MedAI core workflow",
+                     "description":  "Create the workflow contract and publish the role map for the four-agent graph.",
+                     "status":  "completed",
+                     "note":  "This node coordinates only; it does not make medical decisions.",
+                     "result":  "Core workflow contract created."
+                 },
+                 {
+                     "step_id":  2,
+                     "agent_name":  "clinical_assisstment",
+                     "title":  "Clinical Assisstment: intake plus child calculator dispatch",
+                     "description":  "Normalize the case into JSON, prepare retrieval context, and dispatch calculation tasks to the child calculator.",
+                     "status":  "pending",
+                     "note":  "This node combines agent1 intake work with agent2 coordination.",
+                     "result":  null
+                 },
+                 {
+                     "step_id":  3,
+                     "agent_name":  "protocol",
+                     "title":  "Agent3: Treatment and clinical-trial decision",
+                     "description":  "Map calculation outputs to treatment paths, similar-case fallbacks, or direct advice.",
+                     "status":  "pending",
+                     "note":  "This node performs treatment reasoning but does not compile the final physician-facing report.",
+                     "result":  null
+                 },
+                 {
+                     "step_id":  4,
+                     "agent_name":  "reporter",
+                     "title":  "Agent4: Report and iteration review",
+                     "description":  "汇总报告，判断当前结果是否成立；若不通过，则回退到 orchestrator，最多执行三轮总迭代。",
+                     "status":  "pending",
+                     "note":  "该节点负责最终的通过/重试判定，并控制回退到 orchestrator。",
+                     "result":  null
+                 }
+             ],
+    "tools":  [
+                  {
+                      "name":  "case_json_builder",
+                      "description":  "Normalize the incoming case into a stable JSON payload for downstream agents.",
+                      "required":  true,
+                      "input_schema":  {
+                                           "request":  "str",
+                                           "patient_case":  "dict|None",
+                                           "clinical_tool_job":  "dict|None"
+                                       }
+                  },
+                  {
+                      "name":  "progressive_query_builder",
+                      "description":  "Build retrieval-ready case summary and staged queries from the normalized case.",
+                      "required":  true,
+                      "input_schema":  {
+                                           "problem_list":  "list[str]",
+                                           "case_summary":  "str"
+                                       }
+                  },
+                  {
+                      "name":  "calculation_subagent",
+                      "description":  "Run the calculator child-agent workflow under clinical_assisstment.",
+                      "required":  false,
+                      "input_schema":  {
+                                           "clinical_tool_job":  "dict",
+                                           "calculation_tasks":  "list[dict]"
+                                       }
+                  },
+                  {
+                      "name":  "similar_case_estimator",
+                      "description":  "Estimate a single missing parameter from similar cases when calculation is nearly ready.",
+                      "required":  false,
+                      "input_schema":  {
+                                           "calculator":  "str",
+                                           "missing_inputs":  "list[str]",
+                                           "case_summary":  "str"
+                                       }
+                  },
+                  {
+                      "name":  "treatment_matcher",
+                      "description":  "Map risk outputs to treatment or clinical trial strategies.",
+                      "required":  true,
+                      "input_schema":  {
+                                           "structured_case":  "dict",
+                                           "calculation_results":  "list[dict]"
+                                       }
+                  },
+                  {
+                      "name":  "report_compiler",
+                      "description":  "Assemble the physician-facing report from all upstream artifacts.",
+                      "required":  true,
+                      "input_schema":  {
+                                           "structured_case":  "dict",
+                                           "calculation_bundle":  "dict",
+                                           "treatment_bundle":  "dict"
+                                       }
+                  },
+                  {
+                      "name":  "report_reviewer",
+                      "description":  "Judge whether the current iteration is acceptable or should be rerun.",
+                      "required":  true,
+                      "input_schema":  {
+                                           "report_payload":  "dict",
+                                           "attempt":  "int",
+                                           "max_attempts":  "int"
+                                       }
+                  }
+              ],
+    "tool_registry":  {
+                          "registered_tools":  [
+
+                                               ]
+                      },
+    "messages":  [
+                     {
+                         "role":  "user",
+                         "content":  "病史摘要患者诊断胼胝体梗死后失用症伴失语34 d。 症状体征右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。 诊断方法依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。 治疗方法康复训练治疗和经颅直流电刺激（tDCS）定位治疗。 临床转归经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。 适合阅读人群神经科；康复科\",\"resolved_detail_abstract_en\":null,\"resolved_detail_abstract_zh_sections\":[{\"label\":\"病史摘要\",\"text\":\"患者诊断胼胝体梗死后失用症伴失语34 d。\"},{\"label\":\"症状体征\",\"text\":\"右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。\"},{\"label\":\"诊断方法\",\"text\":\"依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。\"},{\"label\":\"治疗方法\",\"text\":\"康复训练治疗和经颅直流电刺激（tDCS）定位治疗。\"},{\"label\":\"临床转归\",\"text\":\"经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。"
+                     }
+                 ],
+    "problem_list":  [
+
+                     ],
+    "retrieval_queries":  [
+
+                          ],
+    "calculator_matches":  [
+
+                           ],
+    "protocol_recommendations":  [
+
+                                 ],
+    "safety_issues":  [
+
+                      ],
+    "final_output":  {
+                         "agent_prompts":  {
+                                               "orchestrator":  {
+                                                                    "agent_name":  "orchestrator",
+                                                                    "llm_type":  "reasoning",
+                                                                    "prompt_path":  "D:\\虚拟C盘\\ibp\\journal_club\\2026.3.7\\MedAI\\agent\\prompt\\orchestrator.md",
+                                                                    "system_prompt":  "\u003csystem_prompt\u003e\n  \u003cagent_name\u003eorchestrator\u003c/agent_name\u003e\n  \u003cidentity\u003eMedAI 核心编排器\u003c/identity\u003e\n  \u003cmission\u003e你负责把病例入口先整理成一个稳定、可追踪的结构化 JSON，并写出本轮工作合同，再把任务路由到下游节点。你不负责风险计算、治疗匹配或最终报告撰写。\u003c/mission\u003e\n\n  \u003cworkflow\u003e\n    \u003ctopology\u003eorchestrator -\u0026gt; clinical_assisstment -\u0026gt; protocol -\u0026gt; reporter\u003c/topology\u003e\n    \u003cchild_agent parent=\"clinical_assisstment\"\u003ecalculator\u003c/child_agent\u003e\n    \u003citeration_policy controller=\"reporter\" max_total_passes=\"3\"\u003e\n      reporter 负责判断当前病例结果是否合理、证据是否充分；若不通过，会把 blocking feedback 返回 orchestrator 重新发起下一轮。\n    \u003c/iteration_policy\u003e\n  \u003c/workflow\u003e\n\n  \u003cresponsibilities\u003e\n    \u003citem\u003e确认当前执行模式、轮次、输入请求与 reporter_feedback。\u003c/item\u003e\n    \u003citem\u003e先根据病例内容与 runtime context，把病例整理为一个结构化 JSON 草案。\u003c/item\u003e\n    \u003citem\u003e基于病例内容从预定义科室标签库中选择一个或多个 department_tags，并确定一个主科室 department。\u003c/item\u003e\n    \u003citem\u003e声明本轮 workflow contract，让每个节点都清楚自己的职责边界与必交字段。\u003c/item\u003e\n    \u003citem\u003e把结构化后的病例入口交给 clinical_assisstment 做进一步补全、检索查询构建与计算任务规划。\u003c/item\u003e\n    \u003citem\u003e若收到上一轮 blocking feedback，将其转译为修订任务，但不能补造病例事实。\u003c/item\u003e\n    \u003citem\u003e确保整个流程始终可追踪、可审计、可回退。\u003c/item\u003e\n  \u003c/responsibilities\u003e\n\n  \u003cdepartment_tag_library\u003e\n    \u003citem\u003e内科\u003c/item\u003e\n    \u003citem\u003e外科\u003c/item\u003e\n    \u003citem\u003e妇产科\u003c/item\u003e\n    \u003citem\u003e儿科\u003c/item\u003e\n    \u003citem\u003e五官科\u003c/item\u003e\n    \u003citem\u003e肿瘤科\u003c/item\u003e\n    \u003citem\u003e皮肤性病科\u003c/item\u003e\n    \u003citem\u003e中医科\u003c/item\u003e\n    \u003citem\u003e传染科\u003c/item\u003e\n    \u003citem\u003e精神心理科\u003c/item\u003e\n    \u003citem\u003e麻醉医学科\u003c/item\u003e\n    \u003citem\u003e医学影像科\u003c/item\u003e\n    \u003citem\u003e其它科室\u003c/item\u003e\n  \u003c/department_tag_library\u003e\n\n  \u003cdownstream_contract\u003e\n    \u003cnode name=\"clinical_assisstment\"\u003e\n      必须接收 orchestrator 产出的 structured_case 草案，并在不编造事实的前提下补全为下游可用的 structured_case、problem_list、progressive_queries、calculation_bundle。\n      其中 department 与 department_tags 必须沿用 orchestrator 已给出的结果，不允许重新造词。\n    \u003c/node\u003e\n    \u003cnode name=\"protocol\"\u003e\n      必须基于 structured_case 与 calculation_bundle 输出 treatment_bundle；禁止重新计算风险值。\n    \u003c/node\u003e\n    \u003cnode name=\"reporter\"\u003e\n      必须基于 structured_case、calculation_bundle、treatment_bundle 生成医生参考报告，并决定 completed、iteration_requested 或 failed_after_max_iterations。\n    \u003c/node\u003e\n  \u003c/downstream_contract\u003e\n\n  \u003cstate_writeback\u003e\n    \u003cbinding field=\"state.orchestrator_result\"\u003e将你的完整 JSON 输出原样写入这里。\u003c/binding\u003e\n    \u003cbinding field=\"state.department\"\u003e写入你输出中的 department。\u003c/binding\u003e\n    \u003cbinding field=\"state.department_tags\"\u003e写入你输出中的 department_tags。\u003c/binding\u003e\n  \u003c/state_writeback\u003e\n\n  \u003crequired_output\u003e\n    \u003cfield name=\"structured_case\"\u003e根据病例整理出的结构化 JSON 草案，至少包含 raw_request、raw_text、case_summary、problem_list、known_facts、missing_information。\u003c/field\u003e\n    \u003cfield name=\"department\"\u003e主科室，必须是单个字符串，且必须来自预定义标签库。\u003c/field\u003e\n    \u003cfield name=\"workflow\"\u003e主链路字符串，必须体现四阶段顺序。\u003c/field\u003e\n    \u003cfield name=\"workflow_roles\"\u003e每个节点的角色说明。\u003c/field\u003e\n    \u003cfield name=\"mode\"\u003e当前执行模式。\u003c/field\u003e\n    \u003cfield name=\"department_tags\"\u003e当前病例对应的一个或多个科室标签，值必须来自预定义标签库。\u003c/field\u003e\n    \u003cfield name=\"notes\"\u003e本轮流程说明、子 agent 归属与迭代规则。\u003c/field\u003e\n  \u003c/required_output\u003e\n\n  \u003coutput_format\u003e\n    你必须只输出一个 JSON object，不要输出 markdown、解释文字或代码块。\n    这个 JSON object 会被直接写入 state.orchestrator_result。\n    推荐结构如下：\n    {\n      \"structured_case\": {\n        \"raw_request\": \"...\",\n        \"raw_text\": \"...\",\n        \"case_summary\": \"...\",\n        \"problem_list\": [\"...\"],\n        \"known_facts\": [\"...\"],\n        \"missing_information\": [\"...\"]\n      },\n      \"department\": \"内科\",\n      \"department_tags\": [\"内科\"],\n      \"workflow\": \"orchestrator -\u003e clinical_assisstment -\u003e protocol -\u003e reporter\",\n      \"workflow_roles\": {\n        \"orchestrator\": \"...\",\n        \"clinical_assisstment\": \"...\",\n        \"protocol\": \"...\",\n        \"reporter\": \"...\"\n      },\n      \"mode\": \"baseline\",\n      \"notes\": [\"...\"]\n    }\n  \u003c/output_format\u003e\n\n  \u003crules\u003e\n    \u003citem\u003e只使用 runtime context 中给出的事实与反馈。\u003c/item\u003e\n    \u003citem\u003e若信息缺失，写入 structured_case.missing_information，并继续输出合法 JSON，不要假设医学事实。\u003c/item\u003e\n    \u003citem\u003estructured_case 必须是病例事实的整理，不是治疗结论。\u003c/item\u003e\n    \u003citem\u003e所有说明都要围绕“病例如何被结构化、谁来做、交什么、何时回退”。\u003c/item\u003e\n    \u003citem\u003edepartment 必须是 department_tags 中的第一个标签。\u003c/item\u003e\n    \u003citem\u003edepartment_tags 只允许从标签库中选择，不允许自由造词。\u003c/item\u003e\n    \u003citem\u003e输出要服务于下游执行，而不是自己抢答。\u003c/item\u003e\n    \u003citem\u003e不要返回空对象；至少要返回 structured_case、department、department_tags、workflow、workflow_roles、mode、notes。\u003c/item\u003e\n  \u003c/rules\u003e\n\n  \u003cdo_not\u003e\n    \u003citem\u003e不要补造不存在的化验值、检查结果、用药史或诊断结论。\u003c/item\u003e\n    \u003citem\u003e不要亲自运行 calculator 或估计参数。\u003c/item\u003e\n    \u003citem\u003e不要亲自给出治疗方案、临床试验匹配或最终报告。\u003c/item\u003e\n    \u003citem\u003e不要忽略 reporter 的 blocking feedback。\u003c/item\u003e\n  \u003c/do_not\u003e\n\u003c/system_prompt\u003e\n\n\u003cruntime_context\u003e\n  \u003cinstruction\u003eUse the following runtime context as the only factual input for this step. If fields are missing, say so explicitly instead of inventing data.\u003c/instruction\u003e\n  \u003cjson_payload\u003e\u003c![CDATA[\n{\n  \"deep_thinking_mode\": true,\n  \"department\": \"内科\",\n  \"department_tag_library\": [\n    \"内科\",\n    \"外科\",\n    \"妇产科\",\n    \"儿科\",\n    \"五官科\",\n    \"肿瘤科\",\n    \"皮肤性病科\",\n    \"中医科\",\n    \"传染科\",\n    \"精神心理科\",\n    \"麻醉医学科\",\n    \"医学影像科\",\n    \"其它科室\"\n  ],\n  \"department_tags\": [\n    \"内科\",\n    \"其它科室\"\n  ],\n  \"messages\": [\n    {\n      \"content\": \"病史摘要患者诊断胼胝体梗死后失用症伴失语34 d。 症状体征右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。 诊断方法依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\\\\\"汉语失语症心理语言评定系统\\\\\\\"评定方法进行诊断。 治疗方法康复训练治疗和经颅直流电刺激（tDCS）定位治疗。 临床转归经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。 适合阅读人群神经科；康复科\\\",\\\"resolved_detail_abstract_en\\\":null,\\\"resolved_detail_abstract_zh_sections\\\":[{\\\"label\\\":\\\"病史摘要\\\",\\\"text\\\":\\\"患者诊断胼胝体梗死后失用症伴失语34 d。\\\"},{\\\"label\\\":\\\"症状体征\\\",\\\"text\\\":\\\"右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。\\\"},{\\\"label\\\":\\\"诊断方法\\\",\\\"text\\\":\\\"依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\\\\\"汉语失语症心理语言评定系统\\\\\\\"评定方法进行诊断。\\\"},{\\\"label\\\":\\\"治疗方法\\\",\\\"text\\\":\\\"康复训练治疗和经颅直流电刺激（tDCS）定位治疗。\\\"},{\\\"label\\\":\\\"临床转归\\\",\\\"text\\\":\\\"经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。\",\n      \"role\": \"user\"\n    }\n  ],\n  \"request\": \"病史摘要患者诊断胼胝体梗死后失用症伴失语34 d。 症状体征右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。 诊断方法依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\\\\\"汉语失语症心理语言评定系统\\\\\\\"评定方法进行诊断。 治疗方法康复训练治疗和经颅直流电刺激（tDCS）定位治疗。 临床转归经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。 适合阅读人群神经科；康复科\\\",\\\"resolved_detail_abstract_en\\\":null,\\\"resolved_detail_abstract_zh_sections\\\":[{\\\"label\\\":\\\"病史摘要\\\",\\\"text\\\":\\\"患者诊断胼胝体梗死后失用症伴失语34 d。\\\"},{\\\"label\\\":\\\"症状体征\\\",\\\"text\\\":\\\"右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。\\\"},{\\\"label\\\":\\\"诊断方法\\\",\\\"text\\\":\\\"依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\\\\\"汉语失语症心理语言评定系统\\\\\\\"评定方法进行诊断。\\\"},{\\\"label\\\":\\\"治疗方法\\\",\\\"text\\\":\\\"康复训练治疗和经颅直流电刺激（tDCS）定位治疗。\\\"},{\\\"label\\\":\\\"临床转归\\\",\\\"text\\\":\\\"经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。\",\n  \"tools\": [\n    {\n      \"description\": \"Normalize the incoming case into a stable JSON payload for downstream agents.\",\n      \"input_schema\": {\n        \"clinical_tool_job\": \"dict|None\",\n        \"patient_case\": \"dict|None\",\n        \"request\": \"str\"\n      },\n      \"name\": \"case_json_builder\",\n      \"required\": true\n    },\n    {\n      \"description\": \"Build retrieval-ready case summary and staged queries from the normalized case.\",\n      \"input_schema\": {\n        \"case_summary\": \"str\",\n        \"problem_list\": \"list[str]\"\n      },\n      \"name\": \"progressive_query_builder\",\n      \"required\": true\n    },\n    {\n      \"description\": \"Run the calculator child-agent workflow under clinical_assisstment.\",\n      \"input_schema\": {\n        \"calculation_tasks\": \"list[dict]\",\n        \"clinical_tool_job\": \"dict\"\n      },\n      \"name\": \"calculation_subagent\",\n      \"required\": false\n    },\n    {\n      \"description\": \"Estimate a single missing parameter from similar cases when calculation is nearly ready.\",\n      \"input_schema\": {\n        \"calculator\": \"str\",\n        \"case_summary\": \"str\",\n        \"missing_inputs\": \"list[str]\"\n      },\n      \"name\": \"similar_case_estimator\",\n      \"required\": false\n    },\n    {\n      \"description\": \"Map risk outputs to treatment or clinical trial strategies.\",\n      \"input_schema\": {\n        \"calculation_results\": \"list[dict]\",\n        \"structured_case\": \"dict\"\n      },\n      \"name\": \"treatment_matcher\",\n      \"required\": true\n    },\n    {\n      \"description\": \"Assemble the physician-facing report from all upstream artifacts.\",\n      \"input_schema\": {\n        \"calculation_bundle\": \"dict\",\n        \"structured_case\": \"dict\",\n        \"treatment_bundle\": \"dict\"\n      },\n      \"name\": \"report_compiler\",\n      \"required\": true\n    },\n    {\n      \"description\": \"Judge whether the current iteration is acceptable or should be rerun.\",\n      \"input_schema\": {\n        \"attempt\": \"int\",\n        \"max_attempts\": \"int\",\n        \"report_payload\": \"dict\"\n      },\n      \"name\": \"report_reviewer\",\n      \"required\": true\n    }\n  ],\n  \"workflow\": \"orchestrator -\u003e clinical_assisstment -\u003e protocol -\u003e reporter\",\n  \"workflow_roles\": {\n    \"clinical_assisstment\": \"agent1_intake_and_agent2_coordination\",\n    \"orchestrator\": \"core_orchestrator\",\n    \"protocol\": \"agent3_treatment_planner\",\n    \"reporter\": \"agent4_report_and_review\"\n  }\n}\n]]\u003e\u003c/json_payload\u003e\n\u003c/runtime_context\u003e"
+                                                                },
+                                               "clinical_assisstment":  {
+                                                                            "agent_name":  "clinical_assisstment",
+                                                                            "llm_type":  "reasoning",
+                                                                            "prompt_path":  "D:\\虚拟C盘\\ibp\\journal_club\\2026.3.7\\MedAI\\agent\\prompt\\clinical_assisstment.md",
+                                                                            "system_prompt":  "\u003csystem_prompt\u003e\n  \u003cagent_name\u003eclinical_assisstment\u003c/agent_name\u003e\n  \u003cidentity\u003eMedAI 临床评估节点\u003c/identity\u003e\n  \u003cmission\u003e你同时承担 intake 标准化、检索查询构建，以及对子 agent calculator 的调度。你的目标是把病例整理成可计算、可治疗决策、可报告的中间产物。\u003c/mission\u003e\n\n  \u003ccomposition\u003e\n    \u003csubrole name=\"intake_normalizer\"\u003e把原始病例文本或结构化输入整理为稳定的 structured_case JSON。\u003c/subrole\u003e\n    \u003csubrole name=\"calculator_coordinator\"\u003e决定哪些 calculation task 可以直接计算、哪些允许单参数估计、哪些必须跳过。\u003c/subrole\u003e\n    \u003cchild_agent name=\"calculator\"\u003e只负责具体计算执行，不负责顶层病例整理或治疗结论。\u003c/child_agent\u003e\n  \u003c/composition\u003e\n\n  \u003cresponsibilities\u003e\n    \u003citem\u003e提炼 problem_list 与 case_summary，保留对下游最有用的临床摘要。\u003c/item\u003e\n    \u003citem\u003e保留并透传 orchestrator 给出的 department_tags，使 structured_case 带上稳定的科室标签。\u003c/item\u003e\n    \u003citem\u003e生成 progressive_queries，便于检索 calculator、相似病例和治疗证据。\u003c/item\u003e\n    \u003citem\u003e基于病例摘要、问题列表与检索结果规划 calculation_tasks，并对子 agent 的输入/输出负责。\u003c/item\u003e\n    \u003citem\u003e显式记录缺失参数、估计参数、跳过原因与不适用原因。\u003c/item\u003e\n  \u003c/responsibilities\u003e\n\n  \u003cdecision_policy\u003e\n    \u003cstep order=\"1\"\u003e先把病例标准化为 structured_case，再生成 case_summary、problem_list 与 progressive_queries。\u003c/step\u003e\n    \u003cstep order=\"2\"\u003e所有中间产物都必须能回溯到 runtime context 中的病例事实，不能凭空补造。\u003c/step\u003e\n    \u003cstep order=\"3\"\u003e为每个候选 calculator 检查参数完备性。\u003c/step\u003e\n    \u003cstep order=\"4\"\u003e\n      对每个 calculation task 执行以下规则：\n      \u003crule name=\"direct_compute\"\u003e若所需参数齐全，直接计算。\u003c/rule\u003e\n      \u003crule name=\"single_missing_parameter\"\u003e若仅缺 1 个关键参数，可以查询相似病例估计该参数后再计算；必须显式标注 estimated_input、estimation_source、estimation_rationale、confidence。\u003c/rule\u003e\n      \u003crule name=\"multiple_missing_parameters\"\u003e若缺失超过 1 个关键参数，不要计算；返回 skipped，并列出 missing_inputs。\u003c/rule\u003e\n      \u003crule name=\"not_applicable\"\u003e若患者明显不适用于该 calculator，返回 not_applicable，并写清不适用原因。\u003c/rule\u003e\n    \u003c/step\u003e\n    \u003cstep order=\"5\"\u003e把结果打包成 calculation_bundle 交给 protocol，不得输出治疗建议。\u003c/step\u003e\n  \u003c/decision_policy\u003e\n\n  \u003crequired_output\u003e\n    \u003cfield name=\"structured_case\"\u003e标准化病例 JSON，包含病例摘要、输入要素与数据准备度。\u003c/field\u003e\n    \u003cfield name=\"problem_list\"\u003e面向检索和推理的核心问题列表。\u003c/field\u003e\n    \u003cfield name=\"department_tags\"\u003e来自 orchestrator 的科室标签，必须同步写入 structured_case。\u003c/field\u003e\n    \u003cfield name=\"progressive_queries\"\u003e分阶段检索查询，面向 calculator、similar case、protocol 证据。\u003c/field\u003e\n    \u003cfield name=\"calculation_bundle\"\u003e包含 calculation_tasks、calculation_results、calculator_matches、missing_inputs、status 等。\u003c/field\u003e\n  \u003c/required_output\u003e\n\n  \u003creporter_feedback_policy\u003e\n    \u003citem\u003e如果 reporter_feedback 存在，把它当作修订指令，而不是新事实来源。\u003c/item\u003e\n    \u003citem\u003e可以修正结构、查询、任务规划和缺失项表达，但不能为了过审而编造病例信息。\u003c/item\u003e\n  \u003c/reporter_feedback_policy\u003e\n\n  \u003crules\u003e\n    \u003citem\u003e所有病例事实必须来自 runtime context。\u003c/item\u003e\n    \u003citem\u003eprogressive_queries 要检索友好、简洁、可执行。\u003c/item\u003e\n    \u003citem\u003e任何估计值都必须与真实观测值严格区分。\u003c/item\u003e\n    \u003citem\u003e你对子 agent calculator 的输入选择与结果打包负最终责任。\u003c/item\u003e\n  \u003c/rules\u003e\n\n  \u003cdo_not\u003e\n    \u003citem\u003e不要直接给出最终治疗方案或临床试验结论。\u003c/item\u003e\n    \u003citem\u003e不要输出最终医生报告。\u003c/item\u003e\n    \u003citem\u003e不要隐藏缺失数据、计算跳过原因或参数估计行为。\u003c/item\u003e\n  \u003c/do_not\u003e\n\u003c/system_prompt\u003e"
+                                                                        },
+                                               "protocol":  {
+                                                                "agent_name":  "protocol",
+                                                                "llm_type":  "reasoning",
+                                                                "prompt_path":  "D:\\虚拟C盘\\ibp\\journal_club\\2026.3.7\\MedAI\\agent\\prompt\\protocol.md",
+                                                                "system_prompt":  "\u003csystem_prompt\u003e\n  \u003cagent_name\u003eprotocol\u003c/agent_name\u003e\n  \u003cidentity\u003eMedAI 治疗与临床试验决策节点\u003c/identity\u003e\n  \u003cmission\u003e你基于 structured_case 和 calculation_bundle 输出治疗判断。你的职责是把风险结果映射到治疗方案、临床试验方案或保守建议，而不是重新计算风险。\u003c/mission\u003e\n\n  \u003cdecision_order\u003e\n    \u003cstep order=\"1\" type=\"protocol_or_trial_match\"\u003e优先匹配明确的治疗方案或临床试验方案，只要风险值和病例条件支持具体分支。\u003c/step\u003e\n    \u003cstep order=\"2\" type=\"similar_case_fallback\"\u003e如果没有可靠的直接匹配，但存在可借鉴的相似病例，则给出 similar_case_fallback。\u003c/step\u003e\n    \u003cstep order=\"3\" type=\"direct_advice\"\u003e如果既没有直接方案也没有可靠相似病例，则给出保守、面向医生的 treatment advice。\u003c/step\u003e\n  \u003c/decision_order\u003e\n\n  \u003cresponsibilities\u003e\n    \u003citem\u003e把 calculation_results 转译为 treatment_bundle。\u003c/item\u003e\n    \u003citem\u003e对每条推荐显式写明 evidence、rationale、uncertainty、actions。\u003c/item\u003e\n    \u003citem\u003e若引用 calculator 或临床试验，必须提供 linked_calculators、linked_trials 或其他可追踪线索。\u003c/item\u003e\n    \u003citem\u003e当证据不足时，明确写出 why_not_matched，而不是强行命中方案。\u003c/item\u003e\n  \u003c/responsibilities\u003e\n\n  \u003crequired_output\u003e\n    \u003cfield name=\"recommendations\"\u003e治疗建议或试验建议列表。\u003c/field\u003e\n    \u003cfield name=\"strategy\"\u003e当前推荐属于 protocol_match、trial_match、similar_case_fallback 或 advice_only。\u003c/field\u003e\n    \u003cfield name=\"status\"\u003e推荐状态，必须直观表达匹配、回退或建议性质。\u003c/field\u003e\n    \u003cfield name=\"rationale\"\u003e推荐依据，必须能回溯到病例事实与计算结果。\u003c/field\u003e\n    \u003cfield name=\"linked_calculators\"\u003e支撑当前建议的风险工具或结果。\u003c/field\u003e\n    \u003cfield name=\"linked_trials\"\u003e支撑当前建议的试验或方案线索。\u003c/field\u003e\n    \u003cfield name=\"actions\"\u003e下一步可执行动作。\u003c/field\u003e\n  \u003c/required_output\u003e\n\n  \u003crules\u003e\n    \u003citem\u003e优先使用直接证据，其次才允许 similar-case fallback。\u003c/item\u003e\n    \u003citem\u003e如果 calculation_bundle 中风险值不足或仅有部分支持，要显式保留不确定性。\u003c/item\u003e\n    \u003citem\u003e推荐要面向临床执行，但不能冒充确定性结论。\u003c/item\u003e\n  \u003c/rules\u003e\n\n  \u003cdo_not\u003e\n    \u003citem\u003e不要重新运行 calculator。\u003c/item\u003e\n    \u003citem\u003e不要伪造 trial match、protocol match 或治疗依据。\u003c/item\u003e\n    \u003citem\u003e不要隐藏证据缺口。\u003c/item\u003e\n    \u003citem\u003e不要代替 reporter 写最终报告。\u003c/item\u003e\n  \u003c/do_not\u003e\n\u003c/system_prompt\u003e"
+                                                            },
+                                               "reporter":  {
+                                                                "agent_name":  "reporter",
+                                                                "llm_type":  "basic",
+                                                                "prompt_path":  "D:\\虚拟C盘\\ibp\\journal_club\\2026.3.7\\MedAI\\agent\\prompt\\reporter.md",
+                                                                "system_prompt":  "\u003csystem_prompt\u003e\n  \u003cagent_name\u003ereporter\u003c/agent_name\u003e\n  \u003cidentity\u003eMedAI 报告与迭代审查节点\u003c/identity\u003e\n  \u003cmission\u003e你同时承担医生参考报告生成与病例合理性审查两项职责。你要根据上游产物生成一份可读报告，并判断当前病例是否成立；如果不成立，就把阻塞反馈返回 orchestrator，最多总共迭代三轮。\u003c/mission\u003e\n\n  \u003citeration_policy max_total_passes=\"3\"\u003e\n    \u003cpass_outcome name=\"completed\"\u003e当前病例结果可接受，流程结束。\u003c/pass_outcome\u003e\n    \u003cpass_outcome name=\"iteration_requested\"\u003e当前病例结果不合理或证据不足，返回 blocking feedback 给 orchestrator 重跑。\u003c/pass_outcome\u003e\n    \u003cpass_outcome name=\"failed_after_max_iterations\"\u003e已达到最大迭代次数，放弃该病例并输出错误报告。\u003c/pass_outcome\u003e\n  \u003c/iteration_policy\u003e\n\n  \u003creview_order\u003e\n    \u003cstep order=\"1\"\u003e检查 structured_case 是否存在，且病例摘要、输入要素和数据准备度是否完整。\u003c/step\u003e\n    \u003cstep order=\"2\"\u003e检查 calculation_bundle 是否清晰区分 direct compute、single-missing estimation、skip、not_applicable、failed。\u003c/step\u003e\n    \u003cstep order=\"3\"\u003e检查 protocol 是否给出了至少一条有依据的治疗建议、方案匹配或临床试验方向。\u003c/step\u003e\n    \u003cstep order=\"4\"\u003e检查病例整体是否合理：事实是否自洽、推理链是否可追溯、建议是否与风险结果一致。\u003c/step\u003e\n    \u003cstep order=\"5\"\u003e根据完整性、合理性与错误情况决定 completed、iteration_requested 或 failed_after_max_iterations。\u003c/step\u003e\n  \u003c/review_order\u003e\n\n  \u003cresponsibilities\u003e\n    \u003citem\u003e生成医生可读的 report payload，汇总患者基本信息、风险结果、治疗建议与不确定性。\u003c/item\u003e\n    \u003citem\u003e在当前轮不通过时返回 concise blocking feedback，明确告诉 orchestrator 要修什么。\u003c/item\u003e\n    \u003citem\u003e在三轮内尽量推动可用结果；超过三轮则生成错误报告并停止。\u003c/item\u003e\n  \u003c/responsibilities\u003e\n\n  \u003crequired_output\u003e\n    \u003cfield name=\"report_payload\"\u003e面向医生的最终或暂定报告。\u003c/field\u003e\n    \u003cfield name=\"review_report\"\u003e结构化审查结果，包括 checks、issues、passed。\u003c/field\u003e\n    \u003cfield name=\"outcome\"\u003ecompleted、iteration_requested 或 failed_after_max_iterations。\u003c/field\u003e\n    \u003cfield name=\"summary\"\u003e对当前轮次结论的简明摘要。\u003c/field\u003e\n    \u003cfield name=\"blocking_feedback\"\u003e当需要重跑时，返回可执行的阻塞反馈。\u003c/field\u003e\n  \u003c/required_output\u003e\n\n  \u003crules\u003e\n    \u003citem\u003e可以指出不合理之处，但不能杜撰新病例事实来“修复”病例。\u003c/item\u003e\n    \u003citem\u003e可以拒绝当前结果，但必须说清为什么拒绝。\u003c/item\u003e\n    \u003citem\u003e最终报告必须把确定性结论与不确定性结论分开写清楚。\u003c/item\u003e\n  \u003c/rules\u003e\n\n  \u003cdo_not\u003e\n    \u003citem\u003e不要添加新的患者事实。\u003c/item\u003e\n    \u003citem\u003e不要重新计算风险值。\u003c/item\u003e\n    \u003citem\u003e不要伪造治疗证据、临床试验匹配或病例合理性。\u003c/item\u003e\n    \u003citem\u003e不要隐藏本轮被拒绝的原因。\u003c/item\u003e\n  \u003c/do_not\u003e\n\u003c/system_prompt\u003e"
+                                                            }
+                                           },
+                         "execution_trace":  {
+                                                 "workflow":  [
+                                                                  "orchestrator",
+                                                                  "clinical_assisstment",
+                                                                  "protocol",
+                                                                  "reporter"
+                                                              ],
+                                                 "workflow_roles":  {
+                                                                        "orchestrator":  "core_orchestrator",
+                                                                        "clinical_assisstment":  "agent1_intake_and_agent2_coordination",
+                                                                        "protocol":  "agent3_treatment_planner",
+                                                                        "reporter":  "agent4_report_and_review"
+                                                                    },
+                                                 "mode":  "baseline",
+                                                 "request":  {
+                                                                 "char_count":  831,
+                                                                 "excerpt":  "病史摘要患者诊断胼胝体梗死后失用症伴失语34 d。 症状体征右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。 诊断方法依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。 治疗方法康复训练治疗和经颅直流电刺激（tDCS）定位治疗。 临床转归经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗..."
+                                                             },
+                                                 "agents":  [
+                                                                {
+                                                                    "agent_name":  "orchestrator",
+                                                                    "status":  "completed",
+                                                                    "summary":  "Core workflow contract created.",
+                                                                    "output":  {
+                                                                                   "structured_case":  {
+                                                                                                           "raw_request":  "病史摘要患者诊断胼胝体梗死后失用症伴失语34 d。 症状体征右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。 诊断方法依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。 治疗方法康复训练治疗和经颅直流电刺激（tDCS）定位治疗。 临床转归经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。 适合阅读人群神经科；康复科\",\"resolved_detail_abstract_en\":null,\"resolved_detail_abstract_zh_sections\":[{\"label\":\"病史摘要\",\"text\":\"患者诊断胼胝体梗死后失用症伴失语34 d。\"},{\"label\":\"症状体征\",\"text\":\"右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。\"},{\"label\":\"诊断方法\",\"text\":\"依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。\"},{\"label\":\"治疗方法\",\"text\":\"康复训练治疗和经颅直流电刺激（tDCS）定位治疗。\"},{\"label\":\"临床转归\",\"text\":\"经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。",
+                                                                                                           "raw_text":  "病史摘要：患者诊断胼胝体梗死后失用症伴失语34天。症状体征：右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。诊断方法：依据头核磁检查及Fugl-Meyer评分、PASS评分、平衡分级、ADL评分、MMSE、失用评定及汉语失语症心理语言评定系统进行诊断。治疗方法：康复训练治疗和经颅直流电刺激（tDCS）定位治疗。临床转归：治疗后肢体活动及言语较前改善，但仍存在言语障碍及双手拮抗；tDCS第3周期（10天）后较第2周期后进一步改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。",
+                                                                                                           "case_summary":  "病例为胼胝体梗死后34天，合并失用症与失语。当前已提供神经功能、语言与认知相关症状描述，以及头核磁和多项量表评估方法信息。既往已接受康复训练和tDCS定位治疗，治疗后肢体活动与言语较前改善，后续周期治疗较前一周期进一步改善。",
+                                                                                                           "problem_list":  [
+                                                                                                                                "胼胝体梗死后状态（34天）",
+                                                                                                                                "失用症",
+                                                                                                                                "失语",
+                                                                                                                                "右侧肢体活动不利",
+                                                                                                                                "肢体遵嘱活动差",
+                                                                                                                                "右手强握和摸索现象",
+                                                                                                                                "言语听理解及交流差",
+                                                                                                                                "字形结构辨识差",
+                                                                                                                                "治疗后仍遗留言语障碍",
+                                                                                                                                "曾出现双手拮抗，后续治疗后消失"
+                                                                                                                            ],
+                                                                                                           "known_facts":  [
+                                                                                                                               "病例文本明确记载为胼胝体梗死后失用症伴失语34天。",
+                                                                                                                               "存在右侧肢体活动不利。",
+                                                                                                                               "存在肢体遵嘱活动差。",
+                                                                                                                               "下肢可自行在床上进行小范围屈伸。",
+                                                                                                                               "上肢可轻微抬举。",
+                                                                                                                               "右手存在强握和摸索。",
+                                                                                                                               "言语听理解及交流差。",
+                                                                                                                               "字形结构辨识差。",
+                                                                                                                               "诊断依据包括头核磁检查。",
+                                                                                                                               "评估工具包括Fugl-Meyer评分、PASS评分、平衡分级、ADL评分、MMSE、失用评定及汉语失语症心理语言评定系统。",
+                                                                                                                               "已接受康复训练治疗。",
+                                                                                                                               "已接受经颅直流电刺激（tDCS）定位治疗。",
+                                                                                                                               "治疗后肢体活动及言语较前改善。",
+                                                                                                                               "治疗后仍存在言语障碍及双手拮抗。",
+                                                                                                                               "tDCS第3周期（10天）后较第2周期后进一步改善。",
+                                                                                                                               "后续描述中双手拮抗消失。"
+                                                                                                                           ],
+                                                                                                           "missing_information":  [
+                                                                                                                                       "患者年龄、性别未提供。",
+                                                                                                                                       "起病时间与梗死发生具体日期未提供，仅提供病后34天。",
+                                                                                                                                       "头核磁的具体影像学结果未提供。",
+                                                                                                                                       "Fugl-Meyer、PASS、平衡分级、ADL、MMSE、失用评定、汉语失语症心理语言评定系统的具体分值未提供。",
+                                                                                                                                       "既往史、合并症、卒中危险因素未提供。",
+                                                                                                                                       "当前用药情况未提供。",
+                                                                                                                                       "生命体征与一般体格检查未提供。",
+                                                                                                                                       "神经系统查体细节未提供。",
+                                                                                                                                       "吞咽功能、感觉功能、视野眼动等伴随神经功能信息未提供。",
+                                                                                                                                       "康复训练与tDCS的具体参数、疗程总次数、电极定位方案未提供。",
+                                                                                                                                       "是否存在复发卒中、出血转化或其他并发症信息未提供。",
+                                                                                                                                       "文本为病例摘要/文献式描述，患者就诊场景与当前评估时间点未完全明确。"
+                                                                                                                                   ]
+                                                                                                       },
+                                                                                   "department":  "内科",
+                                                                                   "department_tags":  [
+                                                                                                           "内科",
+                                                                                                           "其它科室"
+                                                                                                       ],
+                                                                                   "workflow":  "orchestrator -\u003e clinical_assisstment -\u003e protocol -\u003e reporter",
+                                                                                   "workflow_roles":  {
+                                                                                                          "orchestrator":  "core_orchestrator",
+                                                                                                          "clinical_assisstment":  "agent1_intake_and_agent2_coordination",
+                                                                                                          "protocol":  "agent3_treatment_planner",
+                                                                                                          "reporter":  "agent4_report_and_review"
+                                                                                                      },
+                                                                                   "mode":  "baseline",
+                                                                                   "notes":  [
+                                                                                                 "The graph now centers on orchestrate -\u003e assess(+child calculator) -\u003e protocol -\u003e report/review.",
+                                                                                                 "The reporter node is responsible for iteration control and can trigger up to three total passes."
+                                                                                             ],
+                                                                                   "department_tag_library":  [
+                                                                                                                  "内科",
+                                                                                                                  "外科",
+                                                                                                                  "妇产科",
+                                                                                                                  "儿科",
+                                                                                                                  "五官科",
+                                                                                                                  "肿瘤科",
+                                                                                                                  "皮肤性病科",
+                                                                                                                  "中医科",
+                                                                                                                  "传染科",
+                                                                                                                  "精神心理科",
+                                                                                                                  "麻醉医学科",
+                                                                                                                  "医学影像科",
+                                                                                                                  "其它科室"
+                                                                                                              ]
+                                                                               },
+                                                                    "tool_calls":  [
+
+                                                                                   ]
+                                                                }
+                                                            ],
+                                                 "tool_calls":  [
+
+                                                                ]
+                                             },
+                         "department":  "内科",
+                         "department_tags":  [
+                                                 "内科",
+                                                 "其它科室"
+                                             ],
+                         "orchestrator_result":  {
+                                                     "structured_case":  {
+                                                                             "raw_request":  "病史摘要患者诊断胼胝体梗死后失用症伴失语34 d。 症状体征右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。 诊断方法依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。 治疗方法康复训练治疗和经颅直流电刺激（tDCS）定位治疗。 临床转归经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。 适合阅读人群神经科；康复科\",\"resolved_detail_abstract_en\":null,\"resolved_detail_abstract_zh_sections\":[{\"label\":\"病史摘要\",\"text\":\"患者诊断胼胝体梗死后失用症伴失语34 d。\"},{\"label\":\"症状体征\",\"text\":\"右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。\"},{\"label\":\"诊断方法\",\"text\":\"依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。\"},{\"label\":\"治疗方法\",\"text\":\"康复训练治疗和经颅直流电刺激（tDCS）定位治疗。\"},{\"label\":\"临床转归\",\"text\":\"经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。",
+                                                                             "raw_text":  "病史摘要：患者诊断胼胝体梗死后失用症伴失语34天。症状体征：右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。诊断方法：依据头核磁检查及Fugl-Meyer评分、PASS评分、平衡分级、ADL评分、MMSE、失用评定及汉语失语症心理语言评定系统进行诊断。治疗方法：康复训练治疗和经颅直流电刺激（tDCS）定位治疗。临床转归：治疗后肢体活动及言语较前改善，但仍存在言语障碍及双手拮抗；tDCS第3周期（10天）后较第2周期后进一步改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。",
+                                                                             "case_summary":  "病例为胼胝体梗死后34天，合并失用症与失语。当前已提供神经功能、语言与认知相关症状描述，以及头核磁和多项量表评估方法信息。既往已接受康复训练和tDCS定位治疗，治疗后肢体活动与言语较前改善，后续周期治疗较前一周期进一步改善。",
+                                                                             "problem_list":  [
+                                                                                                  "胼胝体梗死后状态（34天）",
+                                                                                                  "失用症",
+                                                                                                  "失语",
+                                                                                                  "右侧肢体活动不利",
+                                                                                                  "肢体遵嘱活动差",
+                                                                                                  "右手强握和摸索现象",
+                                                                                                  "言语听理解及交流差",
+                                                                                                  "字形结构辨识差",
+                                                                                                  "治疗后仍遗留言语障碍",
+                                                                                                  "曾出现双手拮抗，后续治疗后消失"
+                                                                                              ],
+                                                                             "known_facts":  [
+                                                                                                 "病例文本明确记载为胼胝体梗死后失用症伴失语34天。",
+                                                                                                 "存在右侧肢体活动不利。",
+                                                                                                 "存在肢体遵嘱活动差。",
+                                                                                                 "下肢可自行在床上进行小范围屈伸。",
+                                                                                                 "上肢可轻微抬举。",
+                                                                                                 "右手存在强握和摸索。",
+                                                                                                 "言语听理解及交流差。",
+                                                                                                 "字形结构辨识差。",
+                                                                                                 "诊断依据包括头核磁检查。",
+                                                                                                 "评估工具包括Fugl-Meyer评分、PASS评分、平衡分级、ADL评分、MMSE、失用评定及汉语失语症心理语言评定系统。",
+                                                                                                 "已接受康复训练治疗。",
+                                                                                                 "已接受经颅直流电刺激（tDCS）定位治疗。",
+                                                                                                 "治疗后肢体活动及言语较前改善。",
+                                                                                                 "治疗后仍存在言语障碍及双手拮抗。",
+                                                                                                 "tDCS第3周期（10天）后较第2周期后进一步改善。",
+                                                                                                 "后续描述中双手拮抗消失。"
+                                                                                             ],
+                                                                             "missing_information":  [
+                                                                                                         "患者年龄、性别未提供。",
+                                                                                                         "起病时间与梗死发生具体日期未提供，仅提供病后34天。",
+                                                                                                         "头核磁的具体影像学结果未提供。",
+                                                                                                         "Fugl-Meyer、PASS、平衡分级、ADL、MMSE、失用评定、汉语失语症心理语言评定系统的具体分值未提供。",
+                                                                                                         "既往史、合并症、卒中危险因素未提供。",
+                                                                                                         "当前用药情况未提供。",
+                                                                                                         "生命体征与一般体格检查未提供。",
+                                                                                                         "神经系统查体细节未提供。",
+                                                                                                         "吞咽功能、感觉功能、视野眼动等伴随神经功能信息未提供。",
+                                                                                                         "康复训练与tDCS的具体参数、疗程总次数、电极定位方案未提供。",
+                                                                                                         "是否存在复发卒中、出血转化或其他并发症信息未提供。",
+                                                                                                         "文本为病例摘要/文献式描述，患者就诊场景与当前评估时间点未完全明确。"
+                                                                                                     ]
+                                                                         },
+                                                     "department":  "内科",
+                                                     "department_tags":  [
+                                                                             "内科",
+                                                                             "其它科室"
+                                                                         ],
+                                                     "workflow":  "orchestrator -\u003e clinical_assisstment -\u003e protocol -\u003e reporter",
+                                                     "workflow_roles":  {
+                                                                            "orchestrator":  "core_orchestrator",
+                                                                            "clinical_assisstment":  "agent1_intake_and_agent2_coordination",
+                                                                            "protocol":  "agent3_treatment_planner",
+                                                                            "reporter":  "agent4_report_and_review"
+                                                                        },
+                                                     "mode":  "baseline",
+                                                     "notes":  [
+                                                                   "The graph now centers on orchestrate -\u003e assess(+child calculator) -\u003e protocol -\u003e report/review.",
+                                                                   "The reporter node is responsible for iteration control and can trigger up to three total passes."
+                                                               ],
+                                                     "department_tag_library":  [
+                                                                                    "内科",
+                                                                                    "外科",
+                                                                                    "妇产科",
+                                                                                    "儿科",
+                                                                                    "五官科",
+                                                                                    "肿瘤科",
+                                                                                    "皮肤性病科",
+                                                                                    "中医科",
+                                                                                    "传染科",
+                                                                                    "精神心理科",
+                                                                                    "麻醉医学科",
+                                                                                    "医学影像科",
+                                                                                    "其它科室"
+                                                                                ]
+                                                 }
+                     },
+    "orchestrator_result":  {
+                                "structured_case":  {
+                                                        "raw_request":  "病史摘要患者诊断胼胝体梗死后失用症伴失语34 d。 症状体征右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。 诊断方法依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。 治疗方法康复训练治疗和经颅直流电刺激（tDCS）定位治疗。 临床转归经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。 适合阅读人群神经科；康复科\",\"resolved_detail_abstract_en\":null,\"resolved_detail_abstract_zh_sections\":[{\"label\":\"病史摘要\",\"text\":\"患者诊断胼胝体梗死后失用症伴失语34 d。\"},{\"label\":\"症状体征\",\"text\":\"右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。\"},{\"label\":\"诊断方法\",\"text\":\"依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。\"},{\"label\":\"治疗方法\",\"text\":\"康复训练治疗和经颅直流电刺激（tDCS）定位治疗。\"},{\"label\":\"临床转归\",\"text\":\"经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。",
+                                                        "raw_text":  "病史摘要：患者诊断胼胝体梗死后失用症伴失语34天。症状体征：右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。诊断方法：依据头核磁检查及Fugl-Meyer评分、PASS评分、平衡分级、ADL评分、MMSE、失用评定及汉语失语症心理语言评定系统进行诊断。治疗方法：康复训练治疗和经颅直流电刺激（tDCS）定位治疗。临床转归：治疗后肢体活动及言语较前改善，但仍存在言语障碍及双手拮抗；tDCS第3周期（10天）后较第2周期后进一步改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。",
+                                                        "case_summary":  "病例为胼胝体梗死后34天，合并失用症与失语。当前已提供神经功能、语言与认知相关症状描述，以及头核磁和多项量表评估方法信息。既往已接受康复训练和tDCS定位治疗，治疗后肢体活动与言语较前改善，后续周期治疗较前一周期进一步改善。",
+                                                        "problem_list":  [
+                                                                             "胼胝体梗死后状态（34天）",
+                                                                             "失用症",
+                                                                             "失语",
+                                                                             "右侧肢体活动不利",
+                                                                             "肢体遵嘱活动差",
+                                                                             "右手强握和摸索现象",
+                                                                             "言语听理解及交流差",
+                                                                             "字形结构辨识差",
+                                                                             "治疗后仍遗留言语障碍",
+                                                                             "曾出现双手拮抗，后续治疗后消失"
+                                                                         ],
+                                                        "known_facts":  [
+                                                                            "病例文本明确记载为胼胝体梗死后失用症伴失语34天。",
+                                                                            "存在右侧肢体活动不利。",
+                                                                            "存在肢体遵嘱活动差。",
+                                                                            "下肢可自行在床上进行小范围屈伸。",
+                                                                            "上肢可轻微抬举。",
+                                                                            "右手存在强握和摸索。",
+                                                                            "言语听理解及交流差。",
+                                                                            "字形结构辨识差。",
+                                                                            "诊断依据包括头核磁检查。",
+                                                                            "评估工具包括Fugl-Meyer评分、PASS评分、平衡分级、ADL评分、MMSE、失用评定及汉语失语症心理语言评定系统。",
+                                                                            "已接受康复训练治疗。",
+                                                                            "已接受经颅直流电刺激（tDCS）定位治疗。",
+                                                                            "治疗后肢体活动及言语较前改善。",
+                                                                            "治疗后仍存在言语障碍及双手拮抗。",
+                                                                            "tDCS第3周期（10天）后较第2周期后进一步改善。",
+                                                                            "后续描述中双手拮抗消失。"
+                                                                        ],
+                                                        "missing_information":  [
+                                                                                    "患者年龄、性别未提供。",
+                                                                                    "起病时间与梗死发生具体日期未提供，仅提供病后34天。",
+                                                                                    "头核磁的具体影像学结果未提供。",
+                                                                                    "Fugl-Meyer、PASS、平衡分级、ADL、MMSE、失用评定、汉语失语症心理语言评定系统的具体分值未提供。",
+                                                                                    "既往史、合并症、卒中危险因素未提供。",
+                                                                                    "当前用药情况未提供。",
+                                                                                    "生命体征与一般体格检查未提供。",
+                                                                                    "神经系统查体细节未提供。",
+                                                                                    "吞咽功能、感觉功能、视野眼动等伴随神经功能信息未提供。",
+                                                                                    "康复训练与tDCS的具体参数、疗程总次数、电极定位方案未提供。",
+                                                                                    "是否存在复发卒中、出血转化或其他并发症信息未提供。",
+                                                                                    "文本为病例摘要/文献式描述，患者就诊场景与当前评估时间点未完全明确。"
+                                                                                ]
+                                                    },
+                                "department":  "内科",
+                                "department_tags":  [
+                                                        "内科",
+                                                        "其它科室"
+                                                    ],
+                                "workflow":  "orchestrator -\u003e clinical_assisstment -\u003e protocol -\u003e reporter",
+                                "workflow_roles":  {
+                                                       "orchestrator":  "core_orchestrator",
+                                                       "clinical_assisstment":  "agent1_intake_and_agent2_coordination",
+                                                       "protocol":  "agent3_treatment_planner",
+                                                       "reporter":  "agent4_report_and_review"
+                                                   },
+                                "mode":  "baseline",
+                                "notes":  [
+                                              "The graph now centers on orchestrate -\u003e assess(+child calculator) -\u003e protocol -\u003e report/review.",
+                                              "The reporter node is responsible for iteration control and can trigger up to three total passes."
+                                          ],
+                                "department_tag_library":  [
+                                                               "内科",
+                                                               "外科",
+                                                               "妇产科",
+                                                               "儿科",
+                                                               "五官科",
+                                                               "肿瘤科",
+                                                               "皮肤性病科",
+                                                               "中医科",
+                                                               "传染科",
+                                                               "精神心理科",
+                                                               "麻醉医学科",
+                                                               "医学影像科",
+                                                               "其它科室"
+                                                           ]
+                            },
+    "assessment_bundle":  {
+
+                          },
+    "calculation_bundle":  {
+
+                           },
+    "treatment_bundle":  {
+
+                         },
+    "reporter_result":  {
+
+                        },
+    "review_report":  {
+
+                      },
+    "clinical_answer":  [
+
+                        ],
+    "deep_thinking_mode":  true,
+    "search_before_planning":  false,
+    "pass_through_expert":  false,
+    "auto_accepted_plan":  false,
+    "next_agent":  "clinical_assisstment",
+    "status":  "running",
+    "errors":  [
+
+               ],
+    "department":  "内科",
+    "department_tags":  [
+                            "内科",
+                            "其它科室"
+                        ],
+    "structured_case_json":  {
+                                 "raw_request":  "病史摘要患者诊断胼胝体梗死后失用症伴失语34 d。 症状体征右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。 诊断方法依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。 治疗方法康复训练治疗和经颅直流电刺激（tDCS）定位治疗。 临床转归经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。 适合阅读人群神经科；康复科\",\"resolved_detail_abstract_en\":null,\"resolved_detail_abstract_zh_sections\":[{\"label\":\"病史摘要\",\"text\":\"患者诊断胼胝体梗死后失用症伴失语34 d。\"},{\"label\":\"症状体征\",\"text\":\"右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。\"},{\"label\":\"诊断方法\",\"text\":\"依据头核磁检查及Fugl-Meyer评分，PASS评分，平衡分级，ADL评分，MMSE，失用评定及应用\\\"汉语失语症心理语言评定系统\\\"评定方法进行诊断。\"},{\"label\":\"治疗方法\",\"text\":\"康复训练治疗和经颅直流电刺激（tDCS）定位治疗。\"},{\"label\":\"临床转归\",\"text\":\"经过康复治疗和tDCS定位治疗后，肢体活动及言语均较前改善，但仍存在言语障碍及双手拮抗; tDCS治疗第3周期（10 d）后与治疗第2周期后相比有明显改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。",
+                                 "raw_text":  "病史摘要：患者诊断胼胝体梗死后失用症伴失语34天。症状体征：右侧肢体活动不利，肢体遵嘱活动差，下肢可自行床上小范围屈伸，上肢轻微抬举，右手存在强握和摸索，言语听理解及交流差，字形结构辨识差。诊断方法：依据头核磁检查及Fugl-Meyer评分、PASS评分、平衡分级、ADL评分、MMSE、失用评定及汉语失语症心理语言评定系统进行诊断。治疗方法：康复训练治疗和经颅直流电刺激（tDCS）定位治疗。临床转归：治疗后肢体活动及言语较前改善，但仍存在言语障碍及双手拮抗；tDCS第3周期（10天）后较第2周期后进一步改善，言语障碍改善，双手拮抗消失，治疗前后对照有明显差异。",
+                                 "case_summary":  "病例为胼胝体梗死后34天，合并失用症与失语。当前已提供神经功能、语言与认知相关症状描述，以及头核磁和多项量表评估方法信息。既往已接受康复训练和tDCS定位治疗，治疗后肢体活动与言语较前改善，后续周期治疗较前一周期进一步改善。",
+                                 "problem_list":  [
+                                                      "胼胝体梗死后状态（34天）",
+                                                      "失用症",
+                                                      "失语",
+                                                      "右侧肢体活动不利",
+                                                      "肢体遵嘱活动差",
+                                                      "右手强握和摸索现象",
+                                                      "言语听理解及交流差",
+                                                      "字形结构辨识差",
+                                                      "治疗后仍遗留言语障碍",
+                                                      "曾出现双手拮抗，后续治疗后消失"
+                                                  ],
+                                 "known_facts":  [
+                                                     "病例文本明确记载为胼胝体梗死后失用症伴失语34天。",
+                                                     "存在右侧肢体活动不利。",
+                                                     "存在肢体遵嘱活动差。",
+                                                     "下肢可自行在床上进行小范围屈伸。",
+                                                     "上肢可轻微抬举。",
+                                                     "右手存在强握和摸索。",
+                                                     "言语听理解及交流差。",
+                                                     "字形结构辨识差。",
+                                                     "诊断依据包括头核磁检查。",
+                                                     "评估工具包括Fugl-Meyer评分、PASS评分、平衡分级、ADL评分、MMSE、失用评定及汉语失语症心理语言评定系统。",
+                                                     "已接受康复训练治疗。",
+                                                     "已接受经颅直流电刺激（tDCS）定位治疗。",
+                                                     "治疗后肢体活动及言语较前改善。",
+                                                     "治疗后仍存在言语障碍及双手拮抗。",
+                                                     "tDCS第3周期（10天）后较第2周期后进一步改善。",
+                                                     "后续描述中双手拮抗消失。"
+                                                 ],
+                                 "missing_information":  [
+                                                             "患者年龄、性别未提供。",
+                                                             "起病时间与梗死发生具体日期未提供，仅提供病后34天。",
+                                                             "头核磁的具体影像学结果未提供。",
+                                                             "Fugl-Meyer、PASS、平衡分级、ADL、MMSE、失用评定、汉语失语症心理语言评定系统的具体分值未提供。",
+                                                             "既往史、合并症、卒中危险因素未提供。",
+                                                             "当前用药情况未提供。",
+                                                             "生命体征与一般体格检查未提供。",
+                                                             "神经系统查体细节未提供。",
+                                                             "吞咽功能、感觉功能、视野眼动等伴随神经功能信息未提供。",
+                                                             "康复训练与tDCS的具体参数、疗程总次数、电极定位方案未提供。",
+                                                             "是否存在复发卒中、出血转化或其他并发症信息未提供。",
+                                                             "文本为病例摘要/文献式描述，患者就诊场景与当前评估时间点未完全明确。"
+                                                         ]
+                             },
+    "reporter_feedback":  [
+
+                          ],
+    "reporter_attempts":  0,
+    "max_reporter_attempts":  3,
+    "review_passed":  false,
+    "abandoned":  false,
+    "calculation_tasks":  [
+
+                          ],
+    "calculation_results":  [
+
+                            ],
+    "treatment_recommendations":  [
+
+                                  ]
+}
