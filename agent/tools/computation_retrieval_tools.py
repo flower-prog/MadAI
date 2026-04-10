@@ -96,6 +96,7 @@ def build_case_parameter_query_text(structured_case: Any) -> tuple[str, list[str
 
     fallback_query = build_case_query_text(
         raw_text=case_payload.get("raw_text") or case_payload.get("raw_request") or "",
+        case_summary=case_payload.get("case_summary"),
         problem_list=case_payload.get("problem_list"),
         known_facts=case_payload.get("known_facts"),
     )
@@ -133,6 +134,7 @@ class RiskCalcComputationRetrievalTool:
         input_schema={
             "structured_case": {
                 "raw_text": "str",
+                "case_summary": "str",
                 "problem_list": "list[str]",
                 "known_facts": "list[str]",
                 "structured_inputs": "dict[str, Any]",

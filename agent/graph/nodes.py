@@ -39,14 +39,6 @@ from .types import (
 )
 
 
-ROLE_LABELS: dict[str, str] = {
-    "orchestrator": "core_orchestrator",
-    "clinical_assisstment": "agent1_intake_and_agent2_coordination",
-    "calculator": "agent2_child_calculator",
-    "protocol": "agent3_treatment_planner",
-    "reporter": "agent4_report_and_review",
-}
-
 DEPARTMENT_TAG_LIBRARY: tuple[str, ...] = (
     "内科",
     "外科",
@@ -133,7 +125,6 @@ def _ensure_execution_trace(state: GraphState) -> None:
     request_text = _source_text(state)
     mode = state.clinical_tool_job.mode if state.clinical_tool_job is not None else "baseline"
     trace.setdefault("workflow", list(TEAM_MEMBERS))
-    trace.setdefault("workflow_roles", {name: ROLE_LABELS.get(name, name) for name in TEAM_MEMBERS})
     trace.setdefault("mode", mode)
     trace.setdefault("request", summarize_text(request_text))
     trace.setdefault("agents", [])
@@ -255,15 +246,12 @@ def _source_text(state: GraphState) -> str:
 
 
 def _build_orchestrator_prompt_context(state: GraphState) -> dict[str, Any]:
-    workflow = " -> ".join(TEAM_MEMBERS)
     return {
         "request": state.request,
         "messages": list(state.messages),
         "patient_case": state.patient_case,
         "clinical_tool_job": state.clinical_tool_job,
         "reporter_feedback": list(state.reporter_feedback),
-        "workflow": workflow,
-        "workflow_roles": {name: ROLE_LABELS.get(name, name) for name in TEAM_MEMBERS},
         "department": state.department,
         "department_tags": list(state.department_tags),
         "department_tag_library": list(DEPARTMENT_TAG_LIBRARY),
@@ -706,6 +694,106 @@ def _resolve_clinical_tool_runner(state: GraphState):
     if state.clinical_tool_job is None:
         raise ValueError("clinical_tool_job is required to resolve the clinical tool runner.")
     return ClinicalToolAgent.from_job(state.clinical_tool_job)
+
+
+def _resolve_clinical_tool_selector(state: GraphState):
+    """解析支持 `plan_selection(job)` 的 calculator 选择器；缺失时允许回退。"""
+    runner = state.tool_registry.get("clinical_tool_agent")
+    if runner is not None:
+        if hasattr(runner, "plan_selection"):
+            return runner
+        nested_agent = getattr(runner, "agent", None)
+        if nested_agent is not None and hasattr(nested_agent, "plan_selection"):
+            return nested_agent
+        return None
+
+    from agent.clinical_tool_agent import ClinicalToolAgent
+
+    if state.clinical_tool_job is None:
+        raise ValueError("clinical_tool_job is required to resolve the clinical tool selector.")
+    return ClinicalToolAgent.from_job(state.clinical_tool_job)
+
+
+def _plan_clinical_tool_selection(state: GraphState) -> dict[str, Any] | None:
+    """尝试在父节点完成 PMID 预选；若当前 runner 不支持则返回 `None`。"""
+    selector = _resolve_clinical_tool_selector(state)
+    if selector is None:
+        return None
+
+    plan_selection = getattr(selector, "plan_selection", None)
+    if not callable(plan_selection):
+        return None
+
+    job = state.clinical_tool_job
+    if job is None:
+        raise ValueError("clinical_tool_job is missing from graph state.")
+    selection_bundle = plan_selection(job)
+    if not isinstance(selection_bundle, dict):
+        raise TypeError("clinical_tool_agent.plan_selection(job) must return a dict.")
+    return selection_bundle
+
+
+def _apply_clinical_tool_selection_to_job(
+    job: ClinicalToolJob,
+    selection_bundle: dict[str, Any],
+) -> None:
+    """把父节点的 calculator 选择结果写回 `clinical_tool_job`，供子 agent 直接执行。"""
+    selected_tool = dict(selection_bundle.get("selected_tool") or {})
+    selected_pmid = str(selected_tool.get("pmid") or "").strip() or None
+    dispatch_query_text = str(selection_bundle.get("dispatch_query_text") or "").strip()
+    dispatch_query_source = str(selection_bundle.get("dispatch_query_source") or "").strip()
+    selection_mode = str(selection_bundle.get("selection_mode") or "").strip()
+    if job.forced_tool_pmid:
+        selection_mode = "oracle_forced"
+    elif selection_mode != "oracle_forced":
+        selection_mode = "parent_selected"
+
+    job.selected_tool_pmid = selected_pmid
+    job.selected_tool = dict(selected_tool)
+    job.dispatch_query_text = dispatch_query_text
+    job.selection_context = {
+        "risk_hints": list(selection_bundle.get("risk_hints") or job.risk_hints),
+        "retrieval_batches": [
+            dict(item)
+            for item in list(selection_bundle.get("retrieval_batches") or [])
+            if isinstance(item, dict)
+        ],
+        "retrieved_tools": [
+            dict(item)
+            for item in list(selection_bundle.get("retrieved_tools") or [])
+            if isinstance(item, dict)
+        ],
+        "candidate_ranking": [
+            dict(item)
+            for item in list(selection_bundle.get("candidate_ranking") or [])
+            if isinstance(item, dict)
+        ],
+        "selection_candidates": [
+            dict(item)
+            for item in list(selection_bundle.get("selection_candidates") or [])
+            if isinstance(item, dict)
+        ],
+        "bm25_raw_top5": [
+            dict(item)
+            for item in list(selection_bundle.get("bm25_raw_top5") or [])
+            if isinstance(item, dict)
+        ],
+        "vector_raw_top5": [
+            dict(item)
+            for item in list(selection_bundle.get("vector_raw_top5") or [])
+            if isinstance(item, dict)
+        ],
+        "recommended_pmids": [
+            str(item).strip()
+            for item in list(selection_bundle.get("recommended_pmids") or [])
+            if str(item).strip()
+        ],
+        "selected_tool": dict(selected_tool),
+        "selected_tool_pmid": selected_pmid,
+        "selection_mode": selection_mode,
+        "dispatch_query_text": dispatch_query_text,
+        "dispatch_query_source": dispatch_query_source,
+    }
 
 
 def _run_clinical_tool_job(state: GraphState) -> dict[str, object]:
@@ -1301,11 +1389,8 @@ def orchestrator_node(state: GraphState) -> GraphState:  # 定义 orchestrator �
     elif state.department and not state.department_tags:
         state.department_tags = [state.department]
 
-    workflow = " -> ".join(TEAM_MEMBERS)  # 把团队成员元组拼成一个可读字符串，比如 "orchestrator -> clinical_assisstment -> protocol -> reporter"
     state.orchestrator_result = {
         **dict(state.orchestrator_result or {}),
-        "workflow": workflow,
-        "workflow_roles": {name: ROLE_LABELS.get(name, name) for name in TEAM_MEMBERS},
         "mode": state.clinical_tool_job.mode if state.clinical_tool_job is not None else "baseline",
         "department": state.department,
         "department_tags": list(state.department_tags),
@@ -1406,6 +1491,20 @@ def clinical_assisstment_node(state: GraphState) -> GraphState:
         state.clinical_tool_job.case_summary = case_summary
         state.clinical_tool_job.structured_case = dict(structured_case)
         state.clinical_tool_job.retrieval_queries = list(retrieval_queries)
+        state.clinical_tool_job.selected_tool_pmid = None
+        state.clinical_tool_job.selected_tool = {}
+        state.clinical_tool_job.dispatch_query_text = ""
+        state.clinical_tool_job.selection_context = {}
+        try:
+            selection_bundle = _plan_clinical_tool_selection(state)
+        except Exception as exc:
+            state.errors.append(f"clinical_tool parent selection failed; falling back to child selection: {exc}")
+        else:
+            if selection_bundle is not None:
+                _apply_clinical_tool_selection_to_job(
+                    state.clinical_tool_job,
+                    selection_bundle,
+                )
 
     delegated_tool_calls: list[dict[str, Any]] = []
     if state.clinical_tool_job is not None:
@@ -1656,8 +1755,6 @@ def reporter_node(state: GraphState) -> GraphState:
     ]
 
     report_payload = {
-        "workflow": " -> ".join(TEAM_MEMBERS),
-        "workflow_roles": {name: ROLE_LABELS.get(name, name) for name in TEAM_MEMBERS},
         "iteration_attempt": attempt,
         "max_iterations": state.max_reporter_attempts,
         "outcome": "review_pending",

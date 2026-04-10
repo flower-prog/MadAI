@@ -890,6 +890,99 @@ class KeywordToolRetriever:
         return payload
 
 
+def _flatten_dense_vector(vector: Any) -> list[float]:
+    values = vector.tolist() if hasattr(vector, "tolist") else list(vector)
+    while values and isinstance(values[0], list | tuple):
+        values = values[0]
+    return [float(item) for item in list(values or [])]
+
+
+def _rank_dense_subset(
+    *,
+    index: Any,
+    query_embedding: Any,
+    pmids: list[str],
+    pmid_to_index: Mapping[str, int],
+    candidate_pmids: set[str],
+) -> list[tuple[str, float]] | None:
+    if not candidate_pmids:
+        return []
+    if not hasattr(index, "reconstruct"):
+        return None
+
+    query_vector = _flatten_dense_vector(query_embedding)
+    if not query_vector:
+        return []
+
+    scored_rows: list[tuple[str, float, int]] = []
+    for order, pmid in enumerate(list(pmids or [])):
+        if pmid not in candidate_pmids:
+            continue
+        vector_index = pmid_to_index.get(pmid)
+        if vector_index is None:
+            continue
+        try:
+            document_vector = _flatten_dense_vector(index.reconstruct(int(vector_index)))
+        except Exception:
+            return None
+        score = sum(
+            float(query_value) * float(doc_value)
+            for query_value, doc_value in zip(query_vector, document_vector, strict=False)
+        )
+        scored_rows.append((pmid, float(score), order))
+
+    scored_rows.sort(key=lambda item: (-item[1], item[2], item[0]))
+    return [(pmid, score) for pmid, score, _ in scored_rows]
+
+
+def _retrieve_dense_scored_pmids(
+    *,
+    index: Any,
+    query_embedding: Any,
+    pmids: list[str],
+    pmid_to_index: Mapping[str, int],
+    candidate_pmids: set[str] | None,
+    top_k: int,
+) -> list[tuple[str, float]]:
+    normalized_candidate_pmids = (
+        {str(pmid).strip() for pmid in list(candidate_pmids or []) if str(pmid).strip()}
+        if candidate_pmids is not None
+        else None
+    )
+    if normalized_candidate_pmids is not None and not normalized_candidate_pmids:
+        return []
+
+    if normalized_candidate_pmids is not None and len(normalized_candidate_pmids) < len(pmids):
+        subset_rows = _rank_dense_subset(
+            index=index,
+            query_embedding=query_embedding,
+            pmids=pmids,
+            pmid_to_index=pmid_to_index,
+            candidate_pmids=normalized_candidate_pmids,
+        )
+        if subset_rows is not None:
+            return subset_rows[:top_k]
+
+    search_k = (
+        min(top_k, len(pmids))
+        if normalized_candidate_pmids is None or len(normalized_candidate_pmids) >= len(pmids)
+        else len(pmids)
+    )
+    if search_k <= 0:
+        return []
+
+    scores, indices = index.search(query_embedding, k=search_k)
+    results: list[tuple[str, float]] = []
+    for score, index_value in zip(scores[0], indices[0], strict=False):
+        pmid = pmids[int(index_value)]
+        if normalized_candidate_pmids is not None and pmid not in normalized_candidate_pmids:
+            continue
+        results.append((pmid, float(score)))
+        if len(results) >= top_k:
+            break
+    return results
+
+
 class MedCPTRetriever:
     QUERY_MODEL_NAME = "ncbi/MedCPT-Query-Encoder"
     DOC_MODEL_NAME = "ncbi/MedCPT-Article-Encoder"
@@ -911,6 +1004,7 @@ class MedCPTRetriever:
             AutoTokenizer=AutoTokenizer,
         )
         self._pmids = [doc.pmid for doc in catalog.documents()]
+        self._pmid_to_index = {str(pmid): index for index, pmid in enumerate(self._pmids)}
         self._inference_lock = threading.RLock()
         self._index = self._load_or_build_index()
 
@@ -1003,18 +1097,24 @@ class MedCPTRetriever:
                 model_output = self._query_encoder(**encoded)
                 query_embedding = model_output.last_hidden_state[:, 0, :].detach().cpu().numpy()
 
-        scores, indices = self._index.search(query_embedding, k=min(top_k, len(self._pmids)))
         results = []
-        for score, index in zip(scores[0], indices[0], strict=False):
-            pmid = self._pmids[int(index)]
-            if candidate_pmids and pmid not in candidate_pmids:
-                continue
+        scored_pmids = _retrieve_dense_scored_pmids(
+            index=self._index,
+            query_embedding=query_embedding,
+            pmids=self._pmids,
+            pmid_to_index=getattr(
+                self,
+                "_pmid_to_index",
+                {str(pmid): index for index, pmid in enumerate(self._pmids)},
+            ),
+            candidate_pmids=candidate_pmids,
+            top_k=top_k,
+        )
+        for pmid, score in scored_pmids:
             doc = self.catalog.get(pmid)
             payload = doc.to_brief()
             payload["score"] = float(score)
             results.append(payload)
-            if len(results) >= top_k:
-                break
         return results
 
 
@@ -1912,17 +2012,39 @@ def _sanitize_parameter_aliases(parameter_name: str, aliases: Iterable[Any]) -> 
     )
 
 
+_BM25_RAW_TEXT_MAX_CHARS = 1200
+
+
 def build_case_query_text(
     *,
     raw_text: Any = "",
+    case_summary: Any = None,
     problem_list: Any = None,
     known_facts: Any = None,
+    raw_text_max_chars: int = _BM25_RAW_TEXT_MAX_CHARS,
 ) -> str:
     parts: list[str] = []
 
     cleaned_raw_text = _clean_text(raw_text)
-    if cleaned_raw_text:
-        parts.append(cleaned_raw_text)
+    cleaned_case_summary = _clean_text(case_summary)
+    resolved_raw_text_max_chars = max(int(raw_text_max_chars), 0)
+
+    narrative_text = cleaned_raw_text
+    if (
+        cleaned_raw_text
+        and resolved_raw_text_max_chars > 0
+        and len(cleaned_raw_text) > resolved_raw_text_max_chars
+        and cleaned_case_summary
+    ):
+        narrative_text = cleaned_case_summary
+    elif not cleaned_raw_text and cleaned_case_summary:
+        narrative_text = cleaned_case_summary
+
+    if narrative_text:
+        parts.append(narrative_text)
+
+    if cleaned_case_summary and narrative_text != cleaned_case_summary:
+        parts.append("case_summary: " + cleaned_case_summary)
 
     problem_items = _coerce_text_list(problem_list)
     if problem_items:
@@ -2096,12 +2218,14 @@ class RiskCalcParameterRetrievalTool:
         self,
         *,
         raw_text: Any = "",
+        case_summary: Any = None,
         problem_list: Any = None,
         known_facts: Any = None,
         top_k: int = 10,
     ) -> list[dict[str, Any]]:
         query_text = build_case_query_text(
             raw_text=raw_text,
+            case_summary=case_summary,
             problem_list=problem_list,
             known_facts=known_facts,
         )
@@ -2119,6 +2243,7 @@ class RiskCalcParameterRetrievalTool:
             case_payload = dict(case_payload["structured_case"])
         return self.retrieve_from_case_fields(
             raw_text=case_payload.get("raw_text") or case_payload.get("raw_request") or "",
+            case_summary=case_payload.get("case_summary"),
             problem_list=case_payload.get("problem_list"),
             known_facts=case_payload.get("known_facts"),
             top_k=top_k,
@@ -2450,6 +2575,7 @@ class _InlineMedCPTRetriever:
             AutoTokenizer=AutoTokenizer,
         )
         self._pmids = [str(_document_field(document, "pmid") or "") for document in catalog.documents()]
+        self._pmid_to_index = {str(pmid): index for index, pmid in enumerate(self._pmids)}
         self._inference_lock = threading.RLock()
         self._index = self._load_or_build_index()
 
@@ -2559,18 +2685,24 @@ class _InlineMedCPTRetriever:
                 model_output = self._query_encoder(**encoded)
                 query_embedding = model_output.last_hidden_state[:, 0, :].detach().cpu().numpy()
 
-        scores, indices = self._index.search(query_embedding, k=min(top_k, len(self._pmids)))
         results = []
-        for score, index in zip(scores[0], indices[0], strict=False):
-            pmid = self._pmids[int(index)]
-            if candidate_pmids and pmid not in candidate_pmids:
-                continue
+        scored_pmids = _retrieve_dense_scored_pmids(
+            index=self._index,
+            query_embedding=query_embedding,
+            pmids=self._pmids,
+            pmid_to_index=getattr(
+                self,
+                "_pmid_to_index",
+                {str(pmid): index for index, pmid in enumerate(self._pmids)},
+            ),
+            candidate_pmids=candidate_pmids,
+            top_k=top_k,
+        )
+        for pmid, score in scored_pmids:
             document = self.catalog.get(pmid)
             payload = _document_to_brief(document)
             payload["score"] = float(score)
             results.append(payload)
-            if len(results) >= top_k:
-                break
         return results
 
 
@@ -2607,6 +2739,7 @@ class RiskCalcRetrievalTool:
         self,
         *,
         raw_text: Any = "",
+        case_summary: Any = None,
         problem_list: Any = None,
         known_facts: Any = None,
         department_tags: Any = None,
@@ -2617,6 +2750,7 @@ class RiskCalcRetrievalTool:
     ) -> dict[str, Any]:
         query_text = build_case_query_text(
             raw_text=raw_text,
+            case_summary=case_summary,
             problem_list=problem_list,
             known_facts=known_facts,
         )
@@ -2660,6 +2794,7 @@ class RiskCalcRetrievalTool:
         self,
         *,
         raw_text: Any = "",
+        case_summary: Any = None,
         problem_list: Any = None,
         known_facts: Any = None,
         department_tags: Any = None,
@@ -2669,6 +2804,7 @@ class RiskCalcRetrievalTool:
     ) -> dict[str, Any]:
         query_text = build_case_query_text(
             raw_text=raw_text,
+            case_summary=case_summary,
             problem_list=problem_list,
             known_facts=known_facts,
         )
@@ -2716,6 +2852,7 @@ class RiskCalcRetrievalTool:
         input_schema={
             "structured_case": {
                 "raw_text": "str",
+                "case_summary": "str",
                 "problem_list": "list[str]",
                 "known_facts": "list[str]",
                 "department_tags": "list[str]",
@@ -2757,6 +2894,7 @@ class RiskCalcRetrievalTool:
             resolved_department_tags = case_payload.get("department_tags")
         return self.retrieve_coarse_from_case_fields(
             raw_text=case_payload.get("raw_text") or case_payload.get("raw_request") or "",
+            case_summary=case_payload.get("case_summary"),
             problem_list=case_payload.get("problem_list"),
             known_facts=case_payload.get("known_facts"),
             department_tags=resolved_department_tags,
@@ -2773,6 +2911,7 @@ class RiskCalcRetrievalTool:
         input_schema={
             "structured_case": {
                 "raw_text": "str",
+                "case_summary": "str",
                 "problem_list": "list[str]",
                 "known_facts": "list[str]",
                 "department_tags": "list[str]",
@@ -2816,6 +2955,7 @@ class RiskCalcRetrievalTool:
             resolved_department_tags = case_payload.get("department_tags")
         return self.retrieve_from_case_fields(
             raw_text=case_payload.get("raw_text") or case_payload.get("raw_request") or "",
+            case_summary=case_payload.get("case_summary"),
             problem_list=case_payload.get("problem_list"),
             known_facts=case_payload.get("known_facts"),
             department_tags=resolved_department_tags,

@@ -1264,6 +1264,7 @@ class RiskCalcExecutionTool:
         clinical_text: str,
         structured_case: dict[str, Any] | None = None,
         calculator_payload: dict[str, Any] | None = None,
+        retrieval_query_text: str | None = None,
         llm_model: str | None = None,
         temperature: float = 0.0,
     ) -> dict[str, Any]:
@@ -1282,6 +1283,7 @@ class RiskCalcExecutionTool:
         参数:
             calculator: 要执行的 calculator 引用。
             clinical_text: 临床病历文本、问题文本或病例摘要。
+            retrieval_query_text: clinical_assisstment 为这个 PMID 派发的检索查询文本。
             llm_model: 可选，指定抽参时使用的模型名称。
             temperature: 抽参时的采样温度，默认使用更保守的 ``0.0``。
 
@@ -1313,12 +1315,21 @@ class RiskCalcExecutionTool:
         )
         selected_calculator_payload["function_name"] = registration.function_name
         selected_calculator_payload["parameter_names"] = list(registration.parameter_names)
+        tool_input_schema = {
+            "inputs": {
+                str(name): "<value>"
+                for name in list(registration.parameter_names)
+            }
+        }
 
         normalized_structured_case = dict(structured_case or {})
+        normalized_retrieval_query_text = str(retrieval_query_text or "").strip()
         system_prompt = (
-            "You are a calculator-specific clinical parameter extraction agent. "
-            "You must extract values only for the single selected calculator provided to you. "
-            "Use the selected calculator metadata, the structured case JSON, and the raw clinical text together. "
+            "You are the calculator child agent dispatched by clinical_assisstment. "
+            "You must extract values only for the single selected calculator PMID provided to you. "
+            "First build a parameter dictionary for that calculator from the dispatch context. "
+            "The selected calculator repository payload and the dispatch retrieval query are the primary context. "
+            "Use the structured case JSON and raw clinical text only as supporting evidence when they help confirm a value. "
             "Return JSON only in the format {\"inputs\": {\"parameter_name\": value}}. "
             "Only include parameters from the selected calculator's required parameter list. "
             "Do not add extra keys. Do not guess unsupported values."
@@ -1329,12 +1340,22 @@ class RiskCalcExecutionTool:
             f"Selected Calculator Title: {registration.title}\n"
             f"Selected Calculator Function: {registration.function_name}\n"
             f"Selected Calculator Required Parameters: {', '.join(registration.parameter_names)}\n\n"
-            "Selected Calculator Full Payload:\n"
+            "Tool Input Schema (exact JSON shape; keep the parameter keys exactly as written and replace the values only):\n"
+            f"{json.dumps(tool_input_schema, ensure_ascii=False, indent=2)}\n\n"
+            "Selected Calculator Repository Payload (resolved by PMID):\n"
             f"{json.dumps(selected_calculator_payload, ensure_ascii=False, indent=2)}\n\n"
+            "Dispatch Retrieval Query Text (the upstream coarse retrieval query; if raw_text was too long upstream, this may already use case_summary):\n"
+            f"{normalized_retrieval_query_text or '[not provided]'}\n\n"
             "Structured Case JSON:\n"
             f"{json.dumps(normalized_structured_case, ensure_ascii=False, indent=2)}\n\n"
-            "Raw Clinical Text:\n"
+            "Raw Clinical Text (supporting evidence only):\n"
             f"{clinical_text}\n\n"
+            "Task:\n"
+            "1. Read only the selected calculator payload above.\n"
+            "2. Use the dispatch retrieval query text as the primary patient-context summary for this calculator.\n"
+            "3. Produce a parameter dictionary for the selected calculator only, using the exact required parameter names.\n"
+            "4. Omit any parameter that is not supported by the provided context.\n"
+            "5. The returned JSON must match the tool input schema exactly.\n\n"
             "Return JSON only in the format "
             '{"inputs": {"parameter_name": value}}.'
         )
@@ -1362,6 +1383,7 @@ class RiskCalcExecutionTool:
             "parameter_names": list(registration.parameter_names),
             "inputs": normalized_inputs or None,
             "structured_case": normalized_structured_case,
+            "retrieval_query_text": normalized_retrieval_query_text,
             "calculator_payload": selected_calculator_payload,
             "raw_response": answer,
         }
@@ -1490,6 +1512,7 @@ class RiskCalcExecutionTool:
             "clinical_text": "str",
             "structured_case": "dict|None",
             "calculator_payload": "dict|None",
+            "retrieval_query_text": "str|None",
             "mode": "str",
             "llm_model": "str|None",
             "temperature": "float",
@@ -1503,6 +1526,7 @@ class RiskCalcExecutionTool:
         clinical_text: str,
         structured_case: dict[str, Any] | None = None,
         calculator_payload: dict[str, Any] | None = None,
+        retrieval_query_text: str | None = None,
         mode: str = "patient_note",
         llm_model: str | None = None,
         temperature: float = 0.0,
@@ -1524,6 +1548,7 @@ class RiskCalcExecutionTool:
         参数:
             calculator: 目标 calculator 引用。
             clinical_text: 提供给抽参与总结阶段的原始文本。
+            retrieval_query_text: 上游调度到该 calculator 时使用的检索查询文本。
             mode: 输出模式，默认 ``patient_note``。
             llm_model: 可选，统一指定抽参与总结阶段用到的模型。
             temperature: 抽参与总结阶段统一使用的采样温度。
@@ -1552,6 +1577,7 @@ class RiskCalcExecutionTool:
             clinical_text=clinical_text,
             structured_case=structured_case,
             calculator_payload=calculator_payload,
+            retrieval_query_text=retrieval_query_text,
             llm_model=llm_model,
             temperature=temperature,
         )

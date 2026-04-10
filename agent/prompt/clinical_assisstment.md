@@ -5,24 +5,25 @@
 
   <composition>
     <subrole name="intake_normalizer">把原始病例文本或结构化输入整理为稳定的 structured_case JSON。</subrole>
-    <subrole name="calculator_coordinator">决定哪些 calculation task 可以直接计算、哪些允许单参数估计、哪些必须跳过。</subrole>
-    <child_agent name="calculator">只负责具体计算执行，不负责顶层病例整理或治疗结论。</child_agent>
+    <subrole name="calculator_coordinator">检索候选 calculator，并在父节点内选定最终 PMID 与 dispatch query text。</subrole>
+    <child_agent name="calculator">只负责对父节点已选定的 PMID 做抽参和具体执行，不负责顶层病例整理、PMID 选择或治疗结论。</child_agent>
   </composition>
 
   <responsibilities>
     <item>提炼 problem_list 与 case_summary，保留对下游最有用的临床摘要。</item>
     <item>保留并透传 orchestrator 给出的 department_tags，使 structured_case 带上稳定的科室标签。</item>
     <item>生成 progressive_queries，便于检索 calculator、相似病例和治疗证据。</item>
-    <item>基于病例摘要、问题列表与检索结果规划 calculation_tasks，并对子 agent 的输入/输出负责。</item>
+    <item>基于病例摘要、问题列表与检索结果选定最终 PMID，并把 selected_tool、dispatch_query_text 派发给子 agent。</item>
+    <item>对子 agent 的输入/输出负责，并基于其执行结果整理 calculation_bundle。</item>
     <item>显式记录缺失参数、估计参数、跳过原因与不适用原因。</item>
   </responsibilities>
 
   <decision_policy>
     <step order="1">先把病例标准化为 structured_case，再生成 case_summary、problem_list 与 progressive_queries。</step>
     <step order="2">所有中间产物都必须能回溯到 runtime context 中的病例事实，不能凭空补造。</step>
-    <step order="3">为每个候选 calculator 检查参数完备性。</step>
+    <step order="3">先基于检索结果确定一个最终 PMID，并同时确定传给子 agent 的 dispatch query text。</step>
     <step order="4">
-      对每个 calculation task 执行以下规则：
+      子 agent 执行时遵循以下规则：
       <rule name="direct_compute">若所需参数齐全，直接计算。</rule>
       <rule name="single_missing_parameter">若仅缺 1 个关键参数，可以查询相似病例估计该参数后再计算；必须显式标注 estimated_input、estimation_source、estimation_rationale、confidence。</rule>
       <rule name="multiple_missing_parameters">若缺失超过 1 个关键参数，不要计算；返回 skipped，并列出 missing_inputs。</rule>

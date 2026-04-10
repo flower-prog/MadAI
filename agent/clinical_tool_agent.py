@@ -415,6 +415,7 @@ class ClinicalToolAgent:
             self.tools["riskcalc_executor"] = self.execution_tool
         self._trace_tool_calls: list[dict[str, Any]] = []
         self._latest_retrieval_bundle: dict[str, Any] | None = None
+        self._latest_coarse_retrieval_bundle: dict[str, Any] | None = None
 
     @classmethod
     def from_job(cls, job: ClinicalToolJob) -> "ClinicalToolAgent":
@@ -457,6 +458,7 @@ class ClinicalToolAgent:
     def _reset_trace(self) -> None:
         self._trace_tool_calls = []
         self._latest_retrieval_bundle = None
+        self._latest_coarse_retrieval_bundle = None
 
     def _record_tool_call(
         self,
@@ -493,7 +495,17 @@ class ClinicalToolAgent:
         result["trace"] = self._build_trace_bundle()
         return result
 
-    def _run_question(self, job: ClinicalToolJob) -> dict[str, Any]:
+    @staticmethod
+    def _selection_override_pmid(job: ClinicalToolJob) -> str:
+        return str(job.selected_tool_pmid or job.forced_tool_pmid or "").strip()
+
+    def _should_use_preselected_path(self, job: ClinicalToolJob) -> bool:
+        if self._selection_override_pmid(job):
+            return True
+        return bool(job.selection_context)
+
+    def plan_selection(self, job: ClinicalToolJob) -> dict[str, Any]:
+        self._reset_trace()
         retrieval_context = self._retrieve_and_rank_candidates(job)
         selection_candidates = list(retrieval_context.get("question_selection_candidates") or [])
         raw_bm25_top5 = list(
@@ -526,22 +538,237 @@ class ClinicalToolAgent:
         else:
             selection_candidates = selection_candidates[:_QUESTION_SELECTION_POOL_LIMIT]
 
-        if job.forced_tool_pmid:
+        override_pmid = self._selection_override_pmid(job)
+        if override_pmid:
             selected_tool = self._build_forced_question_selection(
                 job,
                 selection_candidates,
-                forced_tool_pmid=job.forced_tool_pmid,
+                forced_tool_pmid=override_pmid,
             )
+            selection_mode = "oracle_forced" if job.forced_tool_pmid else "parent_selected"
         else:
             selected_tool = self._select_tool_for_question(
                 job,
                 selection_candidates,
             )
+            selection_mode = "model_selected"
+
+        selected_pmid = str(selected_tool.get("pmid") or "").strip()
+        selected_candidate = next(
+            (candidate for candidate in selection_candidates if str(candidate.get("pmid") or "").strip() == selected_pmid),
+            None,
+        )
+        dispatch_query_text = ""
+        dispatch_query_source = "unavailable"
+        if selected_pmid:
+            dispatch_query_text, dispatch_query_source = self._resolve_parameter_extraction_query_text(
+                job,
+                selected_pmid=selected_pmid,
+                selected_candidate=selected_candidate,
+            )
+
+        public_candidates = [
+            _public_candidate_view(
+                dict(candidate),
+                recommended_channels=recommended_channels,
+            )
+            for candidate in selection_candidates
+        ]
+        return {
+            "mode": job.mode,
+            "risk_hints": list(retrieval_context.get("risk_hints") or []),
+            "retrieval_batches": list(retrieval_context.get("retrieval_batches") or []),
+            "retrieved_tools": list(public_candidates),
+            "candidate_ranking": list(public_candidates),
+            "selection_candidates": [dict(candidate) for candidate in selection_candidates],
+            "bm25_raw_top5": [
+                _public_context_hit_view(
+                    dict(item),
+                    recommended_channels=recommended_channels,
+                )
+                for item in raw_bm25_top5
+            ],
+            "vector_raw_top5": [
+                _public_context_hit_view(
+                    dict(item),
+                    recommended_channels=recommended_channels,
+                )
+                for item in raw_vector_top5
+            ],
+            "recommended_pmids": list(recommended_channels.keys()),
+            "selected_tool": dict(selected_tool),
+            "selection_mode": selection_mode,
+            "dispatch_query_text": dispatch_query_text,
+            "dispatch_query_source": dispatch_query_source,
+        }
+
+    def _build_preselected_tool(
+        self,
+        job: ClinicalToolJob,
+        *,
+        selected_pmid: str,
+        selected_candidate: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        selection_context = dict(job.selection_context or {})
+        existing = dict(job.selected_tool or selection_context.get("selected_tool") or {})
+        if str(existing.get("pmid") or "").strip() != selected_pmid:
+            existing = {}
+
+        selected_doc = self.catalog.get(selected_pmid)
+        parameter_names = self._resolve_candidate_parameter_names(
+            pmid=selected_pmid,
+            candidate=selected_candidate or existing,
+        )
+        return {
+            "pmid": selected_pmid,
+            "title": str(existing.get("title") or selected_doc.title).strip(),
+            "purpose": str(existing.get("purpose") or selected_doc.purpose).strip(),
+            "parameter_names": list(parameter_names),
+            "model_parameter_names": list(existing.get("model_parameter_names") or []),
+            "model_selected_tool_id": existing.get("model_selected_tool_id"),
+            "fallback_used": bool(existing.get("fallback_used") or False),
+            "reason": str(
+                existing.get("reason")
+                or (
+                    "Forced oracle tool selection for evaluation."
+                    if job.forced_tool_pmid and not job.selected_tool_pmid
+                    else "Calculator PMID selected by clinical_assisstment."
+                )
+            ).strip(),
+            "raw_response": existing.get("raw_response"),
+            "present_in_retrieved_candidates": bool(
+                existing.get("present_in_retrieved_candidates")
+                or selected_candidate
+            ),
+        }
+
+    def _run_preselected(self, job: ClinicalToolJob) -> dict[str, Any]:
+        selected_pmid = self._selection_override_pmid(job)
+        selection_context = dict(job.selection_context or {})
+        raw_selection_candidates = [
+            dict(item)
+            for item in list(selection_context.get("selection_candidates") or [])
+            if isinstance(item, dict)
+        ]
+        selected_candidate = next(
+            (candidate for candidate in raw_selection_candidates if str(candidate.get("pmid") or "").strip() == selected_pmid),
+            None,
+        )
+
+        selected_tool: dict[str, Any]
+        if selected_pmid:
+            selected_tool = self._build_preselected_tool(
+                job,
+                selected_pmid=selected_pmid,
+                selected_candidate=selected_candidate,
+            )
+        else:
+            selected_tool = dict(job.selected_tool or selection_context.get("selected_tool") or {})
+
+        retrieved_tools = [
+            dict(item)
+            for item in list(
+                selection_context.get("retrieved_tools")
+                or selection_context.get("candidate_ranking")
+                or []
+            )
+            if isinstance(item, dict)
+        ]
+        if not retrieved_tools and selected_tool:
+            retrieved_tools = [
+                _public_candidate_view(
+                    dict(selected_candidate or selected_tool),
+                    recommended_channels={selected_pmid: []} if selected_pmid else {},
+                )
+            ]
+
+        execution: dict[str, Any] = {}
+        executions: list[dict[str, Any]] = []
+        if selected_pmid:
+            execution = self._execute_calculator(
+                job,
+                selected_pmid,
+                selected_candidate=selected_candidate,
+            )
+            self._record_tool_call(
+                "python_calculator_executor",
+                status=str(execution.get("status") or "unknown"),
+                input_payload={
+                    "mode": job.mode,
+                    "pmid": selected_pmid,
+                    "title": selected_tool.get("title"),
+                    "clinical_text": summarize_text(job.text),
+                },
+                output_payload=execution,
+                metadata={"dispatch": f"{job.mode}_mode", "source": "parent_preselected_execution"},
+            )
+            execution = dict(execution)
+            executions.append(dict(execution))
+        if not execution:
+            execution = {
+                "status": "skipped",
+                "final_text": "No calculator PMID was selected by clinical_assisstment.",
+            }
+
+        result = {
+            "mode": job.mode,
+            "retrieval_batches": list(selection_context.get("retrieval_batches") or []),
+            "retrieved_tools": list(retrieved_tools),
+            "candidate_ranking": list(selection_context.get("candidate_ranking") or retrieved_tools),
+            "bm25_raw_top5": [
+                dict(item)
+                for item in list(selection_context.get("bm25_raw_top5") or [])
+                if isinstance(item, dict)
+            ],
+            "vector_raw_top5": [
+                dict(item)
+                for item in list(selection_context.get("vector_raw_top5") or [])
+                if isinstance(item, dict)
+            ],
+            "selection_decisions": [],
+            "eligible_tools": [],
+            "selected_tool": selected_tool,
+            "executions": executions,
+            "execution": execution,
+            "recommended_pmids": list(selection_context.get("recommended_pmids") or ([selected_pmid] if selected_pmid else [])),
+            "selection_mode": str(
+                selection_context.get("selection_mode")
+                or ("oracle_forced" if job.forced_tool_pmid and not job.selected_tool_pmid else "parent_selected")
+            ).strip(),
+            "dispatch_query_text": str(
+                job.dispatch_query_text
+                or selection_context.get("dispatch_query_text")
+                or ""
+            ),
+            "dispatch_query_source": str(
+                selection_context.get("dispatch_query_source")
+                or ("job.dispatch_query_text" if job.dispatch_query_text else "")
+            ),
+        }
+        if job.mode == "patient_note":
+            result["risk_hints"] = list(selection_context.get("risk_hints") or job.risk_hints)
+        return result
+
+    def _run_question(self, job: ClinicalToolJob) -> dict[str, Any]:
+        if self._should_use_preselected_path(job):
+            return self._run_preselected(job)
+
+        selection_bundle = self.plan_selection(job)
+        selection_candidates = list(selection_bundle.get("selection_candidates") or [])
+        selected_tool = dict(selection_bundle.get("selected_tool") or {})
         selected_pmid = str(selected_tool.get("pmid") or "").strip()
         execution: dict[str, Any] = {}
         executions: list[dict[str, Any]] = []
         if selected_pmid:
-            execution = self._execute_calculator(job, selected_pmid)
+            selected_candidate = next(
+                (candidate for candidate in selection_candidates if str(candidate.get("pmid") or "").strip() == selected_pmid),
+                None,
+            )
+            execution = self._execute_calculator(
+                job,
+                selected_pmid,
+                selected_candidate=selected_candidate,
+            )
             self._record_tool_call(
                 "python_calculator_executor",
                 status=str(execution.get("status") or "unknown"),
@@ -563,35 +790,18 @@ class ClinicalToolAgent:
             }
         return {
             "mode": job.mode,
-            "retrieved_tools": [
-                _public_candidate_view(
-                    dict(candidate),
-                    recommended_channels=recommended_channels,
-                )
-                for candidate in selection_candidates
-            ],
-            "retrieval_batches": retrieval_context["retrieval_batches"],
-            "bm25_raw_top5": [
-                _public_context_hit_view(
-                    dict(item),
-                    recommended_channels=recommended_channels,
-                )
-                for item in raw_bm25_top5
-            ],
-            "vector_raw_top5": [
-                _public_context_hit_view(
-                    dict(item),
-                    recommended_channels=recommended_channels,
-                )
-                for item in raw_vector_top5
-            ],
+            "retrieved_tools": list(selection_bundle.get("retrieved_tools") or []),
+            "candidate_ranking": list(selection_bundle.get("candidate_ranking") or []),
+            "retrieval_batches": list(selection_bundle.get("retrieval_batches") or []),
+            "bm25_raw_top5": list(selection_bundle.get("bm25_raw_top5") or []),
+            "vector_raw_top5": list(selection_bundle.get("vector_raw_top5") or []),
             "selection_decisions": [],
             "eligible_tools": [],
             "selected_tool": selected_tool,
             "executions": executions,
             "execution": execution,
-            "recommended_pmids": list(recommended_channels.keys()),
-            "selection_mode": "oracle_forced" if job.forced_tool_pmid else "model_selected",
+            "recommended_pmids": list(selection_bundle.get("recommended_pmids") or []),
+            "selection_mode": str(selection_bundle.get("selection_mode") or "model_selected"),
         }
 
     def _build_forced_question_selection(
@@ -636,56 +846,27 @@ class ClinicalToolAgent:
         return selection
 
     def _run_patient_note(self, job: ClinicalToolJob) -> dict[str, Any]:
-        retrieval_context = self._retrieve_and_rank_candidates(job)
-        risk_hints = retrieval_context["risk_hints"]
-        selection_candidates = list(retrieval_context.get("question_selection_candidates") or [])
-        raw_bm25_top5 = list(
-            retrieval_context.get("bm25_raw_top3")
-            or retrieval_context.get("bm25_raw_top5")
-            or []
-        )
-        raw_vector_top5 = list(
-            retrieval_context.get("vector_raw_top3")
-            or retrieval_context.get("vector_raw_top5")
-            or []
-        )
-        recommended_channels = _build_recommended_channels(
-            bm25_raw_top5=raw_bm25_top5,
-            vector_raw_top5=raw_vector_top5,
-        )
-        if not selection_candidates:
-            retrieved_tools = list(
-                retrieval_context.get("retrieved_tools")
-                or retrieval_context.get("candidate_ranking")
-                or []
-            )
-            selection_candidates = self._build_question_selection_candidates(
-                retrieved_tools=retrieved_tools,
-                bm25_raw_top5=raw_bm25_top5,
-                vector_raw_top5=raw_vector_top5,
-                extra_candidates=list(retrieval_context.get("candidate_ranking") or []),
-                limit=_QUESTION_SELECTION_POOL_LIMIT,
-            )
-        else:
-            selection_candidates = selection_candidates[:_QUESTION_SELECTION_POOL_LIMIT]
+        if self._should_use_preselected_path(job):
+            return self._run_preselected(job)
 
-        if job.forced_tool_pmid:
-            selected_tool = self._build_forced_question_selection(
-                job,
-                selection_candidates,
-                forced_tool_pmid=job.forced_tool_pmid,
-            )
-        else:
-            selected_tool = self._select_tool_for_question(
-                job,
-                selection_candidates,
-            )
+        selection_bundle = self.plan_selection(job)
+        risk_hints = list(selection_bundle.get("risk_hints") or [])
+        selection_candidates = list(selection_bundle.get("selection_candidates") or [])
+        selected_tool = dict(selection_bundle.get("selected_tool") or {})
 
         executions: list[dict[str, Any]] = []
         selected_pmid = str(selected_tool.get("pmid") or "").strip()
         selected_execution: dict[str, Any] = {}
         if selected_pmid:
-            execution = self._execute_calculator(job, selected_pmid)
+            selected_candidate = next(
+                (candidate for candidate in selection_candidates if str(candidate.get("pmid") or "").strip() == selected_pmid),
+                None,
+            )
+            execution = self._execute_calculator(
+                job,
+                selected_pmid,
+                selected_candidate=selected_candidate,
+            )
             self._record_tool_call(
                 "python_calculator_executor",
                 status=str(execution.get("status") or "unknown"),
@@ -710,20 +891,18 @@ class ClinicalToolAgent:
         return {
             "mode": job.mode,
             "risk_hints": risk_hints,
-            "retrieval_batches": retrieval_context["retrieval_batches"],
-            "retrieved_tools": [
-                _public_candidate_view(
-                    dict(candidate),
-                    recommended_channels=recommended_channels,
-                )
-                for candidate in selection_candidates
-            ],
-            "recommended_pmids": list(recommended_channels.keys()),
+            "retrieval_batches": list(selection_bundle.get("retrieval_batches") or []),
+            "retrieved_tools": list(selection_bundle.get("retrieved_tools") or []),
+            "candidate_ranking": list(selection_bundle.get("candidate_ranking") or []),
+            "recommended_pmids": list(selection_bundle.get("recommended_pmids") or []),
+            "bm25_raw_top5": list(selection_bundle.get("bm25_raw_top5") or []),
+            "vector_raw_top5": list(selection_bundle.get("vector_raw_top5") or []),
             "selection_decisions": [],
             "eligible_tools": [],
             "selected_tool": selected_tool,
             "executions": executions,
             "execution": selected_execution,
+            "selection_mode": str(selection_bundle.get("selection_mode") or "model_selected"),
         }
 
     @staticmethod
@@ -812,6 +991,53 @@ class ClinicalToolAgent:
         payload.setdefault("computation", registration.code)
         return payload
 
+    def _resolve_parameter_extraction_query_text(
+        self,
+        job: ClinicalToolJob,
+        *,
+        selected_pmid: str,
+        selected_candidate: dict[str, Any] | None = None,
+    ) -> tuple[str, str]:
+        normalized_pmid = str(selected_pmid or "").strip()
+        structured_case = dict(job.structured_case or {})
+        source_entries = dict((selected_candidate or {}).get("source_entries") or {})
+        query_candidates: list[tuple[str, str]] = []
+
+        def _append_candidate(label: str, raw_text: Any) -> None:
+            text = str(raw_text or "").strip()
+            if text:
+                query_candidates.append((label, text))
+
+        _append_candidate("job.dispatch_query_text", job.dispatch_query_text)
+        _append_candidate(
+            "job.selection_context.dispatch_query_text",
+            dict(job.selection_context or {}).get("dispatch_query_text"),
+        )
+        coarse_bundle = dict(self._latest_coarse_retrieval_bundle or {})
+        _append_candidate("coarse_retrieval.query_text", coarse_bundle.get("query_text"))
+        _append_candidate(
+            "selected_candidate.query_text",
+            (selected_candidate or {}).get("query_text"),
+        )
+        for source_name in ("retrieved_union", "bm25", "vector", "legacy_question_pool"):
+            source_entry = dict(source_entries.get(source_name) or {})
+            if normalized_pmid and str(source_entry.get("pmid") or "").strip() not in {"", normalized_pmid}:
+                continue
+            _append_candidate(f"selected_candidate.source_entries.{source_name}", source_entry.get("query_text"))
+
+        for index, query in enumerate(list(job.retrieval_queries or []), start=1):
+            _append_candidate(f"job.retrieval_queries[{index}]", getattr(query, "text", ""))
+
+        _append_candidate("job.case_summary", job.case_summary)
+        _append_candidate("structured_case.case_summary", structured_case.get("case_summary"))
+        _append_candidate("job.text", job.text)
+        _append_candidate("structured_case.raw_text", structured_case.get("raw_text"))
+
+        for source_name, query_text in query_candidates:
+            if query_text:
+                return query_text, source_name
+        return "", "unavailable"
+
     def _score_query_alignment(
         self,
         query_text: str,
@@ -846,6 +1072,7 @@ class ClinicalToolAgent:
         )
         if coarse_retrieved:
             coarse_bundle = dict(self._latest_retrieval_bundle or {})
+            self._latest_coarse_retrieval_bundle = dict(coarse_bundle)
             self._record_tool_call(
                 "riskcalc_coarse_retriever",
                 input_payload={
@@ -1704,7 +1931,11 @@ class ClinicalToolAgent:
         parameter_names = list(registration.parameter_names)
         decision["title"] = registration.title or title
         decision["parameter_names"] = parameter_names
-        extracted_inputs = self._extract_registered_inputs(job, registration) or {}
+        extracted_inputs = self._extract_registered_inputs(
+            job,
+            registration,
+            selected_candidate=candidate,
+        ) or {}
         available_inputs = sorted(str(name) for name in extracted_inputs.keys())
         missing_before_defaults = [
             name for name in parameter_names if name not in extracted_inputs
@@ -1788,18 +2019,30 @@ class ClinicalToolAgent:
         )
         return decision, None
 
-    def _extract_registered_inputs(self, job: ClinicalToolJob, registration: RiskCalcRegistration) -> dict[str, Any] | None:
+    def _extract_registered_inputs(
+        self,
+        job: ClinicalToolJob,
+        registration: RiskCalcRegistration,
+        *,
+        selected_candidate: dict[str, Any] | None = None,
+    ) -> dict[str, Any] | None:
         execution_tool = self.tools.get("riskcalc_executor")
         if execution_tool is None:
             return None
 
         calculator_payload = self._build_selected_calculator_payload(registration)
         structured_case = dict(job.structured_case or {})
+        retrieval_query_text, retrieval_query_source = self._resolve_parameter_extraction_query_text(
+            job,
+            selected_pmid=registration.calc_id,
+            selected_candidate=selected_candidate,
+        )
         extraction = execution_tool.extract_inputs(
             calculator=registration.calc_id,
             clinical_text=job.text,
             structured_case=structured_case,
             calculator_payload=calculator_payload,
+            retrieval_query_text=retrieval_query_text,
             llm_model=job.llm_model,
             temperature=job.temperature,
         )
@@ -1814,6 +2057,8 @@ class ClinicalToolAgent:
                 "clinical_text": summarize_text(job.text),
                 "structured_case": structured_case,
                 "calculator_payload": calculator_payload,
+                "retrieval_query_text": retrieval_query_text,
+                "retrieval_query_source": retrieval_query_source,
             },
             output_payload={
                 "inputs": extracted_inputs,
@@ -1859,7 +2104,13 @@ class ClinicalToolAgent:
         )
         return final_text
 
-    def _try_registered_execution(self, job: ClinicalToolJob, pmid: str) -> dict[str, Any] | None:
+    def _try_registered_execution(
+        self,
+        job: ClinicalToolJob,
+        pmid: str,
+        *,
+        selected_candidate: dict[str, Any] | None = None,
+    ) -> dict[str, Any] | None:
         execution_tool = self.tools.get("riskcalc_executor")
         if execution_tool is None or self.registry is None:
             return None
@@ -1867,7 +2118,11 @@ class ClinicalToolAgent:
             return None
 
         registration = execution_tool.get_registration(pmid)
-        extracted_inputs = self._extract_registered_inputs(job, registration)
+        extracted_inputs = self._extract_registered_inputs(
+            job,
+            registration,
+            selected_candidate=selected_candidate,
+        )
         if not extracted_inputs:
             return None
 
@@ -1903,9 +2158,19 @@ class ClinicalToolAgent:
             "messages": [],
         }
 
-    def _execute_calculator(self, job: ClinicalToolJob, pmid: str) -> dict[str, Any]:
+    def _execute_calculator(
+        self,
+        job: ClinicalToolJob,
+        pmid: str,
+        *,
+        selected_candidate: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         doc = self.catalog.get(pmid)
-        registered_execution = self._try_registered_execution(job, pmid)
+        registered_execution = self._try_registered_execution(
+            job,
+            pmid,
+            selected_candidate=selected_candidate,
+        )
         if registered_execution is not None:
             return registered_execution
 

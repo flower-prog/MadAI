@@ -141,6 +141,10 @@ class ClinicalToolJob:
     structured_case: dict[str, Any] = field(default_factory=dict)
     risk_hints: list[str] = field(default_factory=list)
     retrieval_queries: list[RetrievalQuery] = field(default_factory=list)
+    selected_tool_pmid: str | None = None
+    selected_tool: dict[str, Any] = field(default_factory=dict)
+    dispatch_query_text: str = ""
+    selection_context: dict[str, Any] = field(default_factory=dict)
     top_k: int = 30
     risk_count: int = 5
     max_selected_tools: int | None = 5
@@ -530,6 +534,10 @@ def _coerce_clinical_tool_job(raw: Any) -> ClinicalToolJob | None:
             _coerce_retrieval_query(item)
             for item in list(raw.get("retrieval_queries") or raw.get("progressive_queries") or [])
         ],
+        selected_tool_pmid=(str(raw.get("selected_tool_pmid") or "").strip() or None),
+        selected_tool=dict(raw.get("selected_tool") or {}),
+        dispatch_query_text=str(raw.get("dispatch_query_text") or ""),
+        selection_context=dict(raw.get("selection_context") or {}),
         top_k=_resolve_retrieval_top_k(raw.get("top_k")),
         risk_count=int(raw.get("risk_count") or 5),
         max_selected_tools=(

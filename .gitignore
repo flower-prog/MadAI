@@ -1,0 +1,50 @@
+# Local environment
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+
+# Python cache / tooling
+__pycache__/
+*.py[cod]
+*.pyo
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+.tox/
+.nox/
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Coverage / reports
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Generated outputs / local caches
+outputs/
+MedAI/outputs/
+data/.cache/
+.tmp_ensurepip/
+.tmp_test_artifacts/
+tests/.tmp_test_artifacts/
+*.log
+
+# Local notes / working folders
+思路.md
+数据/
+草稿/
+
+# Editor / OS files
+.idea/
+.vscode/
+.ipynb_checkpoints/
+Thumbs.db
+.DS_Store

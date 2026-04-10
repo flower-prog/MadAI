@@ -159,6 +159,63 @@ def _resolve_retrieval_top_k(top_k: int | None) -> int:
     return _DEFAULT_RETRIEVAL_TOP_K
 
 
+def _normalize_optional_mapping(raw_value: Any, *, label: str) -> dict[str, Any] | None:
+    if raw_value is None:
+        return None
+    if isinstance(raw_value, dict):
+        return dict(raw_value)
+    if is_dataclass(raw_value):
+        return {item.name: getattr(raw_value, item.name) for item in fields(raw_value)}
+    raise ValueError(f"{label} must be a JSON object / dict, got {type(raw_value).__name__}.")
+
+
+def _normalize_optional_list(raw_value: Any, *, label: str) -> list[Any] | None:
+    if raw_value is None:
+        return None
+    if isinstance(raw_value, list):
+        return list(raw_value)
+    if isinstance(raw_value, tuple):
+        return list(raw_value)
+    if isinstance(raw_value, (str, bytes)):
+        raise ValueError(f"{label} must be a JSON array / list, got a string.")
+    raise ValueError(f"{label} must be a JSON array / list, got {type(raw_value).__name__}.")
+
+
+def _normalize_optional_string_list(raw_value: Any, *, label: str) -> list[str] | None:
+    items = _normalize_optional_list(raw_value, label=label)
+    if items is None:
+        return None
+    return [str(item).strip() for item in items if str(item).strip()]
+
+
+def _normalize_optional_mapping_list(raw_value: Any, *, label: str) -> list[dict[str, Any]] | None:
+    items = _normalize_optional_list(raw_value, label=label)
+    if items is None:
+        return None
+
+    normalized_items: list[dict[str, Any]] = []
+    for index, item in enumerate(items):
+        normalized_items.append(
+            _normalize_optional_mapping(
+                item,
+                label=f"{label}[{index}]",
+            )
+            or {}
+        )
+    return normalized_items
+
+
+def _normalize_optional_existing_path(raw_value: str | None, *, label: str) -> str | None:
+    text = str(raw_value or "").strip()
+    if not text:
+        return None
+
+    path = Path(text).expanduser()
+    if not path.exists():
+        raise ValueError(f"{label} file not found: {path}")
+    return str(path.resolve())
+
+
 def _configure_logging(debug: bool) -> None:
     if debug:
         logging.basicConfig(
@@ -268,21 +325,35 @@ def _build_clinical_tool_job_payload(
     forced_tool_pmid: str | None = None,
 ) -> dict[str, Any]:
     retrieval_top_k = _resolve_retrieval_top_k(top_k)
-    structured_case_payload = dict(structured_case or {})
+    structured_case_payload = _normalize_optional_mapping(structured_case, label="structured_case") or {}
+    normalized_risk_hints = _normalize_optional_string_list(risk_hints, label="risk_hints") or []
+    normalized_retrieval_queries = (
+        _normalize_optional_mapping_list(retrieval_queries, label="retrieval_queries") or []
+    )
+    normalized_riskcalcs_path = _normalize_optional_existing_path(
+        riskcalcs_path,
+        label="riskcalcs_path",
+    )
+    normalized_pmid_metadata_path = _normalize_optional_existing_path(
+        pmid_metadata_path,
+        label="pmid_metadata_path",
+    )
+    normalized_llm_model = str(llm_model or "").strip() or None
+    normalized_forced_tool_pmid = str(forced_tool_pmid or "").strip() or None
     return {
         "mode": mode,
         "text": text,
         "case_summary": str(structured_case_payload.get("case_summary") or ""),
         "structured_case": structured_case_payload,
-        "risk_hints": list(risk_hints or []),
-        "retrieval_queries": list(retrieval_queries or []),
-        "riskcalcs_path": riskcalcs_path,
-        "pmid_metadata_path": pmid_metadata_path,
-        "llm_model": llm_model,
+        "risk_hints": normalized_risk_hints,
+        "retrieval_queries": normalized_retrieval_queries,
+        "riskcalcs_path": normalized_riskcalcs_path,
+        "pmid_metadata_path": normalized_pmid_metadata_path,
+        "llm_model": normalized_llm_model,
         "retriever_backend": retriever_backend,
         "top_k": retrieval_top_k,
         "max_selected_tools": max_selected_tools,
-        "forced_tool_pmid": forced_tool_pmid,
+        "forced_tool_pmid": normalized_forced_tool_pmid,
     }
 
 
@@ -537,5 +608,9 @@ def run_clinical_tool_workflow(
     )
 
 
+def main(argv: list[str] | None = None) -> int:
+    return _main(argv)
+
+
 if __name__ == "__main__":
-    raise SystemExit(_main())
+    raise SystemExit(main())

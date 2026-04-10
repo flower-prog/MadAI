@@ -9,9 +9,9 @@
 - `orchestrator`
   负责初始化工作流、确定 `department_tags`、写入 workflow contract，并把任务交给下游。
 - `clinical_assisstment`
-  负责把病例整理为 `structured_case`，提炼 `problem_list`、生成 `case_summary` 和 `progressive_queries`，然后调度 calculator 子 agent。
+  负责把病例整理为 `structured_case`，提炼 `problem_list`、生成 `case_summary` 和 `progressive_queries`，完成最终 PMID 选择后再调度 calculator 子 agent。
 - `calculator`
-  作为 `clinical_assisstment` 的子 agent，负责 retrieval、eligibility 判断和实际 calculator 执行。
+  作为 `clinical_assisstment` 的子 agent，只负责对父节点已选定的 PMID 抽参并执行 calculator。
 - `protocol`
   基于 `structured_case` 与 `calculation_bundle` 生成治疗建议、临床试验方向或 fallback 建议。
 - `reporter`
@@ -39,6 +39,10 @@
 - `case_summary`
 - `risk_hints`
 - `retrieval_queries`
+- `selected_tool_pmid`
+- `selected_tool`
+- `dispatch_query_text`
+- `selection_context`
 - `top_k`
 - `risk_count`
 - `max_selected_tools`
@@ -57,7 +61,9 @@
 2. 从病例文本或结构化输入中派生 `problem_list`
 3. 调用 `build_case_summary(...)` 生成压缩版病例摘要
 4. 调用 `_build_query_set(...)` 生成 `progressive_queries`
-5. 把 `case_summary` 和 `retrieval_queries` 回填到 `clinical_tool_job`，再交给 `ClinicalToolAgent`
+5. 把 `case_summary` 和 `retrieval_queries` 回填到 `clinical_tool_job`
+6. 在父节点完成 PMID 预选，并把 `selected_tool_pmid / selected_tool / dispatch_query_text / selection_context` 写回 `clinical_tool_job`
+7. 再交给 `ClinicalToolAgent` 只做抽参和执行
 
 这里的关键点是：
 
@@ -97,11 +103,11 @@
 
 `ClinicalToolAgent` 收到 `clinical_tool_job` 以后，会继续执行：
 
-1. 用 `case_summary` 或原始文本构造候选 calculator 池
-2. 对 `progressive_queries` 逐条检索并融合排序
-3. 对候选 calculator 做 eligibility 判断
-4. 对能执行的 calculator 进行参数提取和执行
-5. 把执行 trace、候选列表和结果返回给 graph
+1. 读取父节点已选定的 PMID 和 calculator payload
+2. 使用父节点派发的 `dispatch_query_text` 作为抽参主上下文
+3. 对该 calculator 做参数提取
+4. 对能执行的 calculator 进行实际执行
+5. 把执行 trace 和结果返回给 graph
 
 ## protocol 节点做什么
 
