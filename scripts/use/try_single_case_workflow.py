@@ -9,8 +9,10 @@ from typing import Any
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+PROJECT_ROOT_STR = str(PROJECT_ROOT)
+if PROJECT_ROOT_STR in sys.path:
+    sys.path.remove(PROJECT_ROOT_STR)
+sys.path.insert(0, PROJECT_ROOT_STR)
 
 
 from agent.config.env import load_dotenv_if_present
@@ -128,7 +130,7 @@ def build_summary(result: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def parse_args() -> argparse.Namespace:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the MedAI workflow against a single demo clinical case.")
     parser.add_argument(
         "--case-text",
@@ -174,7 +176,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Enable debug logging for the workflow run.",
     )
-    return parser.parse_args()
+    return parser
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    return build_parser().parse_args(argv)
 
 
 def main() -> int:
