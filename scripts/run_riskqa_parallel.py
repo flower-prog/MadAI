@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT_STR = str(PROJECT_ROOT)
 if PROJECT_ROOT_STR in sys.path:
     sys.path.remove(PROJECT_ROOT_STR)
@@ -20,7 +20,7 @@ from agent.config.env import load_dotenv_if_present
 from agent.workflow import run_workflow
 
 if __package__ in {None, ""}:
-    from scripts.use.riskqa_support import (
+    from scripts.riskqa_support import (
         append_record_block,
         build_question_query,
         build_task_id,
@@ -30,7 +30,7 @@ if __package__ in {None, ""}:
         normalize_choices,
         select_entries,
     )
-    from scripts.use.try_single_case_workflow import build_summary, default_corpus_paths
+    from scripts.try_single_case_workflow import build_summary, default_corpus_paths
 else:
     from .riskqa_support import (
         append_record_block,

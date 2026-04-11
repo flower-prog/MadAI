@@ -5,7 +5,7 @@ MedAI 是一个面向临床文本的 calculator workflow。它会读取病例或
 当前仓库的命令行入口已经接好，最常用的入口有两个：
 
 - `main.py`：通用 CLI，适合直接输入问题或病历文本。
-- `scripts/use/try_single_case_workflow.py`：跑仓库自带的单条样例病历，适合先验证流程是否能通。
+- `scripts/try_single_case_workflow.py`：跑仓库自带的单条样例病历，适合先验证流程是否能通。
 
 ## 运行前准备
 
@@ -185,19 +185,19 @@ uv run python main.py "78-year-old male with atrial fibrillation, hypertension, 
 运行命令：
 
 ```powershell
-uv run python .\scripts\use\try_single_case_workflow.py --mode patient_note
+uv run python .\scripts\try_single_case_workflow.py --mode patient_note
 ```
 
 如果想直接在终端打印完整 JSON：
 
 ```powershell
-uv run python .\scripts\use\try_single_case_workflow.py --mode patient_note --show-json
+uv run python .\scripts\try_single_case_workflow.py --mode patient_note --show-json
 ```
 
 如果想临时替换病例文本：
 
 ```powershell
-uv run python .\scripts\use\try_single_case_workflow.py --case-text "65-year-old with CHF and CKD, evaluate the relevant risk calculator." --mode patient_note
+uv run python .\scripts\try_single_case_workflow.py --case-text "65-year-old with CHF and CKD, evaluate the relevant risk calculator." --mode patient_note
 ```
 
 ### 5. 显式指定语料路径
@@ -232,7 +232,7 @@ uv run python main.py "78-year-old male with atrial fibrillation and prior TIA" 
 一个最轻量的回归测试是：
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest tests.test_workflow
+.\.venv\Scripts\python.exe .\scripts\run_baselines.py --help
 ```
 
 这个测试会验证：
@@ -282,8 +282,8 @@ pip install -e .[hybrid]
 
 ```powershell
 .\.venv\Scripts\python.exe .\main.py --help
-.\.venv\Scripts\python.exe .\scripts\use\try_single_case_workflow.py --help
-.\.venv\Scripts\python.exe -m unittest tests.test_workflow
+.\.venv\Scripts\python.exe .\scripts\try_single_case_workflow.py --help
+.\.venv\Scripts\python.exe .\scripts\run_baselines.py --help
 ```
 
 如果你只是想先确认环境是否基本可用，优先跑上面这三个。

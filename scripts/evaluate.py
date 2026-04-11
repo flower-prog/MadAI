@@ -6,7 +6,7 @@ import sys
 from typing import Any
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT_STR = str(PROJECT_ROOT)
 if PROJECT_ROOT_STR in sys.path:
     sys.path.remove(PROJECT_ROOT_STR)
@@ -14,7 +14,7 @@ sys.path.insert(0, PROJECT_ROOT_STR)
 
 
 if __package__ in {None, ""}:
-    from scripts.use.riskqa_support import build_task_id, load_dataset, load_record_blocks
+    from scripts.riskqa_support import build_task_id, load_dataset, load_record_blocks
 else:
     from .riskqa_support import build_task_id, load_dataset, load_record_blocks
 

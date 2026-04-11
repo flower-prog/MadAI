@@ -12,6 +12,7 @@ comparison file and a compatibility file that can be scored with
 """
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
 import re
@@ -22,7 +23,7 @@ from typing import Any
 
 from openai import AzureOpenAI, OpenAI
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT_STR = str(PROJECT_ROOT)
 if PROJECT_ROOT_STR in sys.path:
     sys.path.remove(PROJECT_ROOT_STR)
@@ -36,6 +37,8 @@ ENV_FILENAMES = (".env", ".env.local")
 DEFAULT_DATASET_PATH = PROJECT_ROOT / "\u6570\u636e" / "riskqa.json"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "outputs" / "riskqa"
 CHOICE_PATTERN = re.compile(r"^\s*Choice\s*:\s*([A-F])\b", re.IGNORECASE | re.MULTILINE)
+ANSWER_PATTERN = re.compile(r"^\s*Answer\s*:\s*([A-F])\b", re.IGNORECASE | re.MULTILINE)
+LEADING_CHOICE_PATTERN = re.compile(r"^\s*([A-F])\s*[\.\):]\s*", re.IGNORECASE)
 BRIEF_REASON_PATTERN = re.compile(
     r"^\s*Brief reason\s*:\s*(.+)$",
     re.IGNORECASE | re.MULTILINE,
@@ -49,7 +52,7 @@ Choice: <single letter>
 Brief reason: <one short sentence>"""
 
 
-def parse_args() -> argparse.Namespace:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run direct LLM baseline on RiskQA.")
     parser.add_argument(
         "model",
@@ -86,11 +89,21 @@ def parse_args() -> argparse.Namespace:
         help="Optional delay between API calls.",
     )
     parser.add_argument(
+        "--workers",
+        type=int,
+        default=4,
+        help="Number of concurrent worker threads.",
+    )
+    parser.add_argument(
         "--overwrite",
         action="store_true",
         help="Ignore any cached results and start over.",
     )
-    return parser.parse_args()
+    return parser
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    return build_parser().parse_args(argv)
 
 
 def resolve_path(path_str: str, base_dir: Path) -> Path:
@@ -203,32 +216,68 @@ def format_question(entry: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def extract_answer(answer: str) -> str:
-    for choice in ["A", "B", "C", "D", "E", "F"]:
-        if f"{choice}." in answer:
+def _normalize_valid_choices(valid_choices: set[str] | None) -> set[str] | None:
+    if valid_choices is None:
+        return None
+    return {choice.upper() for choice in valid_choices}
+
+
+def extract_choice_token(answer: str, valid_choices: set[str] | None = None) -> str:
+    normalized_choices = _normalize_valid_choices(valid_choices)
+
+    for pattern in (CHOICE_PATTERN, ANSWER_PATTERN):
+        match = pattern.search(answer)
+        if not match:
+            continue
+        choice = match.group(1).upper()
+        if normalized_choices is None or choice in normalized_choices:
             return choice
+
+    first_nonempty_line = next((line.strip() for line in answer.splitlines() if line.strip()), "")
+    leading_match = LEADING_CHOICE_PATTERN.match(first_nonempty_line)
+    if leading_match:
+        choice = leading_match.group(1).upper()
+        if normalized_choices is None or choice in normalized_choices:
+            return choice
+
     return "X"
 
 
-def parse_response(text: str, valid_choices: set[str]) -> tuple[str, str]:
-    choice_match = CHOICE_PATTERN.search(text)
+def extract_answer(answer: str) -> str:
+    return extract_choice_token(answer, {"A", "B", "C", "D", "E", "F"})
+
+
+def extract_brief_reason(text: str) -> str:
     brief_match = BRIEF_REASON_PATTERN.search(text)
-
-    choice = "X"
-    if choice_match:
-        candidate = choice_match.group(1).upper()
-        if candidate in valid_choices:
-            choice = candidate
-
-    brief_reason = ""
     if brief_match:
-        brief_reason = brief_match.group(1).strip()
-    else:
-        brief_reason = " ".join(part.strip() for part in text.strip().splitlines() if part.strip())
+        return brief_match.group(1).strip()
 
-    if not brief_reason:
-        brief_reason = "No brief reason returned."
+    nonempty_lines = [line.strip() for line in text.strip().splitlines() if line.strip()]
+    if not nonempty_lines:
+        return "No brief reason returned."
 
+    if CHOICE_PATTERN.match(nonempty_lines[0]) or ANSWER_PATTERN.match(nonempty_lines[0]):
+        trailing_lines = nonempty_lines[1:]
+        if trailing_lines:
+            return " ".join(trailing_lines)
+        return "No brief reason returned."
+
+    leading_match = LEADING_CHOICE_PATTERN.match(nonempty_lines[0])
+    if leading_match:
+        stripped = nonempty_lines[0][leading_match.end() :].strip()
+        if stripped:
+            return stripped
+        trailing_lines = nonempty_lines[1:]
+        if trailing_lines:
+            return " ".join(trailing_lines)
+        return "No brief reason returned."
+
+    return " ".join(nonempty_lines)
+
+
+def parse_response(text: str, valid_choices: set[str]) -> tuple[str, str]:
+    choice = extract_choice_token(text, valid_choices)
+    brief_reason = extract_brief_reason(text)
     return choice, brief_reason
 
 
@@ -295,6 +344,70 @@ def compute_accuracy(comparison_rows: list[dict[str, Any]]) -> float:
     return correct / len(comparison_rows)
 
 
+def compute_worker_count(*, requested_workers: int, task_count: int) -> int:
+    if requested_workers <= 0:
+        raise ValueError("workers must be positive.")
+    if task_count <= 0:
+        return 0
+    return min(int(requested_workers), task_count)
+
+
+def build_cache_record(
+    *,
+    idx: int,
+    entry: dict[str, Any],
+    raw_response: str,
+    pred_choice: str,
+    brief_reason: str,
+) -> dict[str, Any]:
+    gold_choice = entry["answer"]
+    return {
+        "index": idx,
+        "question": entry["question"],
+        "choices": entry["choices"],
+        "pmid": entry["pmid"],
+        "gold_answer": gold_choice,
+        "gold_choice_text": entry["choices"].get(gold_choice),
+        "pred_answer": pred_choice,
+        "pred_choice_text": entry["choices"].get(pred_choice),
+        "brief_reason": brief_reason,
+        "raw_response": raw_response,
+        "correct": pred_choice == gold_choice,
+    }
+
+
+def run_baseline_question(
+    *,
+    idx: int,
+    entry: dict[str, Any],
+    model: str,
+    sleep_seconds: float,
+) -> tuple[int, dict[str, Any]]:
+    client, _provider = build_client()
+    prompt = format_question(entry)
+    valid_choices = set(entry["choices"].keys())
+    raw_response, pred_choice, brief_reason = query_model(
+        client=client,
+        model=model,
+        prompt=prompt,
+        valid_choices=valid_choices,
+    )
+
+    if sleep_seconds > 0:
+        time.sleep(sleep_seconds)
+
+    return (
+        idx,
+        build_cache_record(
+            idx=idx,
+            entry=entry,
+            raw_response=raw_response,
+            pred_choice=pred_choice,
+            brief_reason=brief_reason,
+        ),
+    )
+
+
 def main() -> int:
     args = parse_args()
     load_dotenv_if_present(PROJECT_ROOT / ".env")
@@ -308,7 +421,7 @@ def main() -> int:
     dataset = load_json(dataset_path)
     target_indices = build_target_indices(len(dataset), args.start_index, args.max_questions)
 
-    client, provider = build_client()
+    _, provider = build_client()
     resolved_model = resolve_default_model(args.model)
     model_slug = sanitize_filename(resolved_model)
 
@@ -323,42 +436,31 @@ def main() -> int:
         cache = {}
 
     total = len(target_indices)
+    pending_indices = [idx for idx in target_indices if str(idx) not in cache]
+    worker_count = compute_worker_count(requested_workers=args.workers, task_count=len(pending_indices))
+    position_lookup = {idx: position for position, idx in enumerate(target_indices, start=1)}
 
-    for position, idx in enumerate(target_indices, start=1):
-        idx_key = str(idx)
-        entry = dataset[idx]
-        if idx_key in cache:
-            continue
+    if pending_indices:
+        futures: dict[Any, int] = {}
+        with ThreadPoolExecutor(max_workers=worker_count) as executor:
+            for idx in pending_indices:
+                futures[executor.submit(
+                    run_baseline_question,
+                    idx=idx,
+                    entry=dataset[idx],
+                    model=resolved_model,
+                    sleep_seconds=args.sleep_seconds,
+                )] = idx
 
-        prompt = format_question(entry)
-        valid_choices = set(entry["choices"].keys())
-        raw_response, pred_choice, brief_reason = query_model(
-            client=client,
-            model=resolved_model,
-            prompt=prompt,
-            valid_choices=valid_choices,
-        )
-
-        gold_choice = entry["answer"]
-        cache[idx_key] = {
-            "index": idx,
-            "question": entry["question"],
-            "choices": entry["choices"],
-            "pmid": entry["pmid"],
-            "gold_answer": gold_choice,
-            "gold_choice_text": entry["choices"].get(gold_choice),
-            "pred_answer": pred_choice,
-            "pred_choice_text": entry["choices"].get(pred_choice),
-            "brief_reason": brief_reason,
-            "raw_response": raw_response,
-            "correct": pred_choice == gold_choice,
-        }
-
-        dump_json(cache_path, cache)
-        print(f"[{position}/{total}] question {idx}: pred={pred_choice} gold={gold_choice}")
-
-        if args.sleep_seconds > 0:
-            time.sleep(args.sleep_seconds)
+            for future in as_completed(futures):
+                idx, record = future.result()
+                idx_key = str(idx)
+                cache[idx_key] = record
+                dump_json(cache_path, cache)
+                print(
+                    f"[{position_lookup[idx]}/{total}] question {idx}: "
+                    f"pred={record['pred_answer']} gold={record['gold_answer']}"
+                )
 
     compatibility_answers: dict[str, Any] = {}
     comparison_rows: list[dict[str, Any]] = []
@@ -401,6 +503,8 @@ def main() -> int:
         "loaded_env_files": loaded_env_files,
         "dataset_path": str(dataset_path),
         "output_dir": str(output_dir),
+        "requested_workers": args.workers,
+        "effective_workers": worker_count,
         "num_questions": len(comparison_rows),
         "num_correct": sum(1 for row in comparison_rows if row["correct"]),
         "num_incorrect": sum(1 for row in comparison_rows if not row["correct"]),
