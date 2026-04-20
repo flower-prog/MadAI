@@ -176,6 +176,144 @@ class _FakeComputationRetriever:
         }
 
 
+class _QuestionOrderCoarseRetriever:
+    @tool(
+        name="riskcalc_coarse_retriever",
+        description="Retrieve coarse calculator matches from structured_case.",
+        input_schema={
+            "structured_case": {
+                "raw_text": "str",
+                "problem_list": "list[str]",
+                "known_facts": "list[str]",
+            },
+            "top_k": "int",
+        },
+        state_fields={
+            "structured_case": ("structured_case", "clinical_tool_job.structured_case"),
+            "top_k": ("top_k", "clinical_tool_job.top_k"),
+        },
+    )
+    def retrieve_coarse_from_structured_case(self, structured_case, *, top_k: int = 10, candidate_pmids=None):
+        del structured_case
+        rows = [
+            {
+                "pmid": "1",
+                "title": "CHADS2 Stroke Risk Calculator",
+            },
+            {
+                "pmid": "2",
+                "title": "FIB-4 Index for Liver Fibrosis",
+            },
+        ]
+        if candidate_pmids is not None:
+            rows = [row for row in rows if str(row.get("pmid")) in set(candidate_pmids)]
+        rows = rows[:top_k]
+        return {
+            "query_text": "atrial fibrillation hypertension diabetes prior TIA",
+            "candidate_ranking": rows,
+            "retrieved_tools": rows,
+        }
+
+
+class _QuestionOrderComputationRetriever:
+    @tool(
+        name="riskcalc_computation_retriever",
+        description="Refine coarse calculator matches with computation-derived parameters.",
+        input_schema={
+            "structured_case": {
+                "raw_text": "str",
+                "problem_list": "list[str]",
+                "known_facts": "list[str]",
+            },
+            "candidate_pmids": "list[str] | set[str]",
+            "top_k_per_channel": "int",
+        },
+        state_fields={
+            "structured_case": ("structured_case", "clinical_tool_job.structured_case"),
+        },
+    )
+    def retrieve_from_structured_case(self, structured_case, *, candidate_pmids, top_k_per_channel: int = 3):
+        del structured_case, top_k_per_channel
+        rows = [
+            {
+                "pmid": "2",
+                "title": "FIB-4 Index for Liver Fibrosis",
+                "purpose": "Estimate liver fibrosis risk.",
+                "eligibility": "Chronic liver disease patients.",
+                "parameter_names": ["age", "ast", "alt", "platelet_count"],
+                "query_text": "age ; ast ; alt ; platelet count",
+                "source_channels": ["bm25"],
+                "calculator_payload": {
+                    "pmid": "2",
+                    "title": "FIB-4 Index for Liver Fibrosis",
+                    "purpose": "Estimate liver fibrosis risk.",
+                    "eligibility": "Chronic liver disease patients.",
+                },
+            },
+            {
+                "pmid": "1",
+                "title": "CHADS2 Stroke Risk Calculator",
+                "purpose": "Estimate stroke risk in atrial fibrillation.",
+                "eligibility": "Atrial fibrillation patients.",
+                "parameter_names": ["hypertension", "diabetes", "stroke_history"],
+                "query_text": "hypertension ; diabetes ; stroke history",
+                "source_channels": ["bm25", "vector"],
+                "calculator_payload": {
+                    "pmid": "1",
+                    "title": "CHADS2 Stroke Risk Calculator",
+                    "purpose": "Estimate stroke risk in atrial fibrillation.",
+                    "eligibility": "Atrial fibrillation patients.",
+                },
+            },
+        ]
+        filtered = [row for row in rows if str(row.get("pmid")) in set(candidate_pmids)]
+        return {
+            "query_text": "age ; ast ; alt ; platelet count ; hypertension ; diabetes ; stroke history",
+            "bm25_raw_top3": [
+                {
+                    "rank": 1,
+                    "channel": "bm25",
+                    "pmid": "2",
+                    "parameter_names": ["age", "ast", "alt", "platelet_count"],
+                    "calculator_payload": {
+                        "pmid": "2",
+                        "title": "FIB-4 Index for Liver Fibrosis",
+                        "purpose": "Estimate liver fibrosis risk.",
+                        "eligibility": "Chronic liver disease patients.",
+                    },
+                },
+                {
+                    "rank": 2,
+                    "channel": "bm25",
+                    "pmid": "1",
+                    "parameter_names": ["hypertension", "diabetes", "stroke_history"],
+                    "calculator_payload": {
+                        "pmid": "1",
+                        "title": "CHADS2 Stroke Risk Calculator",
+                        "purpose": "Estimate stroke risk in atrial fibrillation.",
+                        "eligibility": "Atrial fibrillation patients.",
+                    },
+                },
+            ],
+            "vector_raw_top3": [
+                {
+                    "rank": 1,
+                    "channel": "vector",
+                    "pmid": "1",
+                    "parameter_names": ["hypertension", "diabetes", "stroke_history"],
+                    "calculator_payload": {
+                        "pmid": "1",
+                        "title": "CHADS2 Stroke Risk Calculator",
+                        "purpose": "Estimate stroke risk in atrial fibrillation.",
+                        "eligibility": "Atrial fibrillation patients.",
+                    },
+                }
+            ],
+            "candidate_ranking": filtered,
+            "retrieved_tools": filtered,
+        }
+
+
 class _FakeChatClient:
     def __init__(self, response: str = "", responses: list[str] | None = None) -> None:
         self.response = response
@@ -314,6 +452,47 @@ class ClinicalToolAgentParameterRetrievalTests(unittest.TestCase):
         self.assertEqual(result["retrieved_tools"][0]["pmid"], "1")
         self.assertTrue(
             any(batch.get("channel") == "computation_parameter_match" for batch in result["retrieval_batches"])
+        )
+
+    def test_question_mode_preserves_coarse_order_when_computation_reranks_candidates(self) -> None:
+        agent = ClinicalToolAgent(
+            catalog=_FakeCatalog(),
+            retriever=_QuestionOrderCoarseRetriever(),
+            computation_retriever=_QuestionOrderComputationRetriever(),
+            chat_client=_FakeChatClient(),
+        )
+        job = ClinicalToolJob(
+            mode="question",
+            text="Atrial fibrillation patient with hypertension, diabetes, and prior TIA. Which score applies?",
+            structured_case={
+                "raw_text": "Atrial fibrillation patient with hypertension, diabetes, and prior TIA.",
+                "problem_list": ["atrial fibrillation", "hypertension", "diabetes"],
+                "known_facts": ["prior TIA"],
+            },
+            top_k=5,
+        )
+
+        result = agent._retrieve_and_rank_candidates(job)
+
+        self.assertEqual(
+            [candidate["pmid"] for candidate in result["retrieval_batches"][1]["tools"][:2]],
+            ["2", "1"],
+        )
+        self.assertEqual(
+            [candidate["pmid"] for candidate in result["question_selection_candidates"][:2]],
+            ["1", "2"],
+        )
+        self.assertEqual(
+            [candidate["pmid"] for candidate in result["retrieved_tools"][:2]],
+            ["1", "2"],
+        )
+        self.assertEqual(
+            [candidate["pmid"] for candidate in result["candidate_ranking"][:2]],
+            ["1", "2"],
+        )
+        self.assertEqual(
+            result["retrieved_tools"][0]["parameter_names"],
+            ["hypertension", "diabetes", "stroke_history"],
         )
 
     def test_select_tool_for_question_returns_parameter_names(self) -> None:

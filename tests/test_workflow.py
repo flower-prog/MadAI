@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -183,6 +184,112 @@ class WorkflowTests(unittest.TestCase):
         state = self.fake_graph.calls[0]["input"]
         self.assertEqual(state["request"], "从中间状态继续")
         self.assertEqual(state["next_agent"], "reporter")
+
+    def test_run_agent_workflow_resumes_from_snapshot_and_reuses_thread_id(self) -> None:
+        temp_root = PROJECT_ROOT / ".tmp_test_artifacts" / "workflow_resume_snapshot"
+        temp_root.mkdir(parents=True, exist_ok=True)
+        snapshot_path = temp_root / "resume_snapshot.json"
+        snapshot_path.write_text(
+            json.dumps(
+                {
+                    "snapshot_version": 1,
+                    "thread_id": "resume-thread-001",
+                    "sequence": 7,
+                    "phase": "node",
+                    "agent_name": "clinical_assisstment",
+                    "state": {
+                        "request": "从快照恢复",
+                        "messages": [{"role": "user", "content": "已有病例"}],
+                        "next_agent": "protocol",
+                        "tool_registry": {"registered_tools": ["demo_tool"]},
+                    },
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+        snapshot_dir = temp_root / "snapshots"
+        result = workflow_module.run_agent_workflow(
+            resume_snapshot=str(snapshot_path),
+            resume_mode="continue",
+            snapshot_dir=str(snapshot_dir),
+            tool_registry={"injected": "runner"},
+        )
+
+        self.assertEqual(result["status"], "completed")
+        self.assertEqual(len(self.fake_graph.calls), 1)
+
+        recorded = self.fake_graph.calls[0]
+        state = recorded["input"]
+        self.assertEqual(state["request"], "从快照恢复")
+        self.assertEqual(state["next_agent"], "protocol")
+        self.assertEqual(state["tool_registry"], {"injected": "runner"})
+        self.assertEqual(recorded["config"]["configurable"]["thread_id"], "resume-thread-001")
+        self.assertEqual(
+            recorded["config"]["configurable"]["snapshot_dir"],
+            str(snapshot_dir.resolve()),
+        )
+
+    def test_run_agent_workflow_restart_mode_resets_iteration_state(self) -> None:
+        temp_root = PROJECT_ROOT / ".tmp_test_artifacts" / "workflow_restart_snapshot"
+        temp_root.mkdir(parents=True, exist_ok=True)
+        snapshot_path = temp_root / "restart_snapshot.json"
+        snapshot_path.write_text(
+            json.dumps(
+                {
+                    "snapshot_version": 1,
+                    "thread_id": "resume-thread-002",
+                    "sequence": 9,
+                    "phase": "final",
+                    "agent_name": "reporter",
+                    "state": {
+                        "request": "重跑这个病例",
+                        "next_agent": "FINISH",
+                        "status": "failed",
+                        "errors": ["previous failure"],
+                        "reporter_attempts": 3,
+                        "review_passed": True,
+                        "abandoned": True,
+                        "final_output": {"old": "result"},
+                        "plan": [
+                            {
+                                "step_id": 1,
+                                "agent_name": "orchestrator",
+                                "title": "old step",
+                                "description": "old description",
+                                "status": "completed",
+                                "result": "done",
+                            }
+                        ],
+                    },
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+        result = workflow_module.run_agent_workflow(
+            resume_snapshot=str(snapshot_path),
+            resume_mode="restart",
+        )
+
+        self.assertEqual(result["status"], "completed")
+        self.assertEqual(len(self.fake_graph.calls), 1)
+
+        state = self.fake_graph.calls[0]["input"]
+        self.assertEqual(state["request"], "重跑这个病例")
+        self.assertEqual(state["next_agent"], "orchestrator")
+        self.assertEqual(state["status"], "pending")
+        self.assertEqual(state["reporter_attempts"], 0)
+        self.assertFalse(state["review_passed"])
+        self.assertFalse(state["abandoned"])
+        self.assertEqual(state["errors"], [])
+        self.assertEqual(state["final_output"], {})
+        self.assertEqual(state["plan"][0].status, "pending")
+        self.assertIsNone(state["plan"][0].result)
 
     def test_workflow_script_supports_direct_execution(self) -> None:
         completed = subprocess.run(

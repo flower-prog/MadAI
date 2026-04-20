@@ -9,12 +9,15 @@ from agent.tools import (
     RiskCalcComputationRetrievalTool,
     RiskCalcExecutionTool,
     RiskCalcRetrievalTool,
+    StructuredRetrievalTool,
+    TrialChunkRetrievalTool,
     append_agent_trace,
     build_agent_trace,
     build_case_summary,
     build_patient_note_queries,
     build_default_chat_client,
     build_tool_call,
+    create_trial_chunk_retrieval_tool,
     export_tool_specs,
     generate_risk_hints,
     maybe_load_json,
@@ -60,6 +63,8 @@ _QUESTION_INSTRUCTION_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^\s*end your final answer with the format", re.IGNORECASE),
     re.compile(r"^\s*answer\s*:\s*<letter>", re.IGNORECASE),
 )
+_PROTOCOL_TRIAL_COARSE_TOP_K = 30
+_PROTOCOL_TRIAL_TOP_K = 10
 
 
 def _mark_step(state: GraphState, agent_name: AgentName, *, status: str, result: str | None = None) -> None:
@@ -137,6 +142,8 @@ def _default_tool_specs() -> list[ToolSpec]:
     decorated_tool_specs = {
         spec.name: spec
         for spec in export_tool_specs(
+            StructuredRetrievalTool,
+            TrialChunkRetrievalTool,
             RiskCalcRetrievalTool,
             RiskCalcComputationRetrievalTool,
             RiskCalcExecutionTool,
@@ -161,6 +168,10 @@ def _default_tool_specs() -> list[ToolSpec]:
             required=False,
             input_schema={"clinical_tool_job": "dict", "calculation_tasks": "list[dict]"},
         ),
+        decorated_tool_specs["structured_bm25_retriever"],
+        decorated_tool_specs["structured_vector_retriever"],
+        decorated_tool_specs["trial_coarse_retriever"],
+        decorated_tool_specs["trial_candidate_retriever"],
         decorated_tool_specs["riskcalc_coarse_retriever"],
         decorated_tool_specs["riskcalc_computation_retriever"],
         decorated_tool_specs["riskcalc_executor"],
@@ -1179,10 +1190,136 @@ def _build_baseline_calculation_bundle(
     return [match], [task], [artifact], bundle
 
 
-def _build_treatment_recommendations(state: GraphState) -> list[TreatmentRecommendation]:
+def _resolve_trial_retriever(state: GraphState):
+    """解析 protocol 使用的 trial retriever；缺省时构建 XML chunk KB 版本。"""
+    trial_retriever = state.tool_registry.get("trial_retriever")
+    if trial_retriever is not None:
+        return trial_retriever
+
+    backend = state.clinical_tool_job.retriever_backend if state.clinical_tool_job is not None else "hybrid"
+    return create_trial_chunk_retrieval_tool(
+        backend=backend,
+        vector_store="auto",
+    )
+
+
+def _retrieve_trial_candidates(state: GraphState) -> dict[str, Any]:
+    """运行 protocol 阶段的本地 trial 两阶段检索。"""
+    structured_case = dict(state.structured_case_json or {})
+    if not structured_case:
+        return {
+            "query_text": "",
+            "backend_used": "bm25",
+            "available_backends": ["bm25"],
+            "department_tags": list(state.department_tags),
+            "fallback_to_full_catalog": False,
+            "coarse_candidate_ids": [],
+            "bm25_top5": [],
+            "vector_top5": [],
+            "candidate_ranking": [],
+        }
+
+    backend = state.clinical_tool_job.retriever_backend if state.clinical_tool_job is not None else "hybrid"
+    trial_retriever = _resolve_trial_retriever(state)
+
+    if hasattr(trial_retriever, "retrieve_from_structured_case"):
+        return trial_retriever.retrieve_from_structured_case(
+            structured_case,
+            top_k=_PROTOCOL_TRIAL_TOP_K,
+            coarse_top_k=_PROTOCOL_TRIAL_COARSE_TOP_K,
+            department_tags=list(state.department_tags),
+            backend=backend,
+        )
+
+    candidate_tool = getattr(trial_retriever, "retrieve_candidates", None)
+    if callable(candidate_tool):
+        return candidate_tool(
+            structured_case=structured_case,
+            top_k=_PROTOCOL_TRIAL_TOP_K,
+            coarse_top_k=_PROTOCOL_TRIAL_COARSE_TOP_K,
+            department_tags=list(state.department_tags),
+            backend=backend,
+        )
+
+    raise TypeError(
+        "trial_retriever registry entry must expose retrieve_from_structured_case(...) or retrieve_candidates(...)."
+    )
+
+
+def _top_non_abandoned_trial_ids(trial_bundle: dict[str, Any], *, limit: int = 3) -> list[str]:
+    selected_ids: list[str] = []
+    for candidate in list(trial_bundle.get("candidate_ranking") or []):
+        if str(candidate.get("status") or "").strip() == "abandoned":
+            continue
+        nct_id = str(candidate.get("nct_id") or "").strip()
+        if not nct_id or nct_id in selected_ids:
+            continue
+        selected_ids.append(nct_id)
+        if len(selected_ids) >= max(int(limit), 1):
+            break
+    return selected_ids
+
+
+def _trial_review_actions(trial_bundle: dict[str, Any], *, limit: int = 3) -> list[str]:
+    actions: list[str] = []
+    for candidate in list(trial_bundle.get("candidate_ranking") or [])[: max(int(limit), 1)]:
+        for action in list(candidate.get("actions") or []):
+            text = str(action).strip()
+            if text and text not in actions:
+                actions.append(text)
+    return actions
+
+
+def _augment_treatment_recommendations_with_trials(
+    recommendations: list[TreatmentRecommendation],
+    trial_bundle: dict[str, Any],
+    *,
+    has_completed_results: bool,
+) -> list[TreatmentRecommendation]:
+    """把 protocol trial retrieval 的结果并入治疗建议。"""
+    top_trial_ids = _top_non_abandoned_trial_ids(trial_bundle, limit=3)
+    if has_completed_results and top_trial_ids:
+        for recommendation in recommendations:
+            recommendation.linked_trials = list(top_trial_ids)
+
+    if has_completed_results or not list(trial_bundle.get("candidate_ranking") or []):
+        return recommendations
+
+    candidate_ranking = list(trial_bundle.get("candidate_ranking") or [])
+    top_candidate = dict(candidate_ranking[0] or {}) if candidate_ranking else {}
+    trial_review_actions = _trial_review_actions(trial_bundle, limit=3)
+    if "Review trial eligibility and enrollment details before surfacing any specific study." not in trial_review_actions:
+        trial_review_actions.append(
+            "Review trial eligibility and enrollment details before surfacing any specific study."
+        )
+    recommendations.insert(
+        0,
+        TreatmentRecommendation(
+            name="trial candidate review",
+            strategy="trial_candidate_review",
+            source="trial_retrieval",
+            status="manual_review",
+            rationale=(
+                "Local trial retrieval surfaced candidate studies for the current case, but there is no usable "
+                "calculator-backed risk output strong enough to promote a direct trial match. "
+                f"Top candidate: {top_candidate.get('title') or top_candidate.get('name') or top_candidate.get('nct_id') or 'unknown trial'}."
+            ),
+            linked_trials=list(top_trial_ids),
+            actions=trial_review_actions,
+        ),
+    )
+    return recommendations
+
+
+def _build_treatment_recommendations(
+    state: GraphState,
+    *,
+    trial_bundle: dict[str, Any] | None = None,
+) -> list[TreatmentRecommendation]:
     """把计算结果翻译成治疗层面的建议列表。"""
     completed_results = [item for item in state.calculation_results if item.status == "completed"]
     estimated_results = [item for item in state.calculation_results if item.status == "estimated"]
+    effective_trial_bundle = dict(trial_bundle or {})
 
     if completed_results:
         recommendations: list[TreatmentRecommendation] = []
@@ -1204,10 +1341,14 @@ def _build_treatment_recommendations(state: GraphState) -> list[TreatmentRecomme
                     ],
                 )
             )
-        return recommendations
+        return _augment_treatment_recommendations_with_trials(
+            recommendations,
+            effective_trial_bundle,
+            has_completed_results=True,
+        )
 
     if estimated_results:
-        return [
+        recommendations = [
             TreatmentRecommendation(
                 name="similar-case treatment fallback",
                 strategy="similar_case_fallback",
@@ -1226,9 +1367,14 @@ def _build_treatment_recommendations(state: GraphState) -> list[TreatmentRecomme
                 ],
             )
         ]
+        return _augment_treatment_recommendations_with_trials(
+            recommendations,
+            effective_trial_bundle,
+            has_completed_results=False,
+        )
 
     if state.calculator_matches:
-        return [
+        recommendations = [
             TreatmentRecommendation(
                 name="similar-case assisted recommendation",
                 strategy="similar_case_fallback",
@@ -1245,8 +1391,13 @@ def _build_treatment_recommendations(state: GraphState) -> list[TreatmentRecomme
                 ],
             )
         ]
+        return _augment_treatment_recommendations_with_trials(
+            recommendations,
+            effective_trial_bundle,
+            has_completed_results=False,
+        )
 
-    return [
+    recommendations = [
         TreatmentRecommendation(
             name="direct treatment advice",
             strategy="direct_advice",
@@ -1262,6 +1413,11 @@ def _build_treatment_recommendations(state: GraphState) -> list[TreatmentRecomme
             ],
         )
     ]
+    return _augment_treatment_recommendations_with_trials(
+        recommendations,
+        effective_trial_bundle,
+        has_completed_results=False,
+    )
 
 
 def _to_protocol_recommendations(
@@ -1283,6 +1439,7 @@ def _to_protocol_recommendations(
                 status=status,
                 rationale=recommendation.rationale,
                 linked_calculators=list(recommendation.linked_calculators),
+                linked_trials=list(recommendation.linked_trials),
                 corrections=list(recommendation.actions),
             )
         )
@@ -1300,6 +1457,7 @@ def _reset_iteration_outputs(state: GraphState) -> None:
     state.protocol_recommendations = []
     state.assessment_bundle = {}
     state.calculation_bundle = {}
+    state.trial_retrieval_bundle = {}
     state.treatment_bundle = {}
     state.reporter_result = {}
     state.review_report = {}
@@ -1670,24 +1828,33 @@ def protocol_node(state: GraphState) -> GraphState:
     """把计算结果整理成治疗与试验推荐包。"""
     _mark_step(state, "protocol", status="in_progress")
 
-    recommendations = _build_treatment_recommendations(state)
+    trial_retrieval_bundle = _retrieve_trial_candidates(state)
+    recommendations = _build_treatment_recommendations(
+        state,
+        trial_bundle=trial_retrieval_bundle,
+    )
     protocol_recommendations = _to_protocol_recommendations(recommendations)
+    trial_candidates = [
+        dict(item)
+        for item in list(trial_retrieval_bundle.get("candidate_ranking") or [])
+        if isinstance(item, dict)
+    ]
     treatment_bundle = {
         "recommendations": [asdict(item) for item in recommendations],
-        "trial_candidates": sorted(
-            {
-                trial
-                for recommendation in recommendations
-                for trial in recommendation.linked_trials
-                if str(trial).strip()
-            }
-        ),
+        "trial_candidates": trial_candidates,
+        "trial_candidate_ids": [
+            str(item.get("nct_id") or "").strip()
+            for item in trial_candidates
+            if str(item.get("nct_id") or "").strip()
+        ],
         "note": "This node now owns treatment and clinical-trial judgment in the core MedAI workflow.",
     }
 
     state.treatment_recommendations = recommendations
     state.protocol_recommendations = protocol_recommendations
+    state.trial_retrieval_bundle = trial_retrieval_bundle
     state.treatment_bundle = treatment_bundle
+    state.final_output["trial_retrieval_bundle"] = trial_retrieval_bundle
     state.final_output["treatment_bundle"] = treatment_bundle
 
     _record_agent_prompt(
@@ -1698,6 +1865,7 @@ def protocol_node(state: GraphState) -> GraphState:
             "structured_case": dict(state.structured_case_json),
             "calculation_results": [asdict(item) for item in state.calculation_results],
             "calculator_matches": [asdict(item) for item in state.calculator_matches],
+            "trial_retrieval_bundle": dict(trial_retrieval_bundle),
         },
     )
     _mark_step(state, "protocol", status="completed", result="Treatment decision bundle generated.")
@@ -1710,10 +1878,21 @@ def protocol_node(state: GraphState) -> GraphState:
             output_payload=treatment_bundle,
             tool_calls=[
                 build_tool_call(
+                    "trial_candidate_retriever",
+                    input_payload={
+                        "structured_case": dict(state.structured_case_json),
+                        "department_tags": list(state.department_tags),
+                        "top_k": _PROTOCOL_TRIAL_TOP_K,
+                        "coarse_top_k": _PROTOCOL_TRIAL_COARSE_TOP_K,
+                    },
+                    output_payload=trial_retrieval_bundle,
+                ),
+                build_tool_call(
                     "treatment_matcher",
                     input_payload={
                         "structured_case": dict(state.structured_case_json),
                         "calculation_result_count": len(state.calculation_results),
+                        "trial_candidate_count": len(trial_candidates),
                     },
                     output_payload=treatment_bundle,
                 )
@@ -1749,9 +1928,20 @@ def reporter_node(state: GraphState) -> GraphState:
             "name": recommendation.name,
             "status": recommendation.status,
             "strategy": recommendation.strategy,
+            "linked_trials": list(recommendation.linked_trials),
             "actions": list(recommendation.actions),
         }
         for recommendation in state.treatment_recommendations
+    ]
+    trial_candidate_summary = [
+        {
+            "nct_id": str(candidate.get("nct_id") or "").strip(),
+            "title": str(candidate.get("title") or candidate.get("name") or "").strip(),
+            "status": str(candidate.get("status") or "").strip(),
+            "enrollment_open": bool(candidate.get("enrollment_open")),
+        }
+        for candidate in list(treatment_bundle.get("trial_candidates") or [])
+        if isinstance(candidate, dict)
     ]
 
     report_payload = {
@@ -1765,6 +1955,7 @@ def reporter_node(state: GraphState) -> GraphState:
         "treatment_bundle": treatment_bundle,
         "calculation_highlights": calculation_highlights,
         "recommendation_summary": recommendation_summary,
+        "trial_candidate_summary": trial_candidate_summary,
         "incoming_feedback": list(state.reporter_feedback),
         "errors": list(state.errors),
     }

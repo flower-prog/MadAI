@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import re
-from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -137,37 +136,6 @@ def extract_choice_from_text(text: str, choices: Mapping[str, str]) -> str | Non
         letter = str(match.group(1) or "").strip().upper()
         if letter in available_letters:
             return letter
-
-    normalized_text = normalize_match_text(text)
-    if not normalized_text:
-        return None
-
-    for key, choice_text in normalized_choices.items():
-        normalized_choice = normalize_match_text(choice_text)
-        if normalized_choice and normalized_choice in normalized_text:
-            return key.upper()
-
-    best_letter = None
-    best_score = 0.0
-    text_tokens = set(normalized_text.split())
-    for key, choice_text in normalized_choices.items():
-        normalized_choice = normalize_match_text(choice_text)
-        if not normalized_choice:
-            continue
-        choice_tokens = set(normalized_choice.split())
-        overlap = 0.0
-        if text_tokens and choice_tokens:
-            overlap = len(text_tokens.intersection(choice_tokens)) / len(choice_tokens)
-        score = max(
-            overlap,
-            SequenceMatcher(None, normalized_choice, normalized_text).ratio(),
-        )
-        if score > best_score:
-            best_score = score
-            best_letter = key.upper()
-
-    if best_letter is not None and best_score >= 0.85:
-        return best_letter
     return None
 
 

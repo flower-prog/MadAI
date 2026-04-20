@@ -9,8 +9,12 @@ __all__ = [
     "RiskCalcRegistration",
     "RiskCalcRegistry",
     "RiskCalcRetrievalTool",
+    "TrialChunkRetrievalTool",
+    "TrialRetrievalTool",
     "create_execution_tool",
     "create_retrieval_tool",
+    "create_trial_chunk_retrieval_tool",
+    "create_trial_retrieval_tool",
     "prewarm_clinical_tool_job",
     "run_agent_workflow",
     "run_clinical_tool_workflow",
@@ -27,8 +31,12 @@ if TYPE_CHECKING:
         RiskCalcRegistration,
         RiskCalcRegistry,
         RiskCalcRetrievalTool,
+        TrialChunkRetrievalTool,
+        TrialRetrievalTool,
         create_execution_tool,
         create_retrieval_tool,
+        create_trial_chunk_retrieval_tool,
+        create_trial_retrieval_tool,
     )
     from .workflow import run_agent_workflow, run_clinical_tool_workflow, run_workflow
 
@@ -47,8 +55,12 @@ def __getattr__(name: str):
         "RiskCalcRegistration",
         "RiskCalcRegistry",
         "RiskCalcRetrievalTool",
+        "TrialChunkRetrievalTool",
+        "TrialRetrievalTool",
         "create_execution_tool",
         "create_retrieval_tool",
+        "create_trial_chunk_retrieval_tool",
+        "create_trial_retrieval_tool",
     }:
         from . import tools as _tools
 

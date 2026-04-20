@@ -22,6 +22,7 @@ from agent.workflow import run_workflow
 
 DEFAULT_CASE_FILE = PROJECT_ROOT / "数据" / "病例.txt"
 DEFAULT_OUTPUT_FILE = PROJECT_ROOT / "outputs" / "try_single_case_workflow_result.json"
+DEFAULT_SNAPSHOT_DIR = PROJECT_ROOT / "outputs" / "snapshots"
 SECTION_PATTERN = re.compile(
     r'\{"label":"(?P<label>(?:\\.|[^"])*)","text":"(?P<text>(?:\\.|[^"])*)"\}',
     re.DOTALL,
@@ -43,6 +44,15 @@ def _resolve_optional_file_path(raw_path: str | None, *, label: str) -> str | No
     if not path.exists():
         raise FileNotFoundError(f"{label} file not found: {path}")
     return str(path.resolve())
+
+
+def _resolve_directory_path(raw_path: str | None) -> str | None:
+    if raw_path is None:
+        return None
+    text = str(raw_path).strip()
+    if not text:
+        return None
+    return str(Path(text).expanduser().resolve())
 
 
 def _normalize_whitespace(text: str) -> str:
@@ -176,6 +186,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Enable debug logging for the workflow run.",
     )
+    parser.add_argument(
+        "--snapshot-dir",
+        default=str(DEFAULT_SNAPSHOT_DIR),
+        help="Directory for workflow snapshots. Defaults to outputs/snapshots.",
+    )
     return parser
 
 
@@ -191,6 +206,7 @@ def main() -> int:
     pmid_metadata_path = (
         _resolve_optional_file_path(args.pmid_metadata_path, label="PMID metadata") or default_pmid_metadata_path
     )
+    snapshot_dir = _resolve_directory_path(args.snapshot_dir)
 
     case_text, case_source = resolve_case_text(args)
     result = run_workflow(
@@ -200,6 +216,7 @@ def main() -> int:
         pmid_metadata_path=pmid_metadata_path,
         top_k=args.top_k,
         debug=args.debug,
+        snapshot_dir=snapshot_dir,
     )
 
     output_path = Path(args.output).expanduser()
@@ -208,6 +225,8 @@ def main() -> int:
 
     print("Case source:", case_source)
     print("Result JSON:", output_path)
+    if snapshot_dir:
+        print("Snapshot dir:", snapshot_dir)
     if args.show_json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:

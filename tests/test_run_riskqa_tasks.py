@@ -50,7 +50,7 @@ class RiskQASupportTests(unittest.TestCase):
             {"A": "1.9", "B": "2.8", "C": "4.0", "D": "5.9", "E": "8.5"},
         )
 
-        self.assertEqual(choice, "E")
+        self.assertIsNone(choice)
 
     def test_select_entries_applies_slice_and_limit(self) -> None:
         selected = select_entries(

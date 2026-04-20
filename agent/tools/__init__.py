@@ -62,6 +62,24 @@ from .retrieval_tools import (
     is_problem_anchor_query,
     is_risk_hint_query,
 )
+from .structured_retrieval_tools import (
+    StructuredRetrievalDocument,
+    StructuredRetrievalTool,
+    build_structured_query_text,
+    create_structured_retrieval_tool,
+)
+from .trial_retrieval_tools import (
+    TrialCatalog,
+    TrialDocument,
+    TrialRetrievalTool,
+    create_trial_retrieval_tool,
+)
+from .trial_vector_retrieval_tools import (
+    TrialChunkCatalog,
+    TrialChunkDocument,
+    TrialChunkRetrievalTool,
+    create_trial_chunk_retrieval_tool,
+)
 
 __all__ = [
     "AGENT_HEALTHY_DEFAULTS",
@@ -118,6 +136,18 @@ __all__ = [
     "load_calculator_healthy_defaults",
     "maybe_load_json",
     "resolve_healthy_default",
+    "StructuredRetrievalDocument",
+    "StructuredRetrievalTool",
+    "TrialCatalog",
+    "TrialChunkCatalog",
+    "TrialChunkDocument",
+    "TrialChunkRetrievalTool",
+    "TrialDocument",
+    "TrialRetrievalTool",
+    "build_structured_query_text",
+    "create_trial_chunk_retrieval_tool",
+    "create_structured_retrieval_tool",
+    "create_trial_retrieval_tool",
     "summarize_text",
     "tool",
 ]

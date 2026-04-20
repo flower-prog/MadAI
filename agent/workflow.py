@@ -17,9 +17,11 @@ if __package__ in {None, ""}:
     if str(PROJECT_ROOT) not in sys.path:
         sys.path.insert(0, str(PROJECT_ROOT))
     from agent.graph import build_graph_with_memory
+    from agent.graph.snapshots import load_state_snapshot, prepare_state_for_resume
     from agent.graph.types import GraphState
 else:
     from .graph import build_graph_with_memory
+    from .graph.snapshots import load_state_snapshot, prepare_state_for_resume
     from .graph.types import GraphState
 
 
@@ -72,6 +74,7 @@ def _extract_cli_summary(result: dict[str, Any]) -> dict[str, Any]:
     final_output = dict(result.get("final_output") or {})
     child_result = dict(final_output.get("clinical_tool_agent") or {})
     calculation_bundle = dict(final_output.get("calculation_bundle") or {})
+    treatment_bundle = dict(final_output.get("treatment_bundle") or {})
     child_from_bundle = dict(calculation_bundle.get("child_result") or {})
     child_result = child_result or child_from_bundle
     raw_job = result.get("clinical_tool_job")
@@ -103,6 +106,16 @@ def _extract_cli_summary(result: dict[str, Any]) -> dict[str, Any]:
         "execution": execution or None,
         "executions": executions,
         "clinical_answer": clinical_answer,
+        "trial_candidates": [
+            {
+                "nct_id": str(item.get("nct_id") or "").strip(),
+                "title": str(item.get("title") or item.get("name") or "").strip(),
+                "status": str(item.get("status") or "").strip(),
+                "enrollment_open": bool(item.get("enrollment_open")),
+            }
+            for item in list(treatment_bundle.get("trial_candidates") or [])
+            if isinstance(item, dict)
+        ],
         "errors": list(result.get("errors") or []),
     }
     if selected_tool:
@@ -216,6 +229,13 @@ def _normalize_optional_existing_path(raw_value: str | None, *, label: str) -> s
     return str(path.resolve())
 
 
+def _normalize_optional_directory_path(raw_value: str | None) -> str | None:
+    text = str(raw_value or "").strip()
+    if not text:
+        return None
+    return str(Path(text).expanduser().resolve())
+
+
 def _configure_logging(debug: bool) -> None:
     if debug:
         logging.basicConfig(
@@ -233,10 +253,16 @@ def _configure_logging(debug: bool) -> None:
     )
 
 
-def _ensure_workflow_config(config: dict[str, Any] | None) -> dict[str, Any]:
+def _ensure_workflow_config(
+    config: dict[str, Any] | None,
+    *,
+    snapshot_dir: str | None = None,
+) -> dict[str, Any]:
     workflow_config = dict(config or {})
     configurable = dict(workflow_config.get("configurable") or {})
     configurable.setdefault("thread_id", str(uuid.uuid4()))
+    if snapshot_dir is not None:
+        configurable["snapshot_dir"] = snapshot_dir
     workflow_config["configurable"] = configurable
     return workflow_config
 
@@ -298,9 +324,11 @@ def _invoke_graph(
     config: dict[str, Any] | None = None,
     debug: bool = False,
     tool_registry: dict[str, Any] | None = None,
+    snapshot_dir: str | None = None,
 ) -> dict[str, Any]:
     _configure_logging(debug)
-    workflow_config = _ensure_workflow_config(config)
+    normalized_snapshot_dir = _normalize_optional_directory_path(snapshot_dir)
+    workflow_config = _ensure_workflow_config(config, snapshot_dir=normalized_snapshot_dir)
     graph_input = _merge_tool_registry(state_input, tool_registry)
 
     logger.info("Starting MedAI workflow")
@@ -395,6 +423,20 @@ def _build_cli_parser() -> argparse.ArgumentParser:
         default="summary",
         help="Print a concise summary or the full workflow JSON.",
     )
+    parser.add_argument(
+        "--snapshot-dir",
+        help="Optional directory for saving step-by-step workflow snapshots.",
+    )
+    parser.add_argument(
+        "--resume-snapshot",
+        help="Resume from a previously saved snapshot JSON file.",
+    )
+    parser.add_argument(
+        "--resume-mode",
+        choices=["continue", "restart"],
+        default="restart",
+        help="How to treat a resumed snapshot: continue from next_agent or restart from orchestrator.",
+    )
     parser.add_argument("--save-json", help="Optional output path for saving the full workflow JSON.")
     return parser
 
@@ -403,6 +445,7 @@ def _main(argv: list[str] | None = None) -> int:
     parser = _build_cli_parser()
     args = parser.parse_args(argv)
     state_input = _coalesce_json_sources(args.state_json, args.state_file, label="state")
+    resume_snapshot = _normalize_optional_existing_path(args.resume_snapshot, label="resume_snapshot")
 
     structured_case = _coalesce_json_sources(
         args.structured_case_json,
@@ -422,10 +465,22 @@ def _main(argv: list[str] | None = None) -> int:
 
     if state_input is not None and args.text:
         parser.error("Do not pass positional text together with --state-json or --state-file.")
+    if resume_snapshot is not None and state_input is not None:
+        parser.error("Do not combine --resume-snapshot with --state-json or --state-file.")
+    if resume_snapshot is not None and args.text:
+        parser.error("Do not combine --resume-snapshot with positional text.")
 
-    if state_input is not None:
+    if resume_snapshot is not None:
+        result = run_workflow(
+            resume_snapshot=resume_snapshot,
+            resume_mode=args.resume_mode,
+            snapshot_dir=args.snapshot_dir,
+            debug=args.debug,
+        )
+    elif state_input is not None:
         result = run_workflow(
             state=state_input,
+            snapshot_dir=args.snapshot_dir,
             debug=args.debug,
         )
     else:
@@ -443,6 +498,7 @@ def _main(argv: list[str] | None = None) -> int:
             retrieval_queries=retrieval_queries,
             max_selected_tools=args.max_selected_tools,
             forced_tool_pmid=args.forced_tool_pmid,
+            snapshot_dir=args.snapshot_dir,
             debug=args.debug,
         )
 
@@ -473,8 +529,45 @@ def run_agent_workflow(
     tool_registry: dict[str, Any] | None = None,
     messages: list[dict[str, str]] | None = None,
     state: GraphState | dict[str, Any] | None = None,
+    snapshot_dir: str | None = None,
+    resume_snapshot: str | None = None,
+    resume_mode: str = "restart",
 ) -> dict[str, Any]:
     """Run the MedAI graph with either placeholder or clinical-tool mode."""
+    normalized_snapshot_dir = _normalize_optional_directory_path(snapshot_dir)
+    normalized_resume_snapshot = _normalize_optional_existing_path(
+        resume_snapshot,
+        label="resume_snapshot",
+    )
+
+    if normalized_resume_snapshot is not None:
+        if state is not None:
+            raise ValueError("Provide either `state` or `resume_snapshot`, not both.")
+        if user_input is not None and str(user_input).strip():
+            raise ValueError("Provide either `resume_snapshot` or `user_input`, not both.")
+        if patient_case is not None or clinical_tool_job is not None or messages is not None:
+            raise ValueError("Provide either `resume_snapshot` or fresh workflow inputs, not both.")
+
+        loaded_snapshot = load_state_snapshot(normalized_resume_snapshot)
+        resumed_state = prepare_state_for_resume(
+            loaded_snapshot,
+            mode="continue" if resume_mode == "continue" else "restart",
+        )
+        workflow_config = dict(config or {})
+        configurable = dict(workflow_config.get("configurable") or {})
+        if loaded_snapshot.thread_id and not str(configurable.get("thread_id") or "").strip():
+            configurable["thread_id"] = loaded_snapshot.thread_id
+        if configurable:
+            workflow_config["configurable"] = configurable
+
+        return _invoke_graph(
+            resumed_state,
+            config=workflow_config,
+            debug=debug,
+            tool_registry=tool_registry,
+            snapshot_dir=normalized_snapshot_dir,
+        )
+
     if state is not None:
         if user_input is not None and str(user_input).strip():
             raise ValueError("Provide either `state` or `user_input`, not both.")
@@ -485,6 +578,7 @@ def run_agent_workflow(
             config=config,
             debug=debug,
             tool_registry=tool_registry,
+            snapshot_dir=normalized_snapshot_dir,
         )
 
     request = str(user_input or "").strip()
@@ -506,6 +600,7 @@ def run_agent_workflow(
         initial_state,
         config=config,
         debug=debug,
+        snapshot_dir=normalized_snapshot_dir,
     )
 
 
@@ -513,6 +608,8 @@ def run_workflow(
     case_text: str | None = None,
     *,
     state: GraphState | dict[str, Any] | None = None,
+    resume_snapshot: str | None = None,
+    resume_mode: str = "restart",
     request: str | None = None,
     mode: str = "patient_note",
     structured_case: dict[str, Any] | None = None,
@@ -528,12 +625,27 @@ def run_workflow(
     debug: bool = False,
     config: dict[str, Any] | None = None,
     tool_registry: dict[str, Any] | None = None,
+    snapshot_dir: str | None = None,
 ) -> dict[str, Any]:
     """Unified MedAI workflow entrypoint.
 
     - Pass `case_text` to start a full workflow directly from a case/question.
     - Pass `state` to continue or integrate from an existing GraphState-style payload.
     """
+    if resume_snapshot is not None:
+        if state is not None:
+            raise ValueError("Provide either `state` or `resume_snapshot`, not both.")
+        if case_text is not None and str(case_text).strip():
+            raise ValueError("Provide either `case_text` or `resume_snapshot`, not both.")
+        return run_agent_workflow(
+            debug=debug,
+            config=config,
+            tool_registry=tool_registry,
+            snapshot_dir=snapshot_dir,
+            resume_snapshot=resume_snapshot,
+            resume_mode=resume_mode,
+        )
+
     if state is not None:
         if case_text is not None and str(case_text).strip():
             raise ValueError("Provide either `case_text` or `state`, not both.")
@@ -542,6 +654,7 @@ def run_workflow(
             config=config,
             debug=debug,
             tool_registry=tool_registry,
+            snapshot_dir=snapshot_dir,
         )
 
     normalized_case_text = str(case_text or "").strip()
@@ -570,6 +683,7 @@ def run_workflow(
         clinical_tool_job=clinical_tool_job,
         tool_registry=tool_registry,
         messages=[{"role": "user", "content": normalized_case_text}],
+        snapshot_dir=snapshot_dir,
     )
 
 
@@ -589,6 +703,7 @@ def run_clinical_tool_workflow(
     forced_tool_pmid: str | None = None,
     debug: bool = False,
     tool_registry: dict[str, Any] | None = None,
+    snapshot_dir: str | None = None,
 ) -> dict[str, Any]:
     return run_workflow(
         case_text=text,
@@ -605,6 +720,7 @@ def run_clinical_tool_workflow(
         forced_tool_pmid=forced_tool_pmid,
         debug=debug,
         tool_registry=tool_registry,
+        snapshot_dir=snapshot_dir,
     )
 
 

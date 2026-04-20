@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
+from .snapshots import FileSnapshotStore
 from .nodes import (
     clinical_assisstment_node,
     orchestrator_node,
@@ -38,6 +39,9 @@ class SimpleAgentGraph:
     def invoke(self, input: GraphState | dict[str, Any], config: dict[str, Any] | None = None) -> dict[str, Any]:
         """按路由顺序执行节点，直到结束、失败或触发防死循环保护。"""
         state = ensure_state(input)
+        snapshot_store = _build_snapshot_store(config)
+        if snapshot_store is not None:
+            snapshot_store.record(state, phase="input")
         current_agent: AgentName | str = cast_agent_name(state.next_agent or "orchestrator")
         max_steps = max(
             14,
@@ -64,6 +68,8 @@ class SimpleAgentGraph:
 
             state.next_agent = None
             state = node(state)
+            if snapshot_store is not None:
+                snapshot_store.record(state, phase="node", agent_name=str(current_agent))
             if state.next_agent is None:
                 if state.status in {"completed", "failed"}:
                     break
@@ -74,12 +80,29 @@ class SimpleAgentGraph:
 
             current_agent = state.next_agent
 
+        if snapshot_store is not None:
+            snapshot_store.record(state, phase="final")
         return state_to_dict(state)
 
 
 def cast_agent_name(value: AgentName | str) -> AgentName | str:
     """规范化 agent 名称，同时保留未知值供后续报错使用。"""
     return str(value).strip() or "orchestrator"
+
+
+def _build_snapshot_store(config: dict[str, Any] | None) -> FileSnapshotStore | None:
+    workflow_config = dict(config or {})
+    configurable = dict(workflow_config.get("configurable") or {})
+    snapshot_dir = str(
+        configurable.get("snapshot_dir")
+        or workflow_config.get("snapshot_dir")
+        or ""
+    ).strip()
+    if not snapshot_dir:
+        return None
+
+    thread_id = str(configurable.get("thread_id") or "").strip() or "default-thread"
+    return FileSnapshotStore(snapshot_dir, thread_id=thread_id)
 
 
 def _build_base_graph() -> SimpleAgentGraph:
@@ -95,6 +118,7 @@ def build_graph() -> SimpleAgentGraph:
 def build_graph_with_memory() -> SimpleAgentGraph:
     """保留向后兼容的别名接口。
 
-    当前脚手架暂未实现 memory 能力，因此仍返回基础图实例。
+    当前通过 `configurable.snapshot_dir` 提供基于文件的快照能力，
+    但图实例本身仍然是同一个轻量实现。
     """
     return _build_base_graph()

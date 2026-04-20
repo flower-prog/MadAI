@@ -20,6 +20,7 @@ from .tools import (
     build_patient_note_queries,
     build_tool_call,
     collect_tools,
+    StructuredRetrievalTool,
     create_computation_retrieval_tool,
     create_execution_tool,
     create_retrieval_tool,
@@ -410,7 +411,15 @@ class ClinicalToolAgent:
             if registry is not None
             else None
         )
-        self.tools = collect_tools(self.retriever, self.computation_retriever, self.execution_tool)
+        structured_tools = getattr(self.retriever, "structured_tools", None)
+        if structured_tools is not None and not isinstance(structured_tools, StructuredRetrievalTool):
+            structured_tools = None
+        self.tools = collect_tools(
+            self.retriever,
+            structured_tools,
+            self.computation_retriever,
+            self.execution_tool,
+        )
         if self.execution_tool is not None and "riskcalc_executor" not in self.tools:
             self.tools["riskcalc_executor"] = self.execution_tool
         self._trace_tool_calls: list[dict[str, Any]] = []
@@ -1140,7 +1149,13 @@ class ClinicalToolAgent:
                         ],
                     }
                 )
-                retrieved_tools = list(refined_retrieved)
+                if job.mode == "question":
+                    retrieved_tools = self._merge_candidates_preserving_primary_order(
+                        primary_candidates=self._hydrate_coarse_candidates(coarse_retrieved),
+                        secondary_candidates=refined_retrieved,
+                    )
+                else:
+                    retrieved_tools = list(refined_retrieved)
             else:
                 retrieved_tools = self._hydrate_coarse_candidates(coarse_retrieved)
         else:
@@ -1226,7 +1241,15 @@ class ClinicalToolAgent:
         vector_raw_top3 = list(retrieval_bundle.get("vector_raw_top3") or [])
         bm25_raw_top5 = list(retrieval_bundle.get("bm25_raw_top5") or bm25_raw_top3 or [])
         vector_raw_top5 = list(retrieval_bundle.get("vector_raw_top5") or vector_raw_top3 or [])
-        if bm25_raw_top3 or vector_raw_top3:
+        if job.mode == "question":
+            retrieved_tools = self._build_question_selection_candidates(
+                retrieved_tools=retrieved_tools,
+                bm25_raw_top5=bm25_raw_top5,
+                vector_raw_top5=vector_raw_top5,
+                extra_candidates=list(retrieval_bundle.get("candidate_ranking") or []),
+                limit=_QUESTION_SELECTION_POOL_LIMIT,
+            )
+        elif bm25_raw_top3 or vector_raw_top3:
             retrieved_tools = [
                 dict(row)
                 for row in list(retrieval_bundle.get("candidate_ranking") or retrieval_bundle.get("retrieved_tools") or retrieved_tools)
@@ -1251,6 +1274,91 @@ class ClinicalToolAgent:
             "retrieved_tools": list(retrieved_tools),
             "candidate_ranking": list(retrieved_tools),
         }
+
+    @staticmethod
+    def _merge_candidates_preserving_primary_order(
+        *,
+        primary_candidates: list[dict[str, Any]],
+        secondary_candidates: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        ordered_candidates: list[dict[str, Any]] = []
+        by_pmid: dict[str, dict[str, Any]] = {}
+
+        def _normalize_candidate(raw_candidate: dict[str, Any] | None) -> dict[str, Any]:
+            candidate = dict(raw_candidate or {})
+            if "parameter_names" in candidate:
+                candidate["parameter_names"] = list(candidate.get("parameter_names") or [])
+            if "source_channels" in candidate:
+                candidate["source_channels"] = list(candidate.get("source_channels") or [])
+            if "source_entries" in candidate:
+                candidate["source_entries"] = {
+                    str(key): dict(value or {})
+                    for key, value in dict(candidate.get("source_entries") or {}).items()
+                }
+            if "calculator_payload" in candidate:
+                candidate["calculator_payload"] = dict(candidate.get("calculator_payload") or {})
+            return candidate
+
+        def _is_missing(value: Any) -> bool:
+            if value is None:
+                return True
+            if isinstance(value, str):
+                return not value.strip()
+            if isinstance(value, (list, dict, tuple, set)):
+                return not value
+            return False
+
+        def _merge_list_values(*values: Any) -> list[Any]:
+            merged: list[Any] = []
+            for value in values:
+                for item in list(value or []):
+                    if item not in merged:
+                        merged.append(item)
+            return merged
+
+        def _merge_candidate(source_candidate: dict[str, Any] | None) -> None:
+            normalized = _normalize_candidate(source_candidate)
+            pmid = str(normalized.get("pmid") or "").strip()
+            if not pmid:
+                return
+            current = by_pmid.get(pmid)
+            if current is None:
+                by_pmid[pmid] = normalized
+                ordered_candidates.append(normalized)
+                return
+
+            for key, value in normalized.items():
+                if key in {"pmid", "parameter_names", "source_channels", "source_entries", "calculator_payload"}:
+                    continue
+                if _is_missing(current.get(key)) and not _is_missing(value):
+                    current[key] = value
+
+            current["parameter_names"] = _merge_list_values(
+                current.get("parameter_names"),
+                normalized.get("parameter_names"),
+            )
+            current["source_channels"] = _merge_list_values(
+                current.get("source_channels"),
+                normalized.get("source_channels"),
+            )
+
+            source_entries = dict(current.get("source_entries") or {})
+            source_entries.update(dict(normalized.get("source_entries") or {}))
+            if source_entries:
+                current["source_entries"] = source_entries
+
+            calculator_payload = dict(current.get("calculator_payload") or {})
+            for key, value in dict(normalized.get("calculator_payload") or {}).items():
+                if _is_missing(calculator_payload.get(key)) and not _is_missing(value):
+                    calculator_payload[key] = value
+            if calculator_payload:
+                current["calculator_payload"] = calculator_payload
+
+        for candidate in list(primary_candidates or []):
+            _merge_candidate(candidate)
+        for candidate in list(secondary_candidates or []):
+            _merge_candidate(candidate)
+        return ordered_candidates
 
     @staticmethod
     def _build_question_selection_candidates(

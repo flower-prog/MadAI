@@ -8,6 +8,7 @@ from pathlib import Path
 import agent.tools as tools
 from agent.graph.types import ClinicalToolJob
 from agent.tools import collect_tools, create_computation_retrieval_tool, create_retrieval_tool
+from agent.tools.retrieval_tools import RiskCalcParameterRetrievalTool
 
 
 class _FakeDocument:
@@ -502,6 +503,7 @@ class RetrievalToolsMinimalTests(unittest.TestCase):
 
         self.assertFalse(hasattr(tool, "retrieve"))
         self.assertTrue(hasattr(tool, "retrieve_from_structured_case"))
+        self.assertTrue(hasattr(tool, "structured_tools"))
 
     def test_agent_tools_facade_exports_consolidated_retrieval_stack(self) -> None:
         expected_exports = {
@@ -511,11 +513,14 @@ class RetrievalToolsMinimalTests(unittest.TestCase):
             "KeywordToolRetriever",
             "MedCPTRetriever",
             "HybridRetriever",
+            "StructuredRetrievalTool",
             "create_computation_retrieval_tool",
             "create_retriever",
             "RiskCalcRetrievalTool",
             "create_retrieval_tool",
+            "create_structured_retrieval_tool",
             "build_case_summary",
+            "build_structured_query_text",
             "build_patient_note_queries",
             "generate_risk_hints",
         }
@@ -739,6 +744,52 @@ class RetrievalToolsMinimalTests(unittest.TestCase):
         self.assertEqual(rows_from_state["candidate_ranking"][0]["pmid"], "1")
         self.assertIn("2", rows_from_state["vector_top5"])
 
+    def test_generic_structured_retrieval_tools_expose_bm25_and_vector_modes(self) -> None:
+        catalog = _FakeCatalog()
+        parameter_path = self._build_temp_parameter_path("riskcalcs_parameter.generic-structured.json")
+        try:
+            self._write_parameter_payload(parameter_path, _af_parameter_payload())
+            tool_provider = create_retrieval_tool(
+                catalog,
+                backend="hybrid",
+                parameter_path=parameter_path,
+                vector_retriever=_FakeVectorRetriever(),
+            )
+            registered_tools = collect_tools(tool_provider.structured_tools)
+
+            bm25_payload = registered_tools["structured_bm25_retriever"].invoke(
+                structured_case={
+                    "raw_text": (
+                        "68 year old with atrial fibrillation, hypertension, diabetes, "
+                        "prior stroke, and congestive heart failure."
+                    ),
+                    "problem_list": ["atrial fibrillation", "hypertension", "diabetes"],
+                    "known_facts": ["prior stroke", "heart failure"],
+                },
+                top_k=2,
+                include_scores=True,
+            )
+            vector_payload = registered_tools["structured_vector_retriever"].invoke(
+                structured_case={
+                    "raw_text": "68 year old with atrial fibrillation and prior stroke.",
+                    "problem_list": ["atrial fibrillation"],
+                    "known_facts": ["prior stroke"],
+                },
+                top_k=2,
+            )
+        finally:
+            parameter_path.unlink(missing_ok=True)
+
+        self.assertIn("structured_bm25_retriever", registered_tools)
+        self.assertIn("structured_vector_retriever", registered_tools)
+        self.assertEqual(bm25_payload["backend_used"], "bm25")
+        self.assertEqual(bm25_payload["candidate_ranking"][0]["document_id"], "1")
+        self.assertEqual(bm25_payload["candidate_ranking"][0]["pmid"], "1")
+        self.assertIn("score", bm25_payload["candidate_ranking"][0])
+        self.assertEqual(vector_payload["backend_used"], "vector")
+        self.assertEqual(vector_payload["candidate_ranking"][0]["document_id"], "2")
+        self.assertEqual(vector_payload["retrieved_ids"], ["2", "1"])
+
     def test_coarse_retrieval_tool_returns_minimal_pmid_title_bundle(self) -> None:
         catalog = _FakeCatalog()
         parameter_path = self._build_temp_parameter_path("riskcalcs_parameter.coarse.json")
@@ -768,6 +819,32 @@ class RetrievalToolsMinimalTests(unittest.TestCase):
 
         self.assertEqual(payload["candidate_ranking"][0], {"pmid": "1", "title": "CHADS2 Stroke Risk Calculator"})
         self.assertNotIn("purpose", payload["candidate_ranking"][0])
+        self.assertEqual(payload["candidate_pmids"][0], "1")
+
+    def test_default_parameter_path_resolves_repo_data_data_layout(self) -> None:
+        resolved = RiskCalcParameterRetrievalTool._resolve_parameter_path(None)
+
+        self.assertTrue(resolved.exists())
+        self.assertEqual(resolved.name, "riskcalcs_parameter.json")
+        self.assertIn("/data/data/", str(resolved))
+
+    def test_coarse_retrieval_tool_falls_back_to_catalog_keyword_when_parameter_payload_missing(self) -> None:
+        catalog = _FakeCatalog()
+        tool_provider = create_retrieval_tool(
+            catalog,
+            backend="keyword",
+            vector_retriever=None,
+        )
+
+        payload = tool_provider.retrieve_coarse_from_case_fields(
+            raw_text="68 year old with atrial fibrillation, hypertension, diabetes, and prior stroke.",
+            problem_list=["atrial fibrillation", "hypertension", "diabetes", "prior stroke"],
+            known_facts=["heart failure"],
+            top_k=2,
+            backend="keyword",
+        )
+
+        self.assertEqual(payload["candidate_ranking"][0], {"pmid": "1", "title": "CHADS2 Stroke Risk Calculator"})
         self.assertEqual(payload["candidate_pmids"][0], "1")
 
     def test_computation_retrieval_tool_returns_union_with_full_calculator_payloads(self) -> None:

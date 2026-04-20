@@ -20,6 +20,7 @@ from agent.config.env import load_dotenv_if_present
 from agent.workflow import run_workflow
 
 if __package__ in {None, ""}:
+    from scripts.evaluate import build_report, evaluate_records
     from scripts.riskqa_support import (
         append_record_block,
         build_question_query,
@@ -32,6 +33,7 @@ if __package__ in {None, ""}:
     )
     from scripts.try_single_case_workflow import build_summary, default_corpus_paths
 else:
+    from .evaluate import build_report, evaluate_records
     from .riskqa_support import (
         append_record_block,
         build_question_query,
@@ -47,6 +49,7 @@ else:
 
 DEFAULT_DATASET_PATH = PROJECT_ROOT / "数据" / "riskqa.json"
 DEFAULT_OUTPUT_PATH = PROJECT_ROOT / "outputs" / "riskqa" / "riskqa_answers.txt"
+DEFAULT_WRONG_LIMIT = 20
 
 
 def _resolve_existing_path(raw_path: str | None, *, label: str) -> str | None:
@@ -168,6 +171,22 @@ def build_failure_record(
     }
 
 
+def default_evaluation_report_path(output_path: str | Path) -> Path:
+    resolved_output_path = Path(output_path).expanduser().resolve()
+    return resolved_output_path.with_name(f"{resolved_output_path.stem}.evaluation.txt")
+
+
+def build_evaluation_summary(
+    records: list[dict[str, Any]],
+    dataset_entries: list[dict[str, Any]],
+    *,
+    wrong_limit: int = DEFAULT_WRONG_LIMIT,
+) -> tuple[dict[str, Any], str]:
+    summary = evaluate_records(records, dataset_entries)
+    report_text = build_report(summary, wrong_limit=wrong_limit)
+    return summary, report_text
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Run MedAI concurrently over every RiskQA question and save answer records to a text file."
@@ -220,6 +239,7 @@ def main() -> int:
     total = len(selected_entries)
     worker_count = max(1, min(int(args.workers), total))
     write_lock = threading.Lock()
+    completed_records: list[dict[str, Any]] = []
 
     def run_one(dataset_index: int, entry: dict[str, Any]) -> dict[str, Any]:
         task_id = build_task_id(dataset_index)
@@ -265,6 +285,7 @@ def main() -> int:
             record = future.result()
             with write_lock:
                 append_record_block(output_path, record)
+            completed_records.append(record)
             correctness = (
                 "correct"
                 if record.get("correct") is True
@@ -275,13 +296,27 @@ def main() -> int:
                 f"pred={record.get('predicted_choice') or '?'} | gold={record.get('gold_answer') or '?'} | {correctness}"
             )
 
+    evaluation_summary, evaluation_report = build_evaluation_summary(completed_records, entries)
+    evaluation_report_path = default_evaluation_report_path(output_path)
+    evaluation_report_path.write_text(evaluation_report, encoding="utf-8")
+
     print("")
     print(f"Dataset: {dataset_path}")
     print(f"Output txt: {output_path}")
+    print(f"Evaluation report: {evaluation_report_path}")
     print(f"Workers: {worker_count}")
     print(f"Resolved riskcalcs: {resolved_riskcalcs_path}")
     print(f"Resolved pmid metadata: {resolved_pmid_metadata_path}")
     print(f"Completed tasks: {total}")
+    comparable_count = int(evaluation_summary.get("comparable_count") or 0)
+    correct_count = int(evaluation_summary.get("correct_count") or 0)
+    wrong_count = int(evaluation_summary.get("wrong_count") or 0)
+    accuracy = evaluation_summary.get("accuracy")
+    accuracy_text = f"{float(accuracy) * 100:.2f}%" if accuracy is not None else "N/A"
+    print(f"Comparable rows: {comparable_count}")
+    print(f"Correct rows: {correct_count}")
+    print(f"Wrong rows: {wrong_count}")
+    print(f"Accuracy: {accuracy_text}")
     return 0
 
 

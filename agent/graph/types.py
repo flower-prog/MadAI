@@ -102,6 +102,7 @@ class ProtocolRecommendation:
     status: ProtocolStatus = "insufficient_data"
     rationale: str = ""
     linked_calculators: list[str] = field(default_factory=list)
+    linked_trials: list[str] = field(default_factory=list)
     corrections: list[str] = field(default_factory=list)
 
 
@@ -221,6 +222,7 @@ class GraphState:
     orchestrator_result: dict[str, Any] = field(default_factory=dict)  # orchestrator 的结构化结果，直接放在主状态里
     assessment_bundle: dict[str, Any] = field(default_factory=dict)  # clinical_assisstment 的结构化产物
     calculation_bundle: dict[str, Any] = field(default_factory=dict)  # calculator 阶段的汇总结果
+    trial_retrieval_bundle: dict[str, Any] = field(default_factory=dict)  # protocol 阶段的 trial 检索包
     treatment_bundle: dict[str, Any] = field(default_factory=dict)  # protocol 阶段的治疗决策包
     reporter_result: dict[str, Any] = field(default_factory=dict)  # reporter 生成的完整报告结果
     review_report: dict[str, Any] = field(default_factory=dict)  # reporter 的通过/重跑判定结果
@@ -698,6 +700,7 @@ def _coerce_protocol_recommendation(raw: Any) -> ProtocolRecommendation:
         status=str(raw.get("status") or "insufficient_data"),
         rationale=str(raw.get("rationale") or ""),
         linked_calculators=[str(item) for item in list(raw.get("linked_calculators") or []) if str(item).strip()],
+        linked_trials=[str(item) for item in list(raw.get("linked_trials") or []) if str(item).strip()],
         corrections=[str(item) for item in list(raw.get("corrections") or []) if str(item).strip()],
     )
 
@@ -957,6 +960,7 @@ def ensure_state(data: GraphState | dict[str, Any]) -> GraphState:
         orchestrator_result=dict(data.get("orchestrator_result") or {}),
         assessment_bundle=dict(data.get("assessment_bundle") or {}),
         calculation_bundle=dict(data.get("calculation_bundle") or {}),
+        trial_retrieval_bundle=dict(data.get("trial_retrieval_bundle") or {}),
         treatment_bundle=dict(data.get("treatment_bundle") or {}),
         reporter_result=dict(data.get("reporter_result") or {}),
         review_report=dict(data.get("review_report") or {}),
