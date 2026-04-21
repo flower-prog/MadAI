@@ -17,6 +17,10 @@ def iter_corpus_candidate_pairs(root: str | Path) -> tuple[tuple[Path, Path], ..
             root_path / "data" / "pmid2info.json",
         ),
         (
+            root_path / "data" / "data" / "riskcalcs.json",
+            root_path / "data" / "data" / "pmid2info.json",
+        ),
+        (
             clinical_tool_learning_root / "mimic_evaluation" / "tools" / "riskcalcs.json",
             clinical_tool_learning_root / "mimic_evaluation" / "dataset" / "pmid2info.json",
         ),

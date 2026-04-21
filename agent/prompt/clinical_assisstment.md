@@ -25,8 +25,9 @@
     <step order="4">
       子 agent 执行时遵循以下规则：
       <rule name="direct_compute">若所需参数齐全，直接计算。</rule>
-      <rule name="single_missing_parameter">若仅缺 1 个关键参数，可以查询相似病例估计该参数后再计算；必须显式标注 estimated_input、estimation_source、estimation_rationale、confidence。</rule>
-      <rule name="multiple_missing_parameters">若缺失超过 1 个关键参数，不要计算；返回 skipped，并列出 missing_inputs。</rule>
+      <rule name="healthy_default_backfill">若存在缺失参数，优先用 calculator healthy defaults 或健康/阴性默认值补齐后继续计算；结果应标记为 partial，并透传 missing_inputs 与 defaults_used。</rule>
+      <rule name="single_missing_parameter">若健康默认值无法覆盖且仅缺 1 个关键参数，可以查询相似病例估计该参数后再计算；必须显式标注 estimated_input、estimation_source、estimation_rationale、confidence。</rule>
+      <rule name="multiple_missing_parameters">若缺失超过 1 个关键参数，但都能被健康默认值补齐，仍然执行；只有缺失参数无法被默认值或估计覆盖时才返回 skipped。</rule>
       <rule name="not_applicable">若患者明显不适用于该 calculator，返回 not_applicable，并写清不适用原因。</rule>
     </step>
     <step order="5">把结果打包成 calculation_bundle 交给 protocol，不得输出治疗建议。</step>

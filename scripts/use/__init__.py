@@ -1,1 +1,1 @@
-"""Package marker for script entrypoints kept under scripts/use/."""
+"""Compatibility package for legacy script entrypoints under scripts/use."""
