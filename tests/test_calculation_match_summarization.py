@@ -82,6 +82,45 @@ class CalculationMatchSummarizationTests(unittest.TestCase):
         self.assertEqual(results[1].status, "skipped")
         self.assertEqual(results[1].missing_inputs, ["ast", "alt"])
 
+    def test_partial_execution_is_preserved_when_completed_output_still_has_missing_inputs(self) -> None:
+        result = {
+            "mode": "patient_note",
+            "retrieved_tools": [
+                {"pmid": "1", "title": "BOAS"},
+            ],
+            "selected_tool": {"pmid": "1", "title": "BOAS"},
+            "selection_decisions": [
+                {
+                    "pmid": "1",
+                    "title": "BOAS",
+                    "gate_status": "failed_missing_inputs",
+                    "execution_status": "missing_inputs",
+                    "missing_inputs": ["age", "nihss_score"],
+                    "rationale": "Required stroke severity fields are missing.",
+                }
+            ],
+            "executions": [
+                {
+                    "pmid": "1",
+                    "title": "BOAS",
+                    "status": "completed",
+                    "final_text": "Minimum known BOAS score is 1.",
+                }
+            ],
+        }
+
+        matches = _summarize_calculator_matches(result, "risk_score")
+
+        self.assertEqual(matches[0].execution_status, "partial")
+        self.assertEqual(matches[0].applicability, "partial")
+        self.assertEqual(matches[0].missing_inputs, ["age", "nihss_score"])
+
+        tasks, results = _build_calculation_tasks_from_matches(matches, "risk_score")
+
+        self.assertEqual(tasks[0].decision, "direct")
+        self.assertEqual(results[0].status, "partial")
+        self.assertEqual(results[0].missing_inputs, ["age", "nihss_score"])
+
 
 if __name__ == "__main__":
     unittest.main()

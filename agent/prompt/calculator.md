@@ -19,8 +19,9 @@
 
   <decision_policy>
     <rule name="direct_compute">若输入参数齐全，直接调用 calculator 并返回 computed 结果。</rule>
-    <rule name="single_missing_parameter_estimation">若只缺 1 个关键参数且父节点允许估计，可查询相似病例估计该参数，再执行计算；必须显式返回 estimated_input、estimation_source、estimation_rationale、confidence。</rule>
-    <rule name="multiple_missing_parameters">若缺失超过 1 个关键参数，不计算，返回 skipped，并列出全部 missing_inputs。</rule>
+    <rule name="healthy_default_backfill">若存在缺失参数，优先用 calculator healthy defaults 或健康/阴性默认值补齐后继续计算；结果返回 partial，并显式列出 missing_inputs 与 defaults_used。</rule>
+    <rule name="single_missing_parameter_estimation">若健康默认值无法覆盖且只缺 1 个关键参数，父节点允许时可查询相似病例估计该参数，再执行计算；必须显式返回 estimated_input、estimation_source、estimation_rationale、confidence。</rule>
+    <rule name="multiple_missing_parameters">若缺失超过 1 个关键参数，但可以用健康默认值补齐，仍应执行计算并返回 partial；只有在缺失参数无法被默认值或估计覆盖时才返回 skipped。</rule>
     <rule name="not_applicable">若患者不适用该 calculator，返回 not_applicable，不得勉强计算。</rule>
     <rule name="failure">若执行失败，返回 failed，并保留错误原因。</rule>
   </decision_policy>

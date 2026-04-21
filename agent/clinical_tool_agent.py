@@ -62,6 +62,16 @@ def _decision_passes_gate(decision: dict[str, Any] | None) -> bool:
     )
 
 
+def _decision_missing_inputs(decision: dict[str, Any] | None) -> list[str]:
+    if not isinstance(decision, dict):
+        return []
+    return [
+        str(item).strip()
+        for item in list(decision.get("missing_inputs") or [])
+        if str(item).strip()
+    ]
+
+
 def _coerce_text_list(value: Any, *, limit: int | None = None) -> list[str]:
     values: list[str] = []
     if value is None:
@@ -691,33 +701,22 @@ class ClinicalToolAgent:
                 )
             ]
 
-        execution: dict[str, Any] = {}
+        selection_decisions: list[dict[str, Any]] = []
+        eligible_tools: list[dict[str, Any]] = []
+        execution: dict[str, Any] = {
+            "status": "skipped",
+            "final_text": "No calculator PMID was selected by clinical_assisstment.",
+            "missing_inputs": [],
+        }
         executions: list[dict[str, Any]] = []
         if selected_pmid:
-            execution = self._execute_calculator(
+            selected_tool, selection_decisions, eligible_tools, execution, executions = self._execute_selected_candidate(
                 job,
-                selected_pmid,
+                selected_tool=selected_tool,
                 selected_candidate=selected_candidate,
+                dispatch=f"{job.mode}_mode",
+                source="parent_preselected_execution",
             )
-            self._record_tool_call(
-                "python_calculator_executor",
-                status=str(execution.get("status") or "unknown"),
-                input_payload={
-                    "mode": job.mode,
-                    "pmid": selected_pmid,
-                    "title": selected_tool.get("title"),
-                    "clinical_text": summarize_text(job.text),
-                },
-                output_payload=execution,
-                metadata={"dispatch": f"{job.mode}_mode", "source": "parent_preselected_execution"},
-            )
-            execution = dict(execution)
-            executions.append(dict(execution))
-        if not execution:
-            execution = {
-                "status": "skipped",
-                "final_text": "No calculator PMID was selected by clinical_assisstment.",
-            }
 
         result = {
             "mode": job.mode,
@@ -734,8 +733,8 @@ class ClinicalToolAgent:
                 for item in list(selection_context.get("vector_raw_top5") or [])
                 if isinstance(item, dict)
             ],
-            "selection_decisions": [],
-            "eligible_tools": [],
+            "selection_decisions": selection_decisions,
+            "eligible_tools": eligible_tools,
             "selected_tool": selected_tool,
             "executions": executions,
             "execution": execution,
@@ -766,37 +765,26 @@ class ClinicalToolAgent:
         selection_candidates = list(selection_bundle.get("selection_candidates") or [])
         selected_tool = dict(selection_bundle.get("selected_tool") or {})
         selected_pmid = str(selected_tool.get("pmid") or "").strip()
-        execution: dict[str, Any] = {}
+        selection_decisions: list[dict[str, Any]] = []
+        eligible_tools: list[dict[str, Any]] = []
+        execution: dict[str, Any] = {
+            "status": "skipped",
+            "final_text": "No calculator was selected from the second-stage candidate pool.",
+            "missing_inputs": [],
+        }
         executions: list[dict[str, Any]] = []
         if selected_pmid:
             selected_candidate = next(
                 (candidate for candidate in selection_candidates if str(candidate.get("pmid") or "").strip() == selected_pmid),
                 None,
             )
-            execution = self._execute_calculator(
+            selected_tool, selection_decisions, eligible_tools, execution, executions = self._execute_selected_candidate(
                 job,
-                selected_pmid,
+                selected_tool=selected_tool,
                 selected_candidate=selected_candidate,
+                dispatch="question_mode",
+                source="post_selection_execution",
             )
-            self._record_tool_call(
-                "python_calculator_executor",
-                status=str(execution.get("status") or "unknown"),
-                input_payload={
-                    "mode": job.mode,
-                    "pmid": selected_pmid,
-                    "title": selected_tool.get("title"),
-                    "clinical_text": summarize_text(job.text),
-                },
-                output_payload=execution,
-                metadata={"dispatch": "question_mode", "source": "post_selection_execution"},
-            )
-            execution = dict(execution)
-            executions.append(dict(execution))
-        if not execution:
-            execution = {
-                "status": "skipped",
-                "final_text": "No calculator was selected from the second-stage candidate pool.",
-            }
         return {
             "mode": job.mode,
             "retrieved_tools": list(selection_bundle.get("retrieved_tools") or []),
@@ -804,8 +792,8 @@ class ClinicalToolAgent:
             "retrieval_batches": list(selection_bundle.get("retrieval_batches") or []),
             "bm25_raw_top5": list(selection_bundle.get("bm25_raw_top5") or []),
             "vector_raw_top5": list(selection_bundle.get("vector_raw_top5") or []),
-            "selection_decisions": [],
-            "eligible_tools": [],
+            "selection_decisions": selection_decisions,
+            "eligible_tools": eligible_tools,
             "selected_tool": selected_tool,
             "executions": executions,
             "execution": execution,
@@ -863,39 +851,27 @@ class ClinicalToolAgent:
         selection_candidates = list(selection_bundle.get("selection_candidates") or [])
         selected_tool = dict(selection_bundle.get("selected_tool") or {})
 
+        selection_decisions: list[dict[str, Any]] = []
+        eligible_tools: list[dict[str, Any]] = []
         executions: list[dict[str, Any]] = []
         selected_pmid = str(selected_tool.get("pmid") or "").strip()
-        selected_execution: dict[str, Any] = {}
+        selected_execution: dict[str, Any] = {
+            "status": "skipped",
+            "final_text": "No calculator was selected from the second-stage candidate pool.",
+            "missing_inputs": [],
+        }
         if selected_pmid:
             selected_candidate = next(
                 (candidate for candidate in selection_candidates if str(candidate.get("pmid") or "").strip() == selected_pmid),
                 None,
             )
-            execution = self._execute_calculator(
+            selected_tool, selection_decisions, eligible_tools, selected_execution, executions = self._execute_selected_candidate(
                 job,
-                selected_pmid,
+                selected_tool=selected_tool,
                 selected_candidate=selected_candidate,
+                dispatch="patient_note_mode",
+                source="post_selection_execution",
             )
-            self._record_tool_call(
-                "python_calculator_executor",
-                status=str(execution.get("status") or "unknown"),
-                input_payload={
-                    "mode": job.mode,
-                    "pmid": selected_pmid,
-                    "title": selected_tool.get("title"),
-                    "clinical_text": summarize_text(job.text),
-                },
-                output_payload=execution,
-                metadata={"dispatch": "patient_note_mode", "source": "post_selection_execution"},
-            )
-            execution = dict(execution)
-            executions.append(execution)
-            selected_execution = dict(execution)
-        if not selected_execution:
-            selected_execution = {
-                "status": "skipped",
-                "final_text": "No calculator was selected from the second-stage candidate pool.",
-            }
 
         return {
             "mode": job.mode,
@@ -906,8 +882,8 @@ class ClinicalToolAgent:
             "recommended_pmids": list(selection_bundle.get("recommended_pmids") or []),
             "bm25_raw_top5": list(selection_bundle.get("bm25_raw_top5") or []),
             "vector_raw_top5": list(selection_bundle.get("vector_raw_top5") or []),
-            "selection_decisions": [],
-            "eligible_tools": [],
+            "selection_decisions": selection_decisions,
+            "eligible_tools": eligible_tools,
             "selected_tool": selected_tool,
             "executions": executions,
             "execution": selected_execution,
@@ -2016,7 +1992,7 @@ class ClinicalToolAgent:
             "execution_status": "failed",
             "parameter_names": list(parameter_names),
             "available_inputs": [],
-            "missing_inputs": list(parameter_names),
+            "missing_inputs": [],
             "defaults_used": {},
             "result": None,
             "rationale": "Candidate is missing a valid calculator PMID.",
@@ -2028,9 +2004,10 @@ class ClinicalToolAgent:
         if execution_tool is None or self.registry is None or not execution_tool.has_registration(pmid):
             decision.update(
                 patient_eligible="no",
-                missing_all_parameters="yes" if parameter_names else "no",
+                missing_all_parameters="no",
                 gate_status="failed_unregistered",
                 execution_status="unregistered",
+                missing_inputs=[],
                 rationale="Calculator is not registered for structured execution.",
             )
             return decision, None
@@ -2050,15 +2027,6 @@ class ClinicalToolAgent:
         ]
         decision["available_inputs"] = available_inputs
         decision["missing_inputs"] = list(missing_before_defaults)
-        if not extracted_inputs:
-            decision.update(
-                patient_eligible="no",
-                missing_all_parameters="yes" if parameter_names else "no",
-                gate_status="failed_missing_inputs",
-                execution_status="missing_inputs",
-                rationale="No calculator parameters could be extracted from the case text.",
-            )
-            return decision, None
 
         execution = execution_tool.execute_registered(
             calculator=pmid,
@@ -2083,28 +2051,45 @@ class ClinicalToolAgent:
         decision["result"] = execution.get("result")
         decision["execution_status"] = execution_status
         if execution_status == "completed":
+            source_missing_inputs = [name for name in missing_before_defaults if str(name).strip()]
+            normalized_status = "partial" if source_missing_inputs else "completed"
             final_text = self._summarize_registered_execution(job, registration, execution)
             normalized_execution = {
                 "pmid": pmid,
                 "title": registration.title,
-                "status": "completed",
+                "status": normalized_status,
                 "rounds": 1,
                 "execution_mode": "registered",
                 "function_name": registration.function_name,
                 "inputs": execution.get("inputs") or {},
                 "defaults_used": defaults_used,
                 "result": execution.get("result"),
+                "missing_inputs": list(source_missing_inputs),
                 "final_text": final_text,
                 "interpretation": registration.interpretation,
                 "messages": [],
             }
-            decision.update(
-                patient_eligible="yes",
-                missing_all_parameters="no",
-                gate_status="passed",
-                missing_inputs=[],
-                rationale="Calculator produced a concrete score from extracted inputs.",
-            )
+            if source_missing_inputs:
+                decision.update(
+                    patient_eligible="yes",
+                    missing_all_parameters="no",
+                    gate_status="passed_partial",
+                    execution_status="partial",
+                    missing_inputs=list(source_missing_inputs),
+                    rationale=(
+                        "Calculator produced a provisional score, but required parameters were still "
+                        "missing from the case and had to be filled by defaults."
+                    ),
+                )
+            else:
+                decision.update(
+                    patient_eligible="yes",
+                    missing_all_parameters="no",
+                    gate_status="passed",
+                    execution_status="completed",
+                    missing_inputs=[],
+                    rationale="Calculator produced a concrete score from extracted inputs.",
+                )
             return decision, normalized_execution
 
         if execution_status == "missing_inputs":
@@ -2231,8 +2216,11 @@ class ClinicalToolAgent:
             registration,
             selected_candidate=selected_candidate,
         )
-        if not extracted_inputs:
-            return None
+        if extracted_inputs is None:
+            extracted_inputs = {}
+        missing_before_defaults = [
+            name for name in registration.parameter_names if name not in extracted_inputs
+        ]
 
         execution = execution_tool.execute_registered(
             calculator=pmid,
@@ -2251,20 +2239,107 @@ class ClinicalToolAgent:
             return None
 
         final_text = self._summarize_registered_execution(job, registration, execution)
+        normalized_status = "partial" if missing_before_defaults else "completed"
         return {
             "pmid": pmid,
             "title": registration.title,
-            "status": "completed",
+            "status": normalized_status,
             "rounds": 1,
             "execution_mode": "registered",
             "function_name": registration.function_name,
             "inputs": execution.get("inputs") or {},
             "defaults_used": execution.get("defaults_used") or {},
             "result": execution.get("result"),
+            "missing_inputs": list(missing_before_defaults),
             "final_text": final_text,
             "interpretation": registration.interpretation,
             "messages": [],
         }
+
+    def _execute_selected_candidate(
+        self,
+        job: ClinicalToolJob,
+        *,
+        selected_tool: dict[str, Any],
+        selected_candidate: dict[str, Any] | None = None,
+        dispatch: str,
+        source: str,
+    ) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any], list[dict[str, Any]]]:
+        normalized_selected_tool = dict(selected_tool or {})
+        selection_decisions: list[dict[str, Any]] = []
+        eligible_tools: list[dict[str, Any]] = []
+        executions: list[dict[str, Any]] = []
+        selected_pmid = str(normalized_selected_tool.get("pmid") or "").strip()
+        if not selected_pmid:
+            skipped_execution = {
+                "status": "skipped",
+                "final_text": "No calculator PMID was selected.",
+                "missing_inputs": [],
+            }
+            return normalized_selected_tool, selection_decisions, eligible_tools, skipped_execution, executions
+
+        gate_candidate = dict(selected_candidate or {})
+        if not gate_candidate:
+            gate_candidate = {
+                "pmid": selected_pmid,
+                "title": normalized_selected_tool.get("title"),
+            }
+        decision, gated_execution = self._assess_candidate_execution_gate(job, gate_candidate)
+        if decision:
+            decision = dict(decision)
+            selection_decisions.append(decision)
+            if _decision_passes_gate(decision):
+                eligible_tools.append(
+                    {
+                        "pmid": selected_pmid,
+                        "title": str(normalized_selected_tool.get("title") or decision.get("title") or "").strip(),
+                    }
+                )
+            decision_missing_inputs = _decision_missing_inputs(decision)
+            if decision_missing_inputs:
+                normalized_selected_tool["missing_inputs"] = list(decision_missing_inputs)
+            gate_status = str(decision.get("gate_status") or "").strip()
+            if gate_status:
+                normalized_selected_tool["gate_status"] = gate_status
+            decision_status = str(decision.get("execution_status") or "").strip()
+            if decision_status:
+                normalized_selected_tool["execution_status"] = decision_status
+
+        if gated_execution is not None:
+            execution = dict(gated_execution)
+        else:
+            execution = dict(
+                self._execute_calculator(
+                    job,
+                    selected_pmid,
+                    selected_candidate=selected_candidate,
+                )
+            )
+            decision_status = str((decision or {}).get("execution_status") or "").strip().lower()
+            gate_status = str((decision or {}).get("gate_status") or "").strip().lower()
+            decision_missing_inputs = _decision_missing_inputs(decision)
+            if (
+                str(execution.get("status") or "").strip().lower() == "completed"
+                and decision_missing_inputs
+                and (decision_status in {"missing_inputs", "partial"} or gate_status in {"failed_missing_inputs", "passed_partial"})
+            ):
+                execution["status"] = "partial"
+                execution["missing_inputs"] = list(decision_missing_inputs)
+
+        self._record_tool_call(
+            "python_calculator_executor",
+            status=str(execution.get("status") or "unknown"),
+            input_payload={
+                "mode": job.mode,
+                "pmid": selected_pmid,
+                "title": normalized_selected_tool.get("title"),
+                "clinical_text": summarize_text(job.text),
+            },
+            output_payload=execution,
+            metadata={"dispatch": dispatch, "source": source},
+        )
+        executions.append(dict(execution))
+        return normalized_selected_tool, selection_decisions, eligible_tools, execution, executions
 
     def _execute_calculator(
         self,

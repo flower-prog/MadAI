@@ -834,6 +834,127 @@ class ClinicalToolAgentParameterRetrievalTests(unittest.TestCase):
         self.assertEqual(decision["missing_inputs"], ["diabetes", "stroke_history"])
         self.assertIsNone(execution)
 
+    def test_assess_candidate_execution_gate_marks_default_backfilled_execution_as_partial(self) -> None:
+        agent = self._build_agent()
+        registration = _build_registration()
+        registry = RiskCalcRegistry({registration.calc_id: registration})
+        execution_tool = _FakeExecutionTool(
+            registration,
+            extracted_inputs={"hypertension": True},
+            execution_result={
+                "status": "completed",
+                "inputs": {
+                    "hypertension": True,
+                    "diabetes": False,
+                    "stroke_history": False,
+                },
+                "defaults_used": {
+                    "diabetes": False,
+                    "stroke_history": False,
+                },
+                "result": 1,
+            },
+            summary_text="Partial CHADS2 lower-bound score is 1.",
+        )
+        agent.registry = registry
+        agent.execution_tool = execution_tool
+        agent.tools["riskcalc_executor"] = execution_tool
+
+        decision, execution = agent._assess_candidate_execution_gate(
+            ClinicalToolJob(mode="question", text="AF patient with hypertension only."),
+            {"pmid": "1", "title": registration.title},
+        )
+
+        self.assertEqual(decision["gate_status"], "passed_partial")
+        self.assertEqual(decision["execution_status"], "partial")
+        self.assertEqual(decision["missing_inputs"], ["diabetes", "stroke_history"])
+        self.assertIsNotNone(execution)
+        self.assertEqual(execution["status"], "partial")
+        self.assertEqual(execution["missing_inputs"], ["diabetes", "stroke_history"])
+
+    def test_assess_candidate_execution_gate_uses_healthy_defaults_even_when_no_inputs_extracted(self) -> None:
+        agent = self._build_agent()
+        registration = _build_registration()
+        registry = RiskCalcRegistry({registration.calc_id: registration})
+        execution_tool = _FakeExecutionTool(
+            registration,
+            extracted_inputs={},
+            execution_result={
+                "status": "completed",
+                "inputs": {
+                    "hypertension": False,
+                    "diabetes": False,
+                    "stroke_history": False,
+                },
+                "defaults_used": {
+                    "hypertension": False,
+                    "diabetes": False,
+                    "stroke_history": False,
+                },
+                "result": 0,
+            },
+            summary_text="Healthy-default CHADS2 lower-bound score is 0.",
+        )
+        agent.registry = registry
+        agent.execution_tool = execution_tool
+        agent.tools["riskcalc_executor"] = execution_tool
+
+        decision, execution = agent._assess_candidate_execution_gate(
+            ClinicalToolJob(mode="question", text="AF question with no structured calculator inputs."),
+            {"pmid": "1", "title": registration.title},
+        )
+
+        self.assertEqual(decision["gate_status"], "passed_partial")
+        self.assertEqual(decision["execution_status"], "partial")
+        self.assertEqual(decision["missing_inputs"], ["hypertension", "diabetes", "stroke_history"])
+        self.assertIsNotNone(execution)
+        self.assertEqual(execution["status"], "partial")
+        self.assertEqual(execution["missing_inputs"], ["hypertension", "diabetes", "stroke_history"])
+
+    def test_run_patient_note_marks_legacy_execution_partial_when_gate_reports_missing_inputs(self) -> None:
+        agent = self._build_agent()
+        job = ClinicalToolJob(
+            mode="patient_note",
+            text="Stroke rehabilitation note with missing age and NIHSS.",
+        )
+        agent.plan_selection = lambda _: {
+            "risk_hints": [],
+            "selection_candidates": [{"pmid": "1", "title": "CHADS2 Stroke Risk Calculator"}],
+            "selected_tool": {"pmid": "1", "title": "CHADS2 Stroke Risk Calculator"},
+            "retrieval_batches": [],
+            "retrieved_tools": [{"pmid": "1", "title": "CHADS2 Stroke Risk Calculator"}],
+            "candidate_ranking": [{"pmid": "1", "title": "CHADS2 Stroke Risk Calculator"}],
+            "recommended_pmids": ["1"],
+            "bm25_raw_top5": [],
+            "vector_raw_top5": [],
+            "selection_mode": "model_selected",
+        }
+        agent._assess_candidate_execution_gate = lambda *_args, **_kwargs: (
+            {
+                "pmid": "1",
+                "title": "CHADS2 Stroke Risk Calculator",
+                "gate_status": "failed_missing_inputs",
+                "execution_status": "missing_inputs",
+                "missing_inputs": ["age", "nihss_score"],
+                "rationale": "Required stroke severity fields are missing.",
+            },
+            None,
+        )
+        agent._execute_calculator = lambda *_args, **_kwargs: {
+            "pmid": "1",
+            "title": "CHADS2 Stroke Risk Calculator",
+            "status": "completed",
+            "execution_mode": "legacy_llm_loop",
+            "final_text": "Only a minimum-risk interpretation is available.",
+        }
+
+        result = agent._run_patient_note(job)
+
+        self.assertEqual(result["selection_decisions"][0]["missing_inputs"], ["age", "nihss_score"])
+        self.assertEqual(result["execution"]["status"], "partial")
+        self.assertEqual(result["execution"]["missing_inputs"], ["age", "nihss_score"])
+        self.assertEqual(result["selected_tool"]["missing_inputs"], ["age", "nihss_score"])
+
     def test_run_question_executes_only_selected_candidate_after_selection(self) -> None:
         agent = self._build_agent()
         job = ClinicalToolJob(
@@ -874,8 +995,17 @@ class ClinicalToolAgentParameterRetrievalTests(unittest.TestCase):
             "bm25_raw_top5": [],
             "vector_raw_top5": [],
         }
-        agent._assess_candidate_execution_gate = lambda *_args, **_kwargs: (_ for _ in ()).throw(
-            AssertionError("selection should not pre-run candidate execution gates")
+        gated_pmids: list[str] = []
+        agent._assess_candidate_execution_gate = lambda _job, candidate: (
+            gated_pmids.append(str(candidate.get("pmid") or "")) or {
+                "pmid": str(candidate.get("pmid") or ""),
+                "title": str(candidate.get("title") or ""),
+                "gate_status": "passed",
+                "execution_status": "completed",
+                "missing_inputs": [],
+                "rationale": "Gate passed for the selected calculator.",
+            },
+            None,
         )
         agent._select_tool_for_question = lambda current_job, retrieved, **kwargs: {
             "pmid": "1",
@@ -896,13 +1026,14 @@ class ClinicalToolAgentParameterRetrievalTests(unittest.TestCase):
 
         result = agent._run_question(job)
 
+        self.assertEqual(gated_pmids, ["1"])
         self.assertEqual(executed_pmids, ["1"])
         self.assertEqual(result["selected_tool"]["pmid"], "1")
         self.assertEqual(result["execution"]["pmid"], "1")
         self.assertEqual(result["execution"]["result"], 3)
         self.assertEqual([item["pmid"] for item in result["executions"]], ["1"])
-        self.assertEqual(result["selection_decisions"], [])
-        self.assertEqual(result["eligible_tools"], [])
+        self.assertEqual(result["selection_decisions"][0]["pmid"], "1")
+        self.assertEqual(result["eligible_tools"], [{"pmid": "1", "title": "CHADS2 Stroke Risk Calculator"}])
 
     def test_run_question_uses_parent_selected_tool_without_retrieval_or_reselection(self) -> None:
         agent = self._build_agent()
@@ -1004,8 +1135,17 @@ class ClinicalToolAgentParameterRetrievalTests(unittest.TestCase):
             "bm25_raw_top5": [],
             "vector_raw_top5": [],
         }
-        agent._assess_candidate_execution_gate = lambda *_args, **_kwargs: (_ for _ in ()).throw(
-            AssertionError("selection should not pre-run candidate execution gates")
+        gated_pmids: list[str] = []
+        agent._assess_candidate_execution_gate = lambda _job, candidate: (
+            gated_pmids.append(str(candidate.get("pmid") or "")) or {
+                "pmid": str(candidate.get("pmid") or ""),
+                "title": str(candidate.get("title") or ""),
+                "gate_status": "passed",
+                "execution_status": "completed",
+                "missing_inputs": [],
+                "rationale": "Gate passed for the selected calculator.",
+            },
+            None,
         )
         agent._select_tool_for_question = lambda current_job, retrieved, **kwargs: {
             "pmid": "",
@@ -1069,8 +1209,17 @@ class ClinicalToolAgentParameterRetrievalTests(unittest.TestCase):
             "bm25_raw_top5": [],
             "vector_raw_top5": [],
         }
-        agent._assess_candidate_execution_gate = lambda *_args, **_kwargs: (_ for _ in ()).throw(
-            AssertionError("selection should not pre-run candidate execution gates")
+        gated_pmids: list[str] = []
+        agent._assess_candidate_execution_gate = lambda _job, candidate: (
+            gated_pmids.append(str(candidate.get("pmid") or "")) or {
+                "pmid": str(candidate.get("pmid") or ""),
+                "title": str(candidate.get("title") or ""),
+                "gate_status": "passed",
+                "execution_status": "completed",
+                "missing_inputs": [],
+                "rationale": "Gate passed for the selected calculator.",
+            },
+            None,
         )
         agent._select_tool_for_question = lambda current_job, retrieved, **kwargs: {
             "pmid": "1",
@@ -1091,6 +1240,7 @@ class ClinicalToolAgentParameterRetrievalTests(unittest.TestCase):
 
         result = agent._run_patient_note(job)
 
+        self.assertEqual(gated_pmids, ["1"])
         self.assertEqual(executed_pmids, ["1"])
         self.assertEqual(result["selected_tool"]["pmid"], "1")
         self.assertEqual([item["pmid"] for item in result["executions"]], ["1"])

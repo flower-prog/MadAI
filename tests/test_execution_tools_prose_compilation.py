@@ -112,6 +112,45 @@ class ExecutionToolsProseCompilationTests(unittest.TestCase):
         self.assertEqual(execution["inputs"]["sex"], "male")
         self.assertEqual(execution["inputs"]["hypertension"], False)
 
+    def test_executor_backfills_missing_inputs_with_generic_healthy_defaults(self) -> None:
+        catalog = _FakeCatalog(
+            [
+                _FakeDocument(
+                    pmid="covid-12",
+                    title="Twelve Factor Deterioration Score",
+                    computation=_PROSE_ONLY_COMPUTATION,
+                )
+            ]
+        )
+        registry = RiskCalcRegistry.from_catalog_with_defaults(catalog)
+        executor = RiskCalcExecutor(registry)
+
+        execution = executor.run("covid-12", {})
+
+        self.assertEqual(execution["status"], "completed")
+        self.assertIsInstance(execution["result"], (int, float))
+        self.assertEqual(execution["inputs"]["age"], 0)
+        self.assertEqual(execution["inputs"]["sex"], "")
+        self.assertEqual(execution["inputs"]["diabetes"], False)
+        self.assertEqual(execution["inputs"]["hypertension"], False)
+        self.assertEqual(
+            set(execution["defaults_used"].keys()),
+            {
+                "age",
+                "sex",
+                "non_white_ethnicity",
+                "oxygen_saturation",
+                "radiological_severity_score",
+                "neutrophil_count",
+                "crp",
+                "albumin",
+                "creatinine",
+                "diabetes",
+                "hypertension",
+                "chronic_lung_disease",
+            },
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

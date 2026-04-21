@@ -18,7 +18,7 @@ RetrieverBackend = Literal["keyword", "vector", "hybrid"]
 ProtocolStatus = Literal["matched", "needs_revision", "insufficient_data"]
 SafetySeverity = Literal["info", "warning", "critical"]
 CalculationDecision = Literal["direct", "estimate_from_similar_case", "skip"]
-CalculationResultStatus = Literal["completed", "estimated", "skipped", "failed"]
+CalculationResultStatus = Literal["completed", "partial", "estimated", "skipped", "failed"]
 TreatmentRecommendationStatus = Literal[
     "matched",
     "fallback",

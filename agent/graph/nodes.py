@@ -928,7 +928,33 @@ def _summarize_calculator_matches(result: dict[str, Any], default_category: str)
     if mode == "question":
         selected_tool = dict(result.get("selected_tool") or {})
         execution = dict(result.get("execution") or {})
+        selected_decision = next(
+            (
+                dict(item)
+                for item in list(result.get("selection_decisions") or [])
+                if str(dict(item).get("pmid") or "").strip() == str(selected_tool.get("pmid") or "").strip()
+            ),
+            {},
+        )
+        missing_inputs = [
+            str(item)
+            for item in list(
+                selected_decision.get("missing_inputs")
+                or selected_tool.get("missing_inputs")
+                or execution.get("missing_inputs")
+                or []
+            )
+            if str(item).strip()
+        ]
+        execution_status = str(
+            execution.get("status")
+            or selected_decision.get("execution_status")
+            or ""
+        ).strip().lower()
+        if execution_status == "completed" and missing_inputs:
+            execution_status = "partial"
         if str(selected_tool.get("pmid") or "").strip():
+            applicability = "partial" if execution_status == "partial" else "selected"
             matches.append(
                 CalculatorMatch(
                     pmid=str(selected_tool.get("pmid") or ""),
@@ -939,13 +965,9 @@ def _summarize_calculator_matches(result: dict[str, Any], default_category: str)
                         or execution.get("final_text")
                         or "Selected calculator for the clinical question."
                     ),
-                    applicability="selected",
-                    missing_inputs=[
-                        str(item)
-                        for item in list(selected_tool.get("missing_inputs") or [])
-                        if str(item).strip()
-                    ],
-                    execution_status=str(execution.get("status") or ""),
+                    applicability=applicability,
+                    missing_inputs=missing_inputs,
+                    execution_status=execution_status,
                     value=execution.get("result"),
                 )
             )
@@ -988,9 +1010,18 @@ def _summarize_calculator_matches(result: dict[str, Any], default_category: str)
             )
             if str(item).strip()
         ]
+        if execution_status == "completed" and missing_inputs:
+            execution_status = "partial"
         value = execution.get("result")
 
-        if execution:
+        if execution and execution_status == "partial":
+            applicability = "partial"
+            rationale = str(
+                execution.get("final_text")
+                or decision.get("rationale")
+                or "Calculator produced only a provisional result because required parameters are still missing."
+            )
+        elif execution:
             applicability = "selected" if pmid == selected_pmid else "computed"
             rationale = str(
                 execution.get("final_text")
@@ -1073,19 +1104,28 @@ def _build_calculation_tasks_from_matches(
         return [task], [result]
 
     for index, match in enumerate(matches, start=1):
-        if str(match.execution_status or "").strip().lower() == "completed":
+        normalized_execution_status = str(match.execution_status or "").strip().lower()
+        if normalized_execution_status == "completed":
             decision = "direct"
             status = "completed"
             rationale = "Calculator completed successfully with the child calculation agent."
             source = "calculation_subagent"
-        elif str(match.execution_status or "").strip().lower() == "missing_inputs" or match.applicability == "data_missing":
+        elif normalized_execution_status == "partial" or match.applicability == "partial":
+            decision = "direct"
+            status = "partial"
+            rationale = (
+                "Calculator produced only a provisional result because one or more required parameters "
+                "were missing from the case."
+            )
+            source = "calculation_subagent"
+        elif normalized_execution_status == "missing_inputs" or match.applicability == "data_missing":
             decision = "skip"
             status = "skipped"
             rationale = (
                 "This calculator is not executable because the current case is missing required parameters."
             )
             source = "calculation_coordinator"
-        elif match.applicability == "execution_failed" or str(match.execution_status or "").strip().lower() in {"failed", "error"}:
+        elif match.applicability == "execution_failed" or normalized_execution_status in {"failed", "error"}:
             decision = "skip"
             status = "failed"
             rationale = match.rationale or "Calculator execution failed before a usable score was produced."
@@ -1270,6 +1310,237 @@ def _trial_review_actions(trial_bundle: dict[str, Any], *, limit: int = 3) -> li
     return actions
 
 
+def _normalize_trial_text_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        raw_items = [value]
+    else:
+        try:
+            raw_items = list(value)
+        except TypeError:
+            raw_items = [value]
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for item in raw_items:
+        normalized = " ".join(str(item or "").split()).strip()
+        if not normalized:
+            continue
+        key = normalized.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(normalized)
+    return deduped
+
+
+def _trial_candidate_text(candidate: dict[str, Any]) -> str:
+    text_parts = [
+        str(candidate.get("title") or ""),
+        str(candidate.get("brief_summary") or ""),
+        str(candidate.get("best_evidence_text") or ""),
+        " ; ".join(_normalize_trial_text_list(candidate.get("conditions"))),
+        " ; ".join(_normalize_trial_text_list(candidate.get("interventions"))),
+        str(candidate.get("primary_purpose") or ""),
+    ]
+    return " ".join(part for part in text_parts if str(part).strip())
+
+
+def _candidate_matches_term(candidate: dict[str, Any], term: str) -> bool:
+    normalized_term = str(term or "").strip().casefold()
+    if not normalized_term:
+        return False
+    candidate_text = _trial_candidate_text(candidate).casefold()
+    return normalized_term in candidate_text
+
+
+def _coerce_optional_float(value: Any) -> float | None:
+    if value in {None, ""}:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _select_protocol_trial_candidate(trial_bundle: dict[str, Any]) -> dict[str, Any]:
+    candidates = [
+        dict(item)
+        for item in list(trial_bundle.get("candidate_ranking") or [])
+        if isinstance(item, dict)
+    ]
+    if not candidates:
+        return {}
+    for candidate in candidates:
+        if str(candidate.get("status") or "").strip() != "abandoned":
+            return candidate
+    return candidates[0]
+
+
+def _assess_protocol_trial_candidate(
+    candidate: dict[str, Any],
+    *,
+    query_profile: dict[str, Any],
+) -> dict[str, Any]:
+    matching_signals: list[str] = []
+    conflicts: list[str] = []
+    missing_information: list[str] = []
+
+    for term in list(query_profile.get("trial_condition_terms") or []):
+        if _candidate_matches_term(candidate, term):
+            matching_signals.append(f"Matched condition focus: {term}.")
+    for term in list(query_profile.get("trial_intervention_terms") or []):
+        if _candidate_matches_term(candidate, term):
+            matching_signals.append(f"Matched intervention focus: {term}.")
+    for term in list(query_profile.get("trial_intent_terms") or []):
+        if _candidate_matches_term(candidate, term):
+            matching_signals.append(f"Matched trial intent: {term}.")
+        elif term.casefold() == "stroke prevention" and str(candidate.get("primary_purpose") or "").casefold() == "prevention":
+            matching_signals.append("Primary purpose aligns with stroke prevention intent.")
+
+    for term in list(query_profile.get("patient_negative_terms") or []):
+        if term in {"diabetes", "congestive heart failure"} and _candidate_matches_term(candidate, term):
+            conflicts.append(
+                f"Trial focus appears to include {term}, which the case explicitly says is absent."
+            )
+
+    age_years = _coerce_optional_float(query_profile.get("age_years"))
+    age_floor = _coerce_optional_float(candidate.get("age_floor_years"))
+    age_ceiling = _coerce_optional_float(candidate.get("age_ceiling_years"))
+    if age_years is not None:
+        if age_floor is not None and age_years < age_floor:
+            conflicts.append(f"Case age {int(age_years)} is below the recorded minimum age {int(age_floor)}.")
+        elif age_floor is None:
+            missing_information.append("Minimum age is not structured on the trial record.")
+        if age_ceiling is not None and age_years > age_ceiling:
+            conflicts.append(f"Case age {int(age_years)} is above the recorded maximum age {int(age_ceiling)}.")
+        elif age_ceiling is None:
+            missing_information.append("Maximum age is not structured on the trial record.")
+
+    patient_gender = str(query_profile.get("gender") or "").strip()
+    trial_gender = str(candidate.get("gender") or "").strip()
+    if patient_gender:
+        if trial_gender and trial_gender not in {"All", patient_gender}:
+            conflicts.append(f"Trial gender restriction is {trial_gender}, while the case is {patient_gender}.")
+        elif not trial_gender:
+            missing_information.append("Trial gender eligibility is not structured on the record.")
+
+    if not str(candidate.get("best_evidence_text") or "").strip():
+        missing_information.append("No matched eligibility/evidence chunk was surfaced for manual review.")
+
+    next_checks = _normalize_trial_text_list(candidate.get("actions"))
+    if not next_checks:
+        next_checks = ["Review the trial inclusion and exclusion criteria against the case manually."]
+    if conflicts:
+        next_checks.append("Verify whether the apparent mismatch is a true exclusion or just noisy retrieval overlap.")
+
+    fit = "possible_match"
+    if str(candidate.get("status") or "").strip() == "abandoned":
+        fit = "not_current_option"
+    elif conflicts:
+        fit = "needs_manual_review"
+    elif matching_signals:
+        fit = "likely_match"
+
+    return {
+        "fit": fit,
+        "matching_signals": _normalize_trial_text_list(matching_signals),
+        "conflicts": _normalize_trial_text_list(conflicts),
+        "missing_information": _normalize_trial_text_list(missing_information),
+        "next_checks": _normalize_trial_text_list(next_checks),
+    }
+
+
+def _build_protocol_trial_selection(
+    trial_bundle: dict[str, Any],
+    *,
+    structured_case: dict[str, Any],
+) -> dict[str, Any]:
+    del structured_case
+    selected_trial = _select_protocol_trial_candidate(trial_bundle)
+    if not selected_trial:
+        return {
+            "selected_trial": None,
+            "selection_reason": "No trial candidate survived retrieval for the current case.",
+            "eligibility_assessment": {
+                "fit": "not_available",
+                "matching_signals": [],
+                "conflicts": [],
+                "missing_information": ["No ranked trial candidates were returned."],
+                "next_checks": ["Adjust the protocol query profile or broaden the trial corpus before retrying."],
+            },
+            "trial_status_assessment": {},
+            "evidence": [],
+            "alternatives": [],
+        }
+
+    query_profile = dict(trial_bundle.get("query_profile") or {})
+    eligibility_assessment = _assess_protocol_trial_candidate(
+        selected_trial,
+        query_profile=query_profile,
+    )
+    status_assessment = {
+        "status": str(selected_trial.get("status") or ""),
+        "overall_status": str(selected_trial.get("overall_status") or ""),
+        "enrollment_open": bool(selected_trial.get("enrollment_open")),
+        "status_reason": str(selected_trial.get("status_reason") or ""),
+    }
+
+    evidence: list[str] = []
+    for item in list(eligibility_assessment.get("matching_signals") or []):
+        if item not in evidence:
+            evidence.append(str(item))
+    best_evidence_text = str(selected_trial.get("best_evidence_text") or "").strip()
+    if best_evidence_text:
+        evidence.append(best_evidence_text[:240])
+    brief_summary = str(selected_trial.get("brief_summary") or "").strip()
+    if brief_summary:
+        evidence.append(brief_summary[:240])
+
+    focus_terms = _normalize_trial_text_list(
+        list(query_profile.get("trial_condition_terms") or [])
+        + list(query_profile.get("trial_intent_terms") or [])
+    )
+    selection_reason = (
+        f"Selected {selected_trial.get('title') or selected_trial.get('nct_id') or 'the top-ranked trial'} "
+        f"because it remained the highest-ranked non-abandoned candidate and matched the protocol focus terms "
+        f"{', '.join(focus_terms[:3]) or 'from the structured case'}."
+    )
+    if status_assessment["overall_status"]:
+        selection_reason += f" Current study status: {status_assessment['overall_status']}."
+
+    alternatives: list[dict[str, Any]] = []
+    for candidate in list(trial_bundle.get("candidate_ranking") or []):
+        if not isinstance(candidate, dict):
+            continue
+        if str(candidate.get("nct_id") or "").strip() == str(selected_trial.get("nct_id") or "").strip():
+            continue
+        alternatives.append(
+            {
+                "nct_id": str(candidate.get("nct_id") or ""),
+                "title": str(candidate.get("title") or ""),
+                "status": str(candidate.get("status") or ""),
+                "overall_status": str(candidate.get("overall_status") or ""),
+                "why_not_selected": (
+                    "Lower final ranking or weaker fit than the selected trial."
+                    if str(candidate.get("status") or "").strip() != "abandoned"
+                    else "Not selected because the trial is not a current option."
+                ),
+            }
+        )
+        if len(alternatives) >= 3:
+            break
+
+    return {
+        "selected_trial": dict(selected_trial),
+        "selection_reason": selection_reason,
+        "eligibility_assessment": eligibility_assessment,
+        "trial_status_assessment": status_assessment,
+        "evidence": evidence[:5],
+        "alternatives": alternatives,
+    }
+
+
 def _augment_treatment_recommendations_with_trials(
     recommendations: list[TreatmentRecommendation],
     trial_bundle: dict[str, Any],
@@ -1318,6 +1589,7 @@ def _build_treatment_recommendations(
 ) -> list[TreatmentRecommendation]:
     """把计算结果翻译成治疗层面的建议列表。"""
     completed_results = [item for item in state.calculation_results if item.status == "completed"]
+    partial_results = [item for item in state.calculation_results if item.status == "partial"]
     estimated_results = [item for item in state.calculation_results if item.status == "estimated"]
     effective_trial_bundle = dict(trial_bundle or {})
 
@@ -1345,6 +1617,32 @@ def _build_treatment_recommendations(
             recommendations,
             effective_trial_bundle,
             has_completed_results=True,
+        )
+
+    if partial_results:
+        recommendations = [
+            TreatmentRecommendation(
+                name="partial calculator result requires parameter completion",
+                strategy="similar_case_fallback",
+                source="partial_parameter_gap",
+                status="similar_case_fallback",
+                rationale=(
+                    "A calculator produced only a provisional result because key parameters are still missing, "
+                    "so treatment and trial routing should remain provisional until those inputs are completed."
+                ),
+                linked_calculators=[
+                    artifact.linked_calculator for artifact in partial_results if artifact.linked_calculator
+                ],
+                actions=[
+                    "Collect the listed missing calculator inputs before treating the score as final.",
+                    "Use the current calculator text only as a provisional lower-bound or partial interpretation.",
+                ],
+            )
+        ]
+        return _augment_treatment_recommendations_with_trials(
+            recommendations,
+            effective_trial_bundle,
+            has_completed_results=False,
         )
 
     if estimated_results:
@@ -1829,6 +2127,10 @@ def protocol_node(state: GraphState) -> GraphState:
     _mark_step(state, "protocol", status="in_progress")
 
     trial_retrieval_bundle = _retrieve_trial_candidates(state)
+    trial_selection = _build_protocol_trial_selection(
+        trial_retrieval_bundle,
+        structured_case=dict(state.structured_case_json or {}),
+    )
     recommendations = _build_treatment_recommendations(
         state,
         trial_bundle=trial_retrieval_bundle,
@@ -1847,6 +2149,7 @@ def protocol_node(state: GraphState) -> GraphState:
             for item in trial_candidates
             if str(item.get("nct_id") or "").strip()
         ],
+        "trial_selection": trial_selection,
         "note": "This node now owns treatment and clinical-trial judgment in the core MedAI workflow.",
     }
 

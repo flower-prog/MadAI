@@ -833,6 +833,66 @@ AGENT_HEALTHY_DEFAULTS: dict[str, Any] = {
     "urea": 5.0,
 }
 
+_GENERIC_BOOLEAN_PARAMETER_TOKENS = {
+    "active",
+    "admin",
+    "admission",
+    "afib",
+    "anaemia",
+    "antibiotic",
+    "arrhythmia",
+    "catheter",
+    "chf",
+    "cirrhosis",
+    "confusion",
+    "cough",
+    "current",
+    "copd",
+    "diabetes",
+    "disease",
+    "disorder",
+    "fever",
+    "frailty",
+    "heart_failure",
+    "history",
+    "hypertension",
+    "icu",
+    "impaired",
+    "infection",
+    "insulin",
+    "ischemia",
+    "male",
+    "metastasis",
+    "oxygen",
+    "paralysis",
+    "pneumonia",
+    "positive",
+    "pregnant",
+    "present",
+    "prior",
+    "renal",
+    "risk",
+    "sepsis",
+    "smoker",
+    "smoking",
+    "steroid",
+    "stroke",
+    "surgery",
+    "symptom",
+    "therapy",
+    "tube",
+    "urinary",
+    "ventilation",
+    "warfarin",
+}
+
+_STRINGISH_PARAMETER_NAMES = {
+    "ethnicity",
+    "gender",
+    "race",
+    "sex",
+}
+
 
 def discover_healthy_defaults_path(search_root: str | Path | None = None) -> Path | None:
     root = Path(search_root) if search_root else Path(__file__).resolve().parents[2]
@@ -876,6 +936,47 @@ def resolve_healthy_default(
     if normalized_name in AGENT_HEALTHY_DEFAULTS:
         return AGENT_HEALTHY_DEFAULTS[normalized_name]
     return AGENT_HEALTHY_DEFAULTS.get(normalized_name.lower())
+
+
+def _infer_generic_healthy_default(
+    parameter_name: str,
+    *,
+    calculator_code: str = "",
+) -> Any:
+    normalized_name = str(parameter_name or "").strip()
+    lowered_name = normalized_name.lower()
+    if not lowered_name:
+        return 0
+
+    name_parts = {
+        part
+        for part in re.split(r"[^a-z0-9]+", lowered_name)
+        if part
+    }
+    if lowered_name in _STRINGISH_PARAMETER_NAMES or name_parts & _STRINGISH_PARAMETER_NAMES:
+        return ""
+
+    # Some calculator functions operate on free-text categorical inputs via
+    # lower()/strip()/casefold(). For these parameters, an empty string is a
+    # safer "healthy/negative" default than numeric zero.
+    if normalized_name:
+        string_usage_patterns = [
+            rf"\b{re.escape(normalized_name)}\s*\.\s*(?:lower|upper|casefold|strip|startswith|endswith|split)\s*\(",
+            rf"['\"][^'\"]+['\"]\s*==\s*{re.escape(normalized_name)}\b",
+            rf"\b{re.escape(normalized_name)}\b\s*==\s*['\"][^'\"]+['\"]",
+            rf"\b{re.escape(normalized_name)}\b\s*!=\s*['\"][^'\"]+['\"]",
+        ]
+        for pattern in string_usage_patterns:
+            if re.search(pattern, calculator_code):
+                return ""
+
+    if name_parts & _GENERIC_BOOLEAN_PARAMETER_TOKENS:
+        return False
+    if lowered_name.startswith(("is_", "has_", "had_", "prior_", "previous_", "current_", "uses_")):
+        return False
+    if lowered_name.endswith(("_history", "_present", "_positive", "_negative", "_admin", "_catheter", "_paralysis")):
+        return False
+    return 0
 
 
 @dataclass(slots=True)
@@ -1039,7 +1140,10 @@ class RiskCalcExecutor:
                 continue
             default_value = resolve_healthy_default(name, calculator_defaults=registration.healthy_defaults)
             if default_value is None:
-                continue
+                default_value = _infer_generic_healthy_default(
+                    name,
+                    calculator_code=registration.code,
+                )
             resolved_inputs[name] = default_value
             defaults_used[name] = default_value
 
