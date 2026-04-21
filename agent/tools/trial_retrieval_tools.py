@@ -402,8 +402,9 @@ class TrialKeywordRetriever:
     def __init__(self, catalog: TrialCatalog) -> None:
         self.catalog = catalog
         self._search_rows: list[dict[str, Any]] = []
+        self._row_index_by_nct_id: dict[str, int] = {}
         bm25_documents: list[dict[str, str]] = []
-        for document in catalog.documents():
+        for row_index, document in enumerate(catalog.documents()):
             self._search_rows.append(
                 {
                     "document": document,
@@ -414,6 +415,7 @@ class TrialKeywordRetriever:
                     "summary": document.summary,
                 }
             )
+            self._row_index_by_nct_id[str(document.nct_id)] = row_index
             bm25_documents.append(
                 {
                     "title": document.title,
@@ -433,35 +435,39 @@ class TrialKeywordRetriever:
         candidate_ids: set[str] | list[str] | tuple[str, ...] | None = None,
         candidate_pmids: set[str] | list[str] | tuple[str, ...] | None = None,
     ) -> list[dict[str, Any]]:
+        raw_candidate_ids = candidate_ids if candidate_ids is not None else candidate_pmids
         normalized_candidate_ids = {
             str(item).strip()
-            for item in list(candidate_ids if candidate_ids is not None else candidate_pmids or [])
+            for item in list(raw_candidate_ids or [])
             if str(item).strip()
         }
-        filtered_rows = (
-            [
-                row
-                for row in self._search_rows
-                if str(row["document"].nct_id) in normalized_candidate_ids
-            ]
-            if normalized_candidate_ids
-            else list(self._search_rows)
-        )
         if not str(query or "").strip():
             return []
+        if raw_candidate_ids is not None and not normalized_candidate_ids:
+            return []
 
-        score_by_id = {
-            str(self._search_rows[index]["document"].nct_id): float(score)
-            for index, score in enumerate(self._bm25.score(query))
-            if index < len(self._search_rows)
-        }
+        candidate_row_indexes = None
+        if raw_candidate_ids is not None:
+            candidate_row_indexes = [
+                self._row_index_by_nct_id[nct_id]
+                for nct_id in sorted(normalized_candidate_ids)
+                if nct_id in self._row_index_by_nct_id
+            ]
+            if not candidate_row_indexes:
+                return []
+
+        score_by_index = self._bm25.score_subset(
+            query,
+            document_indexes=candidate_row_indexes,
+        )
 
         scored_rows: list[tuple[float, TrialDocument]] = []
-        for row in filtered_rows:
-            score = float(score_by_id.get(str(row["document"].nct_id)) or 0.0)
+        for row_index, score in score_by_index.items():
             if score <= 0.0:
                 continue
-            scored_rows.append((score, row["document"]))
+            if row_index >= len(self._search_rows):
+                continue
+            scored_rows.append((float(score), self._search_rows[row_index]["document"]))
 
         scored_rows.sort(key=lambda item: (-item[0], item[1].title.lower(), item[1].nct_id))
         return [self._serialize(document, score) for score, document in scored_rows[: max(int(top_k), 1)]]

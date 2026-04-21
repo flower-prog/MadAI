@@ -1,4 +1,5 @@
 from .runtime import (
+    default_trial_qdrant_server_url,
     default_trial_qdrant_storage_path,
     public_trial_qdrant_runtime_config,
     resolve_trial_qdrant_runtime_config,
@@ -24,6 +25,7 @@ __all__ = [
     "build_qdrant_trial_chunk_payload",
     "build_and_sync_trial_chunk_kb_to_qdrant",
     "create_qdrant_trial_chunk_retriever",
+    "default_trial_qdrant_server_url",
     "default_trial_qdrant_storage_path",
     "public_trial_qdrant_runtime_config",
     "resolve_trial_qdrant_runtime_config",

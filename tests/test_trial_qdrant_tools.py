@@ -20,6 +20,7 @@ from agent.retrieval import (
     QdrantTrialChunkVectorRetriever,
     build_qdrant_trial_chunk_payload,
 )
+from agent.retrieval.qdrant.trial_chunk import _qdrant_point_id
 from agent.tools.trial_vector_retrieval_tools import (
     TrialChunkCatalog,
     create_trial_chunk_retrieval_tool,
@@ -58,9 +59,32 @@ class _FakeModels:
         def __init__(self, *, has_id: list[str]) -> None:
             self.has_id = list(has_id)
 
+    class MatchAny:
+        def __init__(self, *, any: list[str] | None = None, values: list[str] | None = None) -> None:
+            self.any = list(any or values or [])
+
+    class Range:
+        def __init__(self, *, gte: float | None = None, lte: float | None = None) -> None:
+            self.gte = gte
+            self.lte = lte
+
+    class FieldCondition:
+        def __init__(self, *, key: str, match=None, range=None) -> None:
+            self.key = key
+            self.match = match
+            self.range = range
+
     class Filter:
-        def __init__(self, *, must: list[object] | None = None) -> None:
+        def __init__(
+            self,
+            *,
+            must: list[object] | None = None,
+            should: list[object] | None = None,
+            must_not: list[object] | None = None,
+        ) -> None:
             self.must = list(must or [])
+            self.should = list(should or [])
+            self.must_not = list(must_not or [])
 
 
 class _FakeEmbedder:
@@ -257,8 +281,8 @@ class TrialQdrantToolsTests(unittest.TestCase):
         self.assertEqual(
             [point.id for call in fake_client.upsert_calls for point in call["points"]],
             [
-                "NCTMEL001::overview::0",
-                "NCTMEL001::eligibility_inclusion::0",
+                _qdrant_point_id("NCTMEL001::overview::0"),
+                _qdrant_point_id("NCTMEL001::eligibility_inclusion::0"),
             ],
         )
 
@@ -302,7 +326,75 @@ class TrialQdrantToolsTests(unittest.TestCase):
         self.assertEqual(fake_embedder.query_calls, ["metastatic melanoma pembrolizumab"])
         query_filter = fake_client.search_calls[0]["query_filter"]
         self.assertIsInstance(query_filter, _FakeModels.Filter)
-        self.assertEqual(query_filter.must[0].has_id, ["NCTMEL001::overview::0"])
+        self.assertEqual(query_filter.must[0].has_id, [_qdrant_point_id("NCTMEL001::overview::0")])
+
+    def test_qdrant_retriever_merges_payload_filters_with_candidate_filter(self) -> None:
+        fake_client = _FakeQdrantClient(
+            hits=[
+                SimpleNamespace(
+                    id="NCTMEL001::overview::0",
+                    score=0.92,
+                    payload={
+                        "chunk_id": "NCTMEL001::overview::0",
+                        "nct_id": "NCTMEL001",
+                        "chunk_type": "overview",
+                        "title": "Pembrolizumab for Metastatic Melanoma [overview]",
+                        "summary": "metastatic melanoma trial overview",
+                        "purpose": "overview",
+                        "source_fields": ["conditions", "interventions"],
+                        "rank_weight": 1.0,
+                        "gender": "All",
+                        "age_floor_years": 18.0,
+                        "age_ceiling_years": 75.0,
+                    },
+                )
+            ]
+        )
+        retriever = QdrantTrialChunkVectorRetriever(
+            self.catalog,
+            collection_name="trial_chunks_test",
+            client=fake_client,
+            models=_FakeModels,
+            embedding_function=_FakeEmbedder(),
+        )
+
+        retriever.retrieve(
+            "metastatic melanoma pembrolizumab",
+            top_k=5,
+            candidate_ids={"NCTMEL001::overview::0"},
+            payload_filters={
+                "must": [{"field": "condition_terms", "values": ["Melanoma"]}],
+                "should": [{"field": "intervention_terms", "values": ["Pembrolizumab"]}],
+                "must_not": [{"field": "condition_terms", "values": ["Lung Cancer"]}],
+                "gender": "Male",
+                "age_years": 60,
+            },
+        )
+
+        query_filter = fake_client.search_calls[0]["query_filter"]
+        self.assertIsInstance(query_filter, _FakeModels.Filter)
+        self.assertEqual(query_filter.must[0].has_id, [_qdrant_point_id("NCTMEL001::overview::0")])
+        field_conditions = [item for item in query_filter.must[1:] if isinstance(item, _FakeModels.FieldCondition)]
+        self.assertTrue(any(item.key == "condition_terms" and item.match.any == ["Melanoma"] for item in field_conditions))
+        self.assertTrue(any(item.key == "gender" and item.match.any == ["All", "Male"] for item in field_conditions))
+        self.assertTrue(any(item.key == "age_floor_years" and item.range.lte == 60 for item in field_conditions))
+        self.assertTrue(any(item.key == "age_ceiling_years" and item.range.gte == 60 for item in field_conditions))
+        self.assertTrue(
+            any(
+                isinstance(item, _FakeModels.FieldCondition)
+                and item.key == "intervention_terms"
+                and item.match.any == ["Pembrolizumab"]
+                for item in query_filter.should
+            )
+        )
+        self.assertTrue(
+            any(
+                isinstance(item, _FakeModels.FieldCondition)
+                and item.key == "condition_terms"
+                and item.match.any == ["Lung Cancer"]
+                for item in query_filter.must_not
+            )
+        )
 
     def test_trial_chunk_factory_can_wire_qdrant_vector_store(self) -> None:
         sentinel_vector_retriever = object()

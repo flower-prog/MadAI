@@ -54,7 +54,7 @@ def sync_trial_chunk_kb_to_qdrant(
         api_key=api_key,
         path=path,
         collection_name=collection_name,
-        enable_default_path=True,
+        enable_default_url=True,
     )
     catalog = TrialChunkCatalog.from_output_root(resolved_output_dir)
     manager = QdrantTrialChunkIndexManager(
@@ -161,7 +161,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--qdrant-url",
         default="",
-        help="Remote Qdrant URL. Optional when using local on-disk Qdrant.",
+        help="Qdrant server URL. Defaults to http://127.0.0.1:6333 when omitted.",
     )
     parser.add_argument(
         "--qdrant-api-key",
@@ -171,7 +171,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--qdrant-path",
         default="",
-        help="Local Qdrant storage path. Defaults to /home/yuanzy/MadAI/outputs/qdrant_trial_chunks.",
+        help="Optional embedded Qdrant storage path. Leave empty to use Qdrant server mode.",
     )
     parser.add_argument(
         "--recreate",

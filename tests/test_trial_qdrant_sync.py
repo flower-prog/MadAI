@@ -16,7 +16,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 
-from agent.retrieval.qdrant import default_trial_qdrant_storage_path
+from agent.retrieval.qdrant import default_trial_qdrant_server_url
 from agent.retrieval.qdrant.trial_chunk_sync import (
     build_and_sync_trial_chunk_kb_to_qdrant,
     main,
@@ -128,11 +128,30 @@ class TrialQdrantSyncTests(unittest.TestCase):
         self.assertEqual(bundle["qdrant_sync"]["point_count"], 1)
         self.assertEqual(bundle["qdrant_sync"]["batch_size"], 11)
         self.assertEqual(
-            bundle["qdrant_config"]["path"],
-            str(default_trial_qdrant_storage_path().resolve()),
+            bundle["qdrant_config"]["url"],
+            default_trial_qdrant_server_url(),
         )
+        self.assertEqual(bundle["qdrant_config"]["path"], "")
         self.assertEqual(_FakeManager.last_init["catalog_size"], 1)
         self.assertEqual(_FakeManager.last_init["collection_name"], bundle["qdrant_sync"]["collection_name"])
+        self.assertEqual(_FakeManager.last_init["url"], default_trial_qdrant_server_url())
+        self.assertIsNone(_FakeManager.last_init["path"])
+
+    def test_sync_trial_chunk_kb_to_qdrant_accepts_explicit_embedded_path_override(self) -> None:
+        kb_root = self.temp_root / "kb-embedded"
+        local_path = self.temp_root / "qdrant-local"
+        _write_sample_trial_kb(kb_root)
+
+        with patch("agent.retrieval.qdrant.trial_chunk_sync.QdrantTrialChunkIndexManager", _FakeManager):
+            bundle = sync_trial_chunk_kb_to_qdrant(
+                output_dir=kb_root,
+                path=local_path,
+            )
+
+        self.assertEqual(bundle["qdrant_config"]["url"], "")
+        self.assertEqual(bundle["qdrant_config"]["path"], str(local_path.resolve()))
+        self.assertIsNone(_FakeManager.last_init["url"])
+        self.assertEqual(_FakeManager.last_init["path"], str(local_path.resolve()))
 
     def test_build_and_sync_trial_chunk_kb_to_qdrant_runs_build_first(self) -> None:
         build_root = self.temp_root / "built-kb"

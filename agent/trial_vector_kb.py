@@ -19,7 +19,7 @@ DEFAULT_INPUT_PATHS = (
     Path("/home/yuanzy/MadAI/数据/totrials/corpus_2021_2022"),
     Path("/home/yuanzy/MadAI/数据/totrials/corpus_2023"),
 )
-DEFAULT_OUTPUT_DIR = Path("/home/yuanzy/MadAI/outputs/trial_vector_kb")
+DEFAULT_OUTPUT_DIR = Path("/home/yuanzy/MadAI/outputs/trial_vector_kb_part1_caseprobe")
 _CORPUS_PRIORITY = {
     "totrials_2021_2022": 1,
     "totrials_2023": 2,

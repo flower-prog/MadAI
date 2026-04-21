@@ -22,6 +22,7 @@ def resolve_trial_vector_output_root(output_root: str | Path | None = None) -> P
 
     project_root = Path(__file__).resolve().parents[2]
     candidates = (
+        project_root / "outputs" / "trial_vector_kb_part1_caseprobe",
         project_root / "outputs" / "trial_vector_kb",
         project_root / "data" / "trial_vector_kb",
     )

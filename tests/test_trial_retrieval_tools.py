@@ -17,7 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from agent import workflow as workflow_module
 from agent.graph.nodes import protocol_node, reporter_node
 from agent.graph.types import CalculationArtifact, GraphState, TreatmentRecommendation
-from agent.tools.trial_retrieval_tools import create_trial_retrieval_tool
+from agent.tools.trial_retrieval_tools import TrialKeywordRetriever, create_trial_retrieval_tool
 
 
 def _trial_payload(
@@ -112,6 +112,30 @@ class _FakeTrialRetriever:
             }
         )
         return dict(self.bundle)
+
+
+class _SpySubsetBM25:
+    def __init__(self, score_by_index: dict[int, float] | None = None) -> None:
+        self.score_by_index = dict(score_by_index or {})
+        self.calls: list[dict[str, object]] = []
+
+    def score_subset(
+        self,
+        query: str,
+        *,
+        document_indexes: list[int] | None = None,
+    ) -> dict[int, float]:
+        self.calls.append(
+            {
+                "query": query,
+                "document_indexes": list(document_indexes) if document_indexes is not None else None,
+            }
+        )
+        target_indexes = list(document_indexes or [])
+        return {
+            index: float(self.score_by_index.get(index, 0.0))
+            for index in target_indexes
+        }
 
 
 class TrialRetrievalToolTests(unittest.TestCase):
@@ -249,6 +273,54 @@ class TrialRetrievalToolTests(unittest.TestCase):
 
         self.assertTrue(bundle["fallback_to_full_catalog"])
         self.assertEqual(bundle["candidate_ranking"][0]["nct_id"], "NCT2001")
+
+    def test_trial_keyword_retriever_scores_only_candidate_subset(self) -> None:
+        _write_department_payload(
+            self.temp_root,
+            "内科",
+            {
+                "NCT1001": _trial_payload(
+                    "NCT1001",
+                    "Trial 1001",
+                    department_tag="内科",
+                    conditions=["Disease A"],
+                    keywords=["disease a"],
+                ),
+                "NCT2001": _trial_payload(
+                    "NCT2001",
+                    "Trial 2001",
+                    department_tag="内科",
+                    conditions=["Disease B"],
+                    keywords=["disease b"],
+                ),
+            },
+        )
+
+        tool = create_trial_retrieval_tool(
+            department_root=self.temp_root,
+            preferred_department="内科",
+            backend="keyword",
+        )
+        retriever = TrialKeywordRetriever(tool.catalog)
+        spy_bm25 = _SpySubsetBM25({1: 4.2})
+        retriever._bm25 = spy_bm25
+
+        rows = retriever.retrieve(
+            "Disease B patient",
+            top_k=5,
+            candidate_ids=["NCT2001"],
+        )
+
+        self.assertEqual(rows[0]["nct_id"], "NCT2001")
+        self.assertEqual(spy_bm25.calls[0]["document_indexes"], [1])
+        self.assertEqual(
+            retriever.retrieve(
+                "Disease B patient",
+                top_k=5,
+                candidate_ids=[],
+            ),
+            [],
+        )
 
     def test_two_stage_retrieval_returns_bm25_top5_vector_top5_and_merged_union(self) -> None:
         _write_department_payload(
@@ -426,6 +498,9 @@ class TrialRetrievalToolTests(unittest.TestCase):
         self.assertEqual(result.trial_retrieval_bundle["coarse_candidate_ids"], ["NCT5001", "NCT5002"])
         self.assertEqual(result.treatment_bundle["trial_candidate_ids"], ["NCT5001", "NCT5002"])
         self.assertEqual(result.treatment_bundle["trial_candidates"][0]["nct_id"], "NCT5001")
+        self.assertEqual(result.treatment_bundle["trial_selection"]["selected_trial"]["nct_id"], "NCT5001")
+        self.assertEqual(result.treatment_bundle["trial_selection"]["trial_status_assessment"]["overall_status"], "")
+        self.assertTrue(result.treatment_bundle["trial_selection"]["selection_reason"])
         self.assertEqual(result.treatment_recommendations[0].linked_trials, ["NCT5001", "NCT5002"])
         self.assertEqual(result.protocol_recommendations[0].linked_trials, ["NCT5001", "NCT5002"])
         self.assertEqual(len(fake_retriever.calls), 1)
@@ -469,6 +544,11 @@ class TrialRetrievalToolTests(unittest.TestCase):
         self.assertEqual(result.treatment_recommendations[0].source, "trial_retrieval")
         self.assertEqual(result.treatment_recommendations[0].linked_trials, ["NCT6001"])
         self.assertEqual(result.treatment_bundle["trial_candidate_ids"], ["NCT6001"])
+        self.assertEqual(result.treatment_bundle["trial_selection"]["selected_trial"]["nct_id"], "NCT6001")
+        self.assertIn(
+            "Review eligibility.",
+            result.treatment_bundle["trial_selection"]["eligibility_assessment"]["next_checks"],
+        )
 
     def test_protocol_node_defaults_to_trial_chunk_retriever_for_xml_trial_kb(self) -> None:
         fake_retriever = _FakeTrialRetriever(

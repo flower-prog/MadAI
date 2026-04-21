@@ -15,6 +15,7 @@ from typing import Any
 from agent.corpus_paths import discover_complete_corpus_pair
 from agent.graph.types import RetrievalQuery
 from agent.retrieval import FieldedBM25Index, HybridRetriever, MedCPTRetriever, tokenize_bm25_text
+from agent.retrieval.vector import _retrieve_dense_scored_pmids
 
 from .execution_tools import (
     ChatClient,

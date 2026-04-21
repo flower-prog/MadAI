@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Iterable
 from typing import Any, Callable
 import math
 import re
@@ -49,12 +50,26 @@ class FieldedBM25Index:
         self._build()
 
     def score(self, query: str) -> list[float]:
+        score_by_index = self.score_subset(query)
+        scores = [0.0 for _ in self.documents]
+        for document_index, score in score_by_index.items():
+            if 0 <= document_index < len(scores):
+                scores[document_index] = float(score)
+        return scores
+
+    def score_subset(
+        self,
+        query: str,
+        *,
+        document_indexes: Iterable[int] | None = None,
+    ) -> dict[int, float]:
+        target_indexes = self._normalize_document_indexes(document_indexes)
         query_terms = self.tokenizer(query)
         if not query_terms:
-            return [0.0 for _ in self.documents]
+            return {index: 0.0 for index in target_indexes}
 
         query_term_counts = Counter(query_terms)
-        scores = [0.0 for _ in self.documents]
+        scores = {index: 0.0 for index in target_indexes}
         for field_name in self.field_names:
             field_weight = float(self.field_weights.get(field_name) or 0.0)
             if field_weight <= 0.0:
@@ -64,7 +79,10 @@ class FieldedBM25Index:
             avg_length = float(self._field_avg_length.get(field_name) or 0.0)
             idf_map = self._field_idf.get(field_name) or {}
 
-            for doc_index, term_frequency in enumerate(term_frequencies):
+            for doc_index in target_indexes:
+                if doc_index >= len(term_frequencies):
+                    continue
+                term_frequency = term_frequencies[doc_index]
                 if not term_frequency:
                     continue
                 document_length = int(field_lengths[doc_index]) if doc_index < len(field_lengths) else 0
@@ -80,8 +98,27 @@ class FieldedBM25Index:
                     if denominator <= 0.0:
                         continue
                     field_score += query_count * idf * ((tf * (self.k1 + 1.0)) / denominator)
-                scores[doc_index] += field_weight * field_score
+                scores[doc_index] = float(scores.get(doc_index) or 0.0) + (field_weight * field_score)
         return scores
+
+    def _normalize_document_indexes(self, document_indexes: Iterable[int] | None) -> list[int]:
+        if document_indexes is None:
+            return list(range(len(self.documents)))
+
+        normalized_indexes: list[int] = []
+        seen: set[int] = set()
+        for raw_index in list(document_indexes):
+            try:
+                document_index = int(raw_index)
+            except (TypeError, ValueError):
+                continue
+            if document_index < 0 or document_index >= len(self.documents):
+                continue
+            if document_index in seen:
+                continue
+            seen.add(document_index)
+            normalized_indexes.append(document_index)
+        return normalized_indexes
 
     def _build(self) -> None:
         document_count = len(self.documents)

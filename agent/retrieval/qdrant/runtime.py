@@ -7,8 +7,15 @@ from typing import Any
 from .trial_chunk import DEFAULT_QDRANT_COLLECTION_NAME
 
 
+DEFAULT_TRIAL_QDRANT_SERVER_URL = "http://127.0.0.1:6333"
+
+
 def _normalize_whitespace(value: Any) -> str:
     return " ".join(str(value or "").split()).strip()
+
+
+def default_trial_qdrant_server_url() -> str:
+    return DEFAULT_TRIAL_QDRANT_SERVER_URL
 
 
 def default_trial_qdrant_storage_path() -> Path:
@@ -22,10 +29,11 @@ def resolve_trial_qdrant_runtime_config(
     api_key: str | None = None,
     path: str | Path | None = None,
     collection_name: str | None = None,
+    enable_default_url: bool = True,
     enable_default_path: bool = False,
 ) -> dict[str, Any]:
     default_qdrant_path = default_trial_qdrant_storage_path()
-    resolved_url = _normalize_whitespace(url or os.getenv("MEDAI_TRIAL_QDRANT_URL")) or None
+    requested_url = _normalize_whitespace(url or os.getenv("MEDAI_TRIAL_QDRANT_URL")) or None
     resolved_api_key = _normalize_whitespace(api_key or os.getenv("MEDAI_TRIAL_QDRANT_API_KEY")) or None
     requested_path = _normalize_whitespace(path or os.getenv("MEDAI_TRIAL_QDRANT_PATH"))
     resolved_collection_name = (
@@ -33,10 +41,14 @@ def resolve_trial_qdrant_runtime_config(
         or DEFAULT_QDRANT_COLLECTION_NAME
     )
 
+    resolved_url = requested_url
+    if resolved_url is None and not requested_path and enable_default_url:
+        resolved_url = default_trial_qdrant_server_url()
+
     resolved_path: str | None = None
     if requested_path:
         resolved_path = str(Path(requested_path).expanduser().resolve())
-    elif enable_default_path or default_qdrant_path.exists():
+    elif enable_default_path and not resolved_url:
         resolved_path = str(default_qdrant_path.resolve())
 
     return {
@@ -59,6 +71,8 @@ def public_trial_qdrant_runtime_config(config: dict[str, Any]) -> dict[str, Any]
 
 
 __all__ = [
+    "DEFAULT_TRIAL_QDRANT_SERVER_URL",
+    "default_trial_qdrant_server_url",
     "default_trial_qdrant_storage_path",
     "public_trial_qdrant_runtime_config",
     "resolve_trial_qdrant_runtime_config",

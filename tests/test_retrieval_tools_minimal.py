@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 import agent.tools as tools
+import agent.tools.retrieval_tools as retrieval_tools
 from agent.graph.types import ClinicalToolJob
 from agent.tools import collect_tools, create_computation_retrieval_tool, create_retrieval_tool
 from agent.tools.retrieval_tools import RiskCalcParameterRetrievalTool
@@ -919,6 +920,23 @@ class RetrievalToolsMinimalTests(unittest.TestCase):
 
     def test_medcpt_retriever_scores_candidate_subset_instead_of_filtering_global_top_k(self) -> None:
         retriever = tools.MedCPTRetriever.__new__(tools.MedCPTRetriever)
+        retriever.catalog = _ManyFakeCatalog(count=5)
+        retriever._torch = _FakeTorchModule()
+        retriever._device = "cpu"
+        retriever._tokenizer = _FakeTokenizer()
+        retriever._query_encoder = _FakeQueryEncoder()
+        retriever._pmids = ["1", "2", "3", "4", "5"]
+        retriever._pmid_to_index = {pmid: index for index, pmid in enumerate(retriever._pmids)}
+        retriever._inference_lock = _NoOpLock()
+        retriever._index = _FakeDenseIndex()
+
+        rows = retriever.retrieve("condition", top_k=2, candidate_pmids={"4", "5"})
+
+        self.assertEqual([str(row["pmid"]) for row in rows], ["4", "5"])
+        self.assertEqual([float(row["score"]) for row in rows], [0.6, 0.5])
+
+    def test_inline_medcpt_retriever_scores_candidate_subset_instead_of_filtering_global_top_k(self) -> None:
+        retriever = retrieval_tools._InlineMedCPTRetriever.__new__(retrieval_tools._InlineMedCPTRetriever)
         retriever.catalog = _ManyFakeCatalog(count=5)
         retriever._torch = _FakeTorchModule()
         retriever._device = "cpu"

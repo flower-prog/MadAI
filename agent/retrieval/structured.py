@@ -160,10 +160,12 @@ class StructuredRetriever:
         candidate_ids: list[str] | set[str] | tuple[str, ...] | None = None,
         backend: str | None = None,
         include_scores: bool = False,
+        retriever_options: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         resolved_backend = self.resolve_backend(backend)
         normalized_candidate_ids = _normalize_candidate_ids(candidate_ids)
         requested_top_k = max(int(top_k), 1)
+        normalized_retriever_options = dict(retriever_options or {})
 
         bm25_rows: list[dict[str, Any]] = []
         vector_rows: list[dict[str, Any]] = []
@@ -174,6 +176,7 @@ class StructuredRetriever:
                 top_k=requested_top_k,
                 candidate_ids=normalized_candidate_ids,
                 source_name="bm25",
+                retriever_options=normalized_retriever_options,
             )
         if resolved_backend in {"vector", "hybrid"}:
             vector_rows = self._retrieve_rows(
@@ -182,6 +185,7 @@ class StructuredRetriever:
                 top_k=requested_top_k,
                 candidate_ids=normalized_candidate_ids,
                 source_name="vector",
+                retriever_options=normalized_retriever_options,
             )
 
         if resolved_backend == "bm25":
@@ -231,6 +235,7 @@ class StructuredRetriever:
         candidate_ids: list[str] | set[str] | tuple[str, ...] | None = None,
         backend: str | None = None,
         include_scores: bool = False,
+        retriever_options: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         case_payload = dict(structured_case or {})
         if isinstance(case_payload.get("structured_case"), Mapping):
@@ -247,6 +252,7 @@ class StructuredRetriever:
             candidate_ids=candidate_ids,
             backend=backend,
             include_scores=include_scores,
+            retriever_options=retriever_options,
         )
 
     def _retrieve_rows(
@@ -257,30 +263,39 @@ class StructuredRetriever:
         top_k: int,
         candidate_ids: set[str] | None,
         source_name: str,
+        retriever_options: Mapping[str, Any] | None,
     ) -> list[dict[str, Any]]:
         if retriever is None:
             return []
-        try:
-            rows = retriever.retrieve(
-                query_text,
-                top_k=top_k,
-                candidate_ids=candidate_ids,
-            )
-        except TypeError:
+        normalized_retriever_options = dict(retriever_options or {})
+        rows = None
+        retrieval_attempts = (
+            {"candidate_ids": candidate_ids, **normalized_retriever_options},
+            {"candidate_pmids": candidate_ids, **normalized_retriever_options},
+            dict(normalized_retriever_options),
+            {"candidate_ids": candidate_ids},
+            {"candidate_pmids": candidate_ids},
+            {},
+        )
+        for attempt_kwargs in retrieval_attempts:
             try:
                 rows = retriever.retrieve(
                     query_text,
                     top_k=top_k,
-                    candidate_pmids=candidate_ids,
+                    **attempt_kwargs,
                 )
             except TypeError:
-                rows = retriever.retrieve(query_text, top_k=top_k)
-                if candidate_ids is not None:
-                    rows = [
-                        row
-                        for row in list(rows)
-                        if self._resolve_document_id(row) in candidate_ids
-                    ]
+                continue
+            break
+        if rows is None:
+            rows = retriever.retrieve(query_text, top_k=top_k)
+
+        if candidate_ids is not None:
+            rows = [
+                row
+                for row in list(rows)
+                if self._resolve_document_id(row) in candidate_ids
+            ]
 
         serialized_rows: list[dict[str, Any]] = []
         for row in list(rows):

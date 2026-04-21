@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import threading
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
 import re
 from typing import Any
+import uuid
 
 
 DEFAULT_QDRANT_COLLECTION_NAME = "trial_chunks_medcpt"
 _CACHE_LOCK = threading.RLock()
 _MEDCPT_RESOURCE_CACHE: dict[tuple[str, str, str], tuple[Any, Any, Any]] = {}
+_TRIAL_CHUNK_POINT_ID_NAMESPACE = uuid.UUID("4a2c57f1-bf41-4f4b-91db-59d12f35e6a8")
 
 
 def _normalize_whitespace(value: Any) -> str:
@@ -60,6 +62,13 @@ def _coerce_int(value: Any) -> int | None:
         return int(value)
     except (TypeError, ValueError):
         return None
+
+
+def _qdrant_point_id(raw_id: Any) -> str:
+    normalized = _normalize_whitespace(raw_id)
+    if not normalized:
+        normalized = "__empty__"
+    return str(uuid.uuid5(_TRIAL_CHUNK_POINT_ID_NAMESPACE, normalized))
 
 
 def _load_qdrant_dependencies() -> tuple[Any, Any]:
@@ -374,7 +383,7 @@ class QdrantTrialChunkIndexManager:
                 )
             points = [
                 self.models.PointStruct(
-                    id=str(getattr(document, "chunk_id", "") or ""),
+                    id=_qdrant_point_id(getattr(document, "chunk_id", "") or ""),
                     vector=list(vector or []),
                     payload=build_qdrant_trial_chunk_payload(document),
                 )
@@ -422,18 +431,203 @@ class QdrantTrialChunkVectorRetriever:
         self.client = client or _create_qdrant_client(url=url, api_key=api_key, path=path)
         self.embedding_function = embedding_function or MedCPTTrialChunkEmbeddingFunction()
 
-    def _candidate_filter(
+    def _candidate_filter_components(
         self,
         candidate_ids: set[str] | list[str] | tuple[str, ...] | None,
-    ) -> Any | None:
+    ) -> dict[str, list[Any]]:
         normalized_candidate_ids = _normalize_candidate_ids(candidate_ids)
         if normalized_candidate_ids is None:
-            return None
+            return {}
         if not normalized_candidate_ids:
-            return self.models.Filter(must=[self.models.HasIdCondition(has_id=["__empty__"])])
-        return self.models.Filter(
-            must=[self.models.HasIdCondition(has_id=list(normalized_candidate_ids))]
+            return {
+                "must": [self.models.HasIdCondition(has_id=[_qdrant_point_id("__empty__")])],
+                "should": [],
+                "must_not": [],
+            }
+        return {
+            "must": [self.models.HasIdCondition(has_id=[_qdrant_point_id(item) for item in normalized_candidate_ids])],
+            "should": [],
+            "must_not": [],
+        }
+
+    @staticmethod
+    def _coerce_filter_values(values: Any) -> list[str]:
+        if values is None:
+            return []
+        if isinstance(values, str):
+            raw_values = [values]
+        elif isinstance(values, Iterable):
+            raw_values = list(values)
+        else:
+            raw_values = [values]
+
+        normalized: list[str] = []
+        seen: set[str] = set()
+        for value in raw_values:
+            text = _normalize_whitespace(value)
+            if not text:
+                continue
+            key = text.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            normalized.append(text)
+        return normalized
+
+    def _build_match_any(self, values: list[str]) -> Any:
+        match_any_cls = getattr(self.models, "MatchAny", None)
+        if match_any_cls is None:
+            return list(values)
+        for kwargs in ({"any": list(values)}, {"values": list(values)}):
+            try:
+                return match_any_cls(**kwargs)
+            except TypeError:
+                continue
+        try:
+            return match_any_cls(list(values))
+        except TypeError:
+            return list(values)
+
+    def _build_range(self, **kwargs: float) -> Any:
+        range_cls = getattr(self.models, "Range", None)
+        if range_cls is None:
+            return dict(kwargs)
+        try:
+            return range_cls(**kwargs)
+        except TypeError:
+            return dict(kwargs)
+
+    def _build_field_condition(
+        self,
+        *,
+        field_name: str,
+        match: Any | None = None,
+        range_value: Any | None = None,
+    ) -> Any:
+        field_condition_cls = getattr(self.models, "FieldCondition", None)
+        if field_condition_cls is None:
+            return {
+                "key": str(field_name),
+                "match": match,
+                "range": range_value,
+            }
+        for kwargs in (
+            {"key": str(field_name), "match": match, "range": range_value},
+            {"field": str(field_name), "match": match, "range": range_value},
+            {"key": str(field_name), "match": match},
+            {"field": str(field_name), "match": match},
+            {"key": str(field_name), "range": range_value},
+            {"field": str(field_name), "range": range_value},
+        ):
+            cleaned_kwargs = {key: value for key, value in kwargs.items() if value is not None}
+            try:
+                return field_condition_cls(**cleaned_kwargs)
+            except TypeError:
+                continue
+        return {
+            "key": str(field_name),
+            "match": match,
+            "range": range_value,
+        }
+
+    def _match_filter_entry(self, entry: Mapping[str, Any]) -> Any | None:
+        field_name = _normalize_whitespace(entry.get("field"))
+        values = self._coerce_filter_values(entry.get("values"))
+        if not field_name or not values:
+            return None
+        return self._build_field_condition(
+            field_name=field_name,
+            match=self._build_match_any(values),
         )
+
+    def _payload_filter_components(
+        self,
+        payload_filters: Mapping[str, Any] | None,
+    ) -> dict[str, list[Any]]:
+        components: dict[str, list[Any]] = {
+            "must": [],
+            "should": [],
+            "must_not": [],
+        }
+        if not isinstance(payload_filters, Mapping):
+            return components
+
+        for clause_name in ("must", "should", "must_not"):
+            for raw_entry in list(payload_filters.get(clause_name) or []):
+                if not isinstance(raw_entry, Mapping):
+                    continue
+                condition = self._match_filter_entry(raw_entry)
+                if condition is None:
+                    continue
+                components[clause_name].append(condition)
+
+        gender = _normalize_whitespace(payload_filters.get("gender"))
+        if gender.casefold() in {"male", "female"}:
+            allowed_gender_values = ["All", gender.title()]
+            components["must"].append(
+                self._build_field_condition(
+                    field_name="gender",
+                    match=self._build_match_any(allowed_gender_values),
+                )
+            )
+
+        age_years = _coerce_float(payload_filters.get("age_years"))
+        if age_years is not None:
+            components["must"].append(
+                self._build_field_condition(
+                    field_name="age_floor_years",
+                    range_value=self._build_range(lte=float(age_years)),
+                )
+            )
+            components["must"].append(
+                self._build_field_condition(
+                    field_name="age_ceiling_years",
+                    range_value=self._build_range(gte=float(age_years)),
+                )
+            )
+
+        return components
+
+    @staticmethod
+    def _merge_filter_components(*component_sets: Mapping[str, list[Any]]) -> dict[str, list[Any]]:
+        merged: dict[str, list[Any]] = {
+            "must": [],
+            "should": [],
+            "must_not": [],
+        }
+        for component_set in component_sets:
+            for clause_name in merged:
+                merged[clause_name].extend(list(component_set.get(clause_name) or []))
+        return merged
+
+    def _build_filter(self, components: Mapping[str, list[Any]]) -> Any | None:
+        must = list(components.get("must") or [])
+        should = list(components.get("should") or [])
+        must_not = list(components.get("must_not") or [])
+        if not must and not should and not must_not:
+            return None
+        filter_cls = getattr(self.models, "Filter", None)
+        if filter_cls is None:
+            return {
+                "must": must,
+                "should": should,
+                "must_not": must_not,
+            }
+        for kwargs in (
+            {"must": must, "should": should, "must_not": must_not},
+            {"must": must, "should": should},
+            {"must": must},
+        ):
+            cleaned_kwargs = {
+                key: value
+                for key, value in kwargs.items()
+                if value
+            }
+            try:
+                return filter_cls(**cleaned_kwargs)
+            except TypeError:
+                continue
+        return filter_cls(must=must)
 
     def retrieve(
         self,
@@ -442,6 +636,7 @@ class QdrantTrialChunkVectorRetriever:
         *,
         candidate_ids: set[str] | list[str] | tuple[str, ...] | None = None,
         candidate_pmids: set[str] | list[str] | tuple[str, ...] | None = None,
+        payload_filters: Mapping[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         normalized_query = _normalize_whitespace(query)
         if not normalized_query:
@@ -451,8 +646,13 @@ class QdrantTrialChunkVectorRetriever:
         if not query_vector:
             return []
 
-        query_filter = self._candidate_filter(
-            candidate_ids if candidate_ids is not None else candidate_pmids
+        query_filter = self._build_filter(
+            self._merge_filter_components(
+                self._candidate_filter_components(
+                    candidate_ids if candidate_ids is not None else candidate_pmids
+                ),
+                self._payload_filter_components(payload_filters),
+            )
         )
         limit = max(int(top_k), 1)
 
@@ -501,6 +701,15 @@ class QdrantTrialChunkVectorRetriever:
                     "chunk_type": chunk_type,
                     "source_fields": list(payload.get("source_fields") or []),
                     "rank_weight": float(payload.get("rank_weight") or 1.0),
+                    "overall_status": _normalize_whitespace(payload.get("overall_status")),
+                    "study_type": _normalize_whitespace(payload.get("study_type")),
+                    "phase": _normalize_whitespace(payload.get("phase")),
+                    "primary_purpose": _normalize_whitespace(payload.get("primary_purpose")),
+                    "conditions": _normalize_text_list(payload.get("conditions", [])),
+                    "interventions": _normalize_text_list(payload.get("interventions", [])),
+                    "gender": _normalize_whitespace(payload.get("gender")),
+                    "age_floor_years": _coerce_float(payload.get("age_floor_years")),
+                    "age_ceiling_years": _coerce_float(payload.get("age_ceiling_years")),
                     "score": float(getattr(hit, "score", 0.0) or 0.0),
                 }
             )

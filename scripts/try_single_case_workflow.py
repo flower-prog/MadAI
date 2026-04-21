@@ -16,7 +16,7 @@ sys.path.insert(0, PROJECT_ROOT_STR)
 
 
 from agent.config.env import load_dotenv_if_present
-from agent.corpus_paths import resolve_default_corpus_paths
+from agent.corpus_paths import discover_complete_corpus_pair, resolve_default_corpus_paths
 from agent.workflow import run_workflow
 
 
@@ -30,7 +30,10 @@ SECTION_PATTERN = re.compile(
 
 
 def default_corpus_paths(root: Path) -> tuple[str | None, str | None]:
-    riskcalcs_path, pmid_metadata_path = resolve_default_corpus_paths(root)
+    try:
+        riskcalcs_path, pmid_metadata_path = discover_complete_corpus_pair(root)
+    except FileNotFoundError:
+        riskcalcs_path, pmid_metadata_path = resolve_default_corpus_paths(root)
     return (
         str(riskcalcs_path) if riskcalcs_path is not None else None,
         str(pmid_metadata_path) if pmid_metadata_path is not None else None,
