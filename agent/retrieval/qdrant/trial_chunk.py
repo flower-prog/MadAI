@@ -1,17 +1,21 @@
 from __future__ import annotations
 
+import logging
+import os
 import threading
 from collections.abc import Iterable, Mapping, Sequence
 from pathlib import Path
 import re
+import time
 from typing import Any
 import uuid
 
 
-DEFAULT_QDRANT_COLLECTION_NAME = "trial_chunks_medcpt"
+DEFAULT_QDRANT_COLLECTION_NAME = "trial_chunks_medcpt_full"
 _CACHE_LOCK = threading.RLock()
-_MEDCPT_RESOURCE_CACHE: dict[tuple[str, str, str], tuple[Any, Any, Any]] = {}
+_MEDCPT_RESOURCE_CACHE: dict[tuple[str, str, str], Any] = {}
 _TRIAL_CHUNK_POINT_ID_NAMESPACE = uuid.UUID("4a2c57f1-bf41-4f4b-91db-59d12f35e6a8")
+_LOGGER = logging.getLogger(__name__)
 
 
 def _normalize_whitespace(value: Any) -> str:
@@ -92,7 +96,22 @@ def _create_qdrant_client(
     QdrantClient, _ = _load_qdrant_dependencies()
     if path is not None and str(path).strip():
         return QdrantClient(path=str(Path(path).expanduser().resolve()))
-    return QdrantClient(url=str(url or "http://localhost:6333"), api_key=api_key)
+    raw_timeout = (
+        os.environ.get("TRIAL_QDRANT_TIMEOUT")
+        or os.environ.get("MEDAI_TRIAL_QDRANT_TIMEOUT")
+        or os.environ.get("QDRANT_TIMEOUT")
+        or "300"
+    )
+    try:
+        timeout = int(float(raw_timeout))
+    except (TypeError, ValueError):
+        timeout = 300
+    return QdrantClient(
+        url=str(url or "http://localhost:6333"),
+        api_key=api_key,
+        timeout=timeout,
+        check_compatibility=False,
+    )
 
 
 def _payload_schema(models: Any, schema_name: str) -> Any:
@@ -148,49 +167,77 @@ class MedCPTTrialChunkEmbeddingFunction:
         self.query_model_name = str(query_model_name or self.QUERY_MODEL_NAME)
         self.doc_model_name = str(doc_model_name or self.DOC_MODEL_NAME)
         self._torch = torch
+        self._AutoModel = AutoModel
+        self._AutoTokenizer = AutoTokenizer
         self._device = str(device or ("cuda" if torch.cuda.is_available() else "cpu"))
-        self._query_encoder, self._doc_encoder, self._tokenizer = self._load_shared_resources(
-            AutoModel=AutoModel,
-            AutoTokenizer=AutoTokenizer,
-        )
+        self._query_encoder: Any | None = None
+        self._doc_encoder: Any | None = None
+        self._tokenizer: Any | None = None
         self._inference_lock = threading.RLock()
 
-    def _load_shared_resources(self, *, AutoModel: Any, AutoTokenizer: Any) -> tuple[Any, Any, Any]:
-        cache_key = (self._device, self.query_model_name, self.doc_model_name)
+    def _load_shared_tokenizer(self) -> Any:
+        cache_key = ("tokenizer", self.query_model_name)
         with _CACHE_LOCK:
             cached = _MEDCPT_RESOURCE_CACHE.get(cache_key)
             if cached is not None:
                 return cached
 
-        query_encoder = AutoModel.from_pretrained(self.query_model_name).to(self._device)
-        doc_encoder = AutoModel.from_pretrained(self.doc_model_name).to(self._device)
-        tokenizer = AutoTokenizer.from_pretrained(self.query_model_name)
-        if hasattr(query_encoder, "eval"):
-            query_encoder.eval()
-        if hasattr(doc_encoder, "eval"):
-            doc_encoder.eval()
-
+        tokenizer = self._AutoTokenizer.from_pretrained(self.query_model_name)
         with _CACHE_LOCK:
-            cached = _MEDCPT_RESOURCE_CACHE.setdefault(cache_key, (query_encoder, doc_encoder, tokenizer))
-        return cached
+            return _MEDCPT_RESOURCE_CACHE.setdefault(cache_key, tokenizer)
+
+    def _load_shared_encoder(self, *, role: str, model_name: str) -> Any:
+        cache_key = ("encoder", self._device, role, model_name)
+        with _CACHE_LOCK:
+            cached = _MEDCPT_RESOURCE_CACHE.get(cache_key)
+            if cached is not None:
+                return cached
+
+        encoder = self._AutoModel.from_pretrained(model_name).to(self._device)
+        if hasattr(encoder, "eval"):
+            encoder.eval()
+        with _CACHE_LOCK:
+            return _MEDCPT_RESOURCE_CACHE.setdefault(cache_key, encoder)
+
+    @property
+    def _query_resources(self) -> tuple[Any, Any]:
+        if self._query_encoder is None or self._tokenizer is None:
+            self._query_encoder = self._load_shared_encoder(
+                role="query",
+                model_name=self.query_model_name,
+            )
+            self._tokenizer = self._load_shared_tokenizer()
+        return self._query_encoder, self._tokenizer
+
+    @property
+    def _document_resources(self) -> tuple[Any, Any]:
+        if self._doc_encoder is None or self._tokenizer is None:
+            self._doc_encoder = self._load_shared_encoder(
+                role="document",
+                model_name=self.doc_model_name,
+            )
+            self._tokenizer = self._load_shared_tokenizer()
+        return self._doc_encoder, self._tokenizer
 
     @property
     def vector_size(self) -> int:
-        hidden_size = getattr(getattr(self._doc_encoder, "config", None), "hidden_size", None)
+        doc_encoder, _ = self._document_resources
+        hidden_size = getattr(getattr(doc_encoder, "config", None), "hidden_size", None)
         if hidden_size is not None:
             return int(hidden_size)
-        fallback = self.encode_query("trial search embedding size probe")
+        fallback = self.encode_documents(["trial search embedding size probe"])
         if not fallback:
             raise RuntimeError("Unable to determine MedCPT embedding size.")
-        return len(fallback)
+        return len(fallback[0])
 
     def encode_query(self, query: str) -> list[float]:
         normalized_query = _normalize_whitespace(query)
         if not normalized_query:
             return []
         with self._inference_lock:
+            query_encoder, tokenizer = self._query_resources
             with self._torch.no_grad():
-                encoded = self._tokenizer(
+                encoded = tokenizer(
                     [normalized_query],
                     truncation=True,
                     padding=True,
@@ -198,7 +245,7 @@ class MedCPTTrialChunkEmbeddingFunction:
                     max_length=512,
                 )
                 encoded.to(self._device)
-                model_output = self._query_encoder(**encoded)
+                model_output = query_encoder(**encoded)
                 vector = model_output.last_hidden_state[:, 0, :].detach().cpu().tolist()[0]
         return [float(item) for item in list(vector or [])]
 
@@ -208,20 +255,25 @@ class MedCPTTrialChunkEmbeddingFunction:
 
         tool_texts: list[list[str]] = []
         for document in list(documents or []):
-            title = _normalize_whitespace(getattr(document, "title", ""))
-            retrieval_text = _normalize_whitespace(
-                getattr(document, "retrieval_text", "")
-                or getattr(document, "text", "")
-                or getattr(document, "summary", "")
-                or getattr(document, "purpose", "")
-            )
+            if isinstance(document, str):
+                title = ""
+                retrieval_text = _normalize_whitespace(document)
+            else:
+                title = _normalize_whitespace(getattr(document, "title", ""))
+                retrieval_text = _normalize_whitespace(
+                    getattr(document, "retrieval_text", "")
+                    or getattr(document, "text", "")
+                    or getattr(document, "summary", "")
+                    or getattr(document, "purpose", "")
+                )
             tool_texts.append([title, retrieval_text])
 
         embeddings: list[list[float]] = []
         with self._inference_lock:
+            doc_encoder, tokenizer = self._document_resources
             with self._torch.no_grad():
                 for start in range(0, len(tool_texts), 16):
-                    encoded = self._tokenizer(
+                    encoded = tokenizer(
                         tool_texts[start : start + 16],
                         truncation=True,
                         padding=True,
@@ -229,7 +281,7 @@ class MedCPTTrialChunkEmbeddingFunction:
                         max_length=512,
                     )
                     encoded.to(self._device)
-                    model_output = self._doc_encoder(**encoded)
+                    model_output = doc_encoder(**encoded)
                     batch_vectors = model_output.last_hidden_state[:, 0, :].detach().cpu().tolist()
                     embeddings.extend(
                         [[float(item) for item in list(vector or [])] for vector in list(batch_vectors or [])]
@@ -362,52 +414,405 @@ class QdrantTrialChunkIndexManager:
             created_fields.append(field_name)
         return created_fields
 
+    @staticmethod
+    def _extract_count_value(raw_value: Any) -> int | None:
+        if raw_value is None:
+            return None
+        if isinstance(raw_value, Mapping):
+            if "count" in raw_value:
+                return _coerce_int(raw_value.get("count"))
+            result = raw_value.get("result")
+            if isinstance(result, Mapping) and "count" in result:
+                return _coerce_int(result.get("count"))
+        count_attr = getattr(raw_value, "count", None)
+        if callable(count_attr):
+            count_attr = None
+        if count_attr is not None:
+            coerced = _coerce_int(count_attr)
+            if coerced is not None:
+                return coerced
+        result_attr = getattr(raw_value, "result", None)
+        if isinstance(result_attr, Mapping) and "count" in result_attr:
+            return _coerce_int(result_attr.get("count"))
+        return None
+
+    @staticmethod
+    def _extract_record_id(raw_row: Any) -> str:
+        if isinstance(raw_row, Mapping):
+            return str(raw_row.get("id") or "").strip()
+        return str(getattr(raw_row, "id", "") or "").strip()
+
+    def _collection_point_count(self) -> int:
+        if hasattr(self.client, "count"):
+            try:
+                count_result = self.client.count(
+                    collection_name=self.collection_name,
+                    exact=True,
+                )
+            except TypeError:
+                count_result = self.client.count(collection_name=self.collection_name)
+            resolved = self._extract_count_value(count_result)
+            if resolved is not None:
+                return max(int(resolved), 0)
+
+        if hasattr(self.client, "get_collection"):
+            collection_info = self.client.get_collection(self.collection_name)
+            resolved = _coerce_int(getattr(collection_info, "points_count", None))
+            if resolved is not None:
+                return max(int(resolved), 0)
+            resolved = self._extract_count_value(collection_info)
+            if resolved is not None:
+                return max(int(resolved), 0)
+
+        raise RuntimeError("Unable to determine current Qdrant point count for resume.")
+
+    def _chunk_point_presence(self, chunk_ids: Sequence[str]) -> dict[str, bool]:
+        normalized_chunk_ids = [
+            str(chunk_id).strip()
+            for chunk_id in list(chunk_ids or [])
+            if str(chunk_id).strip()
+        ]
+        if not normalized_chunk_ids:
+            return {}
+
+        point_id_by_chunk = {
+            chunk_id: _qdrant_point_id(chunk_id)
+            for chunk_id in normalized_chunk_ids
+        }
+        if hasattr(self.client, "retrieve"):
+            try:
+                rows = self.client.retrieve(
+                    collection_name=self.collection_name,
+                    ids=list(point_id_by_chunk.values()),
+                    with_payload=False,
+                    with_vectors=False,
+                )
+            except TypeError:
+                rows = self.client.retrieve(
+                    collection_name=self.collection_name,
+                    ids=list(point_id_by_chunk.values()),
+                )
+            found_ids = {
+                self._extract_record_id(row)
+                for row in list(rows or [])
+                if self._extract_record_id(row)
+            }
+            return {
+                chunk_id: point_id in found_ids
+                for chunk_id, point_id in point_id_by_chunk.items()
+            }
+
+        if hasattr(self.client, "count"):
+            results: dict[str, bool] = {}
+            for chunk_id in normalized_chunk_ids:
+                chunk_filter = self.models.Filter(
+                    must=[
+                        self._build_field_condition(
+                            field_name="chunk_id",
+                            match=self._build_match_any([chunk_id]),
+                        )
+                    ]
+                )
+                try:
+                    count_result = self.client.count(
+                        collection_name=self.collection_name,
+                        count_filter=chunk_filter,
+                        exact=True,
+                    )
+                except TypeError:
+                    count_result = self.client.count(
+                        collection_name=self.collection_name,
+                        query_filter=chunk_filter,
+                    )
+                resolved = self._extract_count_value(count_result) or 0
+                results[chunk_id] = int(resolved) > 0
+            return results
+
+        raise RuntimeError("Unable to inspect Qdrant point presence for resume verification.")
+
+    def _build_match_any(self, values: list[str]) -> Any:
+        match_any_cls = getattr(self.models, "MatchAny", None)
+        if match_any_cls is None:
+            return list(values)
+        for kwargs in ({"any": list(values)}, {"values": list(values)}):
+            try:
+                return match_any_cls(**kwargs)
+            except TypeError:
+                continue
+        try:
+            return match_any_cls(list(values))
+        except TypeError:
+            return list(values)
+
+    def _build_field_condition(
+        self,
+        *,
+        field_name: str,
+        match: Any | None = None,
+        range_value: Any | None = None,
+    ) -> Any:
+        field_condition_cls = getattr(self.models, "FieldCondition", None)
+        if field_condition_cls is None:
+            return {
+                "key": str(field_name),
+                "match": match,
+                "range": range_value,
+            }
+        for kwargs in (
+            {"key": str(field_name), "match": match, "range": range_value},
+            {"field": str(field_name), "match": match, "range": range_value},
+            {"key": str(field_name), "match": match},
+            {"field": str(field_name), "match": match},
+            {"key": str(field_name), "range": range_value},
+            {"field": str(field_name), "range": range_value},
+        ):
+            cleaned_kwargs = {key: value for key, value in kwargs.items() if value is not None}
+            try:
+                return field_condition_cls(**cleaned_kwargs)
+            except TypeError:
+                continue
+        return {
+            "key": str(field_name),
+            "match": match,
+            "range": range_value,
+        }
+
+    def _resolve_start_offset(
+        self,
+        *,
+        chunk_count: int,
+        start_offset: int = 0,
+        resume_prefix_count: bool = False,
+    ) -> tuple[int, int]:
+        requested_start_offset = max(int(start_offset), 0)
+        if int(start_offset) < 0:
+            raise ValueError("start_offset must be non-negative.")
+        if resume_prefix_count and requested_start_offset:
+            raise ValueError("Do not combine explicit start_offset with resume_prefix_count.")
+        if not resume_prefix_count:
+            if requested_start_offset > int(chunk_count):
+                raise ValueError(
+                    f"start_offset {requested_start_offset} exceeds chunk count {chunk_count}."
+                )
+            return requested_start_offset, 0
+
+        existing_point_count = self._collection_point_count()
+        if existing_point_count > int(chunk_count):
+            raise RuntimeError(
+                "Existing Qdrant point count exceeds trial chunk count; collection is not resumable by prefix."
+            )
+        if existing_point_count <= 0:
+            return 0, 0
+        if existing_point_count == int(chunk_count):
+            return existing_point_count, existing_point_count
+
+        boundary_chunk_ids = [
+            str(getattr(self._catalog_document_at(existing_point_count - 1), "chunk_id", "") or "").strip(),
+            str(getattr(self._catalog_document_at(existing_point_count), "chunk_id", "") or "").strip(),
+        ]
+        boundary_presence = self._chunk_point_presence(boundary_chunk_ids)
+        previous_chunk_id, next_chunk_id = boundary_chunk_ids
+        if previous_chunk_id and not boundary_presence.get(previous_chunk_id, False):
+            raise RuntimeError(
+                "Existing Qdrant point count does not match the expected prefix boundary."
+            )
+        if next_chunk_id and boundary_presence.get(next_chunk_id, False):
+            raise RuntimeError(
+                "Next chunk already exists in Qdrant; collection is not a clean prefix and cannot be resumed safely."
+            )
+        return existing_point_count, existing_point_count
+
+    def _catalog_document_count(self) -> int:
+        if hasattr(self.catalog, "document_count"):
+            try:
+                return max(int(self.catalog.document_count()), 0)
+            except (TypeError, ValueError):
+                pass
+        return len(list(getattr(self.catalog, "documents")() or []))
+
+    def _catalog_trial_count(self) -> int:
+        if hasattr(self.catalog, "trial_count"):
+            try:
+                return max(int(self.catalog.trial_count()), 0)
+            except (TypeError, ValueError):
+                pass
+        return len(getattr(self.catalog, "_record_by_id", {}) or {})
+
+    def _catalog_document_at(self, index: int) -> Any | None:
+        if int(index) < 0:
+            return None
+        if hasattr(self.catalog, "document_at"):
+            return self.catalog.document_at(int(index))
+        documents = list(getattr(self.catalog, "documents")() or [])
+        if int(index) >= len(documents):
+            return None
+        return documents[int(index)]
+
+    def _catalog_iter_documents(self, *, start_offset: int = 0) -> Iterable[Any]:
+        if hasattr(self.catalog, "iter_documents"):
+            return self.catalog.iter_documents(start_offset=max(int(start_offset), 0))
+        documents = list(getattr(self.catalog, "documents")() or [])
+        return list(documents[max(int(start_offset), 0) :])
+
+    def _safe_collection_point_count(self) -> int | None:
+        try:
+            return self._collection_point_count()
+        except Exception:
+            return None
+
+    def _sync_batch(
+        self,
+        *,
+        batch_documents: Sequence[Any],
+        batch_index: int,
+        batch_start_offset: int,
+        batch_end_offset: int,
+    ) -> int:
+        _LOGGER.info(
+            "Trial chunk Qdrant sync batch starting: collection=%s batch_index=%d batch_start_offset=%d batch_end_offset=%d batch_size=%d",
+            self.collection_name,
+            batch_index,
+            batch_start_offset,
+            batch_end_offset,
+            len(batch_documents),
+        )
+        embedding_started_at = time.perf_counter()
+        vectors = self.embedding_function.encode_documents(batch_documents)
+        embedding_duration_seconds = time.perf_counter() - embedding_started_at
+        if len(vectors) != len(batch_documents):
+            raise RuntimeError(
+                "Embedding function returned a different number of vectors than trial chunk documents."
+            )
+        points = [
+            self.models.PointStruct(
+                id=_qdrant_point_id(getattr(document, "chunk_id", "") or ""),
+                vector=list(vector or []),
+                payload=build_qdrant_trial_chunk_payload(document),
+            )
+            for document, vector in zip(batch_documents, vectors, strict=False)
+            if str(getattr(document, "chunk_id", "") or "").strip()
+        ]
+        if not points:
+            _LOGGER.info(
+                "Trial chunk Qdrant sync batch skipped: collection=%s batch_index=%d batch_start_offset=%d batch_end_offset=%d reason=no_valid_points",
+                self.collection_name,
+                batch_index,
+                batch_start_offset,
+                batch_end_offset,
+            )
+            return 0
+
+        upsert_started_at = time.perf_counter()
+        self.client.upsert(
+            collection_name=self.collection_name,
+            points=points,
+            wait=True,
+        )
+        upsert_duration_seconds = time.perf_counter() - upsert_started_at
+        current_collection_count = self._safe_collection_point_count()
+        _LOGGER.info(
+            "Trial chunk Qdrant sync batch finished: collection=%s batch_index=%d batch_start_offset=%d batch_end_offset=%d point_count=%d embedding_seconds=%.3f upsert_seconds=%.3f current_collection_count=%s",
+            self.collection_name,
+            batch_index,
+            batch_start_offset,
+            batch_end_offset,
+            len(points),
+            embedding_duration_seconds,
+            upsert_duration_seconds,
+            "unknown" if current_collection_count is None else current_collection_count,
+        )
+        return len(points)
+
     def sync_catalog(
         self,
         *,
         recreate: bool = False,
         batch_size: int = 64,
+        start_offset: int = 0,
+        resume_prefix_count: bool = False,
     ) -> dict[str, Any]:
         collection_bundle = self.ensure_collection(recreate=recreate)
-        documents = list(self.catalog.documents())
         total_points = 0
         batch_count = 0
         requested_batch_size = max(int(batch_size), 1)
+        chunk_count = self._catalog_document_count()
+        effective_start_offset, existing_point_count = self._resolve_start_offset(
+            chunk_count=chunk_count,
+            start_offset=start_offset,
+            resume_prefix_count=resume_prefix_count,
+        )
+        _LOGGER.info(
+            "Trial chunk Qdrant sync starting: collection=%s output_root=%s chunk_count=%d batch_size=%d requested_start_offset=%d effective_start_offset=%d resume_prefix_count=%s existing_point_count=%d recreated=%s",
+            self.collection_name,
+            str(getattr(self.catalog, "output_root", "")),
+            chunk_count,
+            requested_batch_size,
+            max(int(start_offset), 0),
+            effective_start_offset,
+            bool(resume_prefix_count),
+            existing_point_count,
+            bool(recreate),
+        )
 
-        for start in range(0, len(documents), requested_batch_size):
-            batch_documents = documents[start : start + requested_batch_size]
-            vectors = self.embedding_function.encode_documents(batch_documents)
-            if len(vectors) != len(batch_documents):
-                raise RuntimeError(
-                    "Embedding function returned a different number of vectors than trial chunk documents."
-                )
-            points = [
-                self.models.PointStruct(
-                    id=_qdrant_point_id(getattr(document, "chunk_id", "") or ""),
-                    vector=list(vector or []),
-                    payload=build_qdrant_trial_chunk_payload(document),
-                )
-                for document, vector in zip(batch_documents, vectors, strict=False)
-                if str(getattr(document, "chunk_id", "") or "").strip()
-            ]
-            if not points:
+        batch_documents: list[Any] = []
+        batch_start_offset = effective_start_offset
+        for document_index, document in enumerate(
+            self._catalog_iter_documents(start_offset=effective_start_offset),
+            start=effective_start_offset,
+        ):
+            if not batch_documents:
+                batch_start_offset = document_index
+            batch_documents.append(document)
+            if len(batch_documents) < requested_batch_size:
                 continue
-            self.client.upsert(
-                collection_name=self.collection_name,
-                points=points,
-                wait=True,
+
+            batch_end_offset = document_index + 1
+            synced_points = self._sync_batch(
+                batch_documents=batch_documents,
+                batch_index=batch_count + 1,
+                batch_start_offset=batch_start_offset,
+                batch_end_offset=batch_end_offset,
             )
-            total_points += len(points)
-            batch_count += 1
+            if synced_points > 0:
+                total_points += synced_points
+                batch_count += 1
+            batch_documents = []
+
+        if batch_documents:
+            batch_end_offset = batch_start_offset + len(batch_documents)
+            synced_points = self._sync_batch(
+                batch_documents=batch_documents,
+                batch_index=batch_count + 1,
+                batch_start_offset=batch_start_offset,
+                batch_end_offset=batch_end_offset,
+            )
+            if synced_points > 0:
+                total_points += synced_points
+                batch_count += 1
+
+        final_collection_count = self._safe_collection_point_count()
+        _LOGGER.info(
+            "Trial chunk Qdrant sync completed: collection=%s output_root=%s chunk_count=%d start_offset=%d newly_upserted_points=%d batch_count=%d current_collection_count=%s",
+            self.collection_name,
+            str(getattr(self.catalog, "output_root", "")),
+            chunk_count,
+            effective_start_offset,
+            total_points,
+            batch_count,
+            "unknown" if final_collection_count is None else final_collection_count,
+        )
 
         return {
             **collection_bundle,
             "output_root": str(getattr(self.catalog, "output_root", "")),
-            "trial_count": len(getattr(self.catalog, "_record_by_id", {}) or {}),
-            "chunk_count": len(documents),
+            "trial_count": self._catalog_trial_count(),
+            "chunk_count": chunk_count,
             "point_count": total_points,
             "batch_count": batch_count,
             "batch_size": requested_batch_size,
+            "start_offset": effective_start_offset,
+            "resume_prefix_count": bool(resume_prefix_count),
+            "existing_point_count": existing_point_count,
         }
 
 

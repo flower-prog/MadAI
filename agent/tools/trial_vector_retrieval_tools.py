@@ -390,7 +390,7 @@ def build_protocol_trial_query_profile(
         trial_condition_terms = list(fallback_condition_terms)
         _append_unique(
             derivation_notes,
-            "Fell back to problem_list phrases as trial condition anchors because no domain-specific condition term was detected.",
+            "No domain-specific trial condition term was detected; using problem_list phrases as coarse structured condition filters.",
         )
 
     fallback_intervention_terms: list[str] = []
@@ -432,21 +432,24 @@ def build_protocol_trial_query_profile(
         else:
             _append_unique(negative_profile_terms, f"no {term}")
 
+    query_text = build_structured_query_text(
+        raw_text=case_payload.get("raw_text") or case_payload.get("raw_request") or "",
+        case_summary=case_payload.get("case_summary"),
+        problem_list=problem_items,
+        known_facts=known_fact_items,
+    )
+    if _QUESTION_STYLE_CUE_PATTERN.search(query_text):
+        query_text = "clinical trial eligibility search: " + " ; ".join(focus_terms)
     query_lines: list[str] = []
+    if query_text:
+        query_lines.append(query_text)
     if focus_terms:
-        query_lines.append("clinical trial eligibility search: " + " ; ".join(focus_terms))
+        query_lines.append("trial focus hints: " + " ; ".join(focus_terms))
     if positive_profile_terms:
         query_lines.append("patient profile: " + " ; ".join(positive_profile_terms))
     if negative_profile_terms:
         query_lines.append("screening constraints: " + " ; ".join(negative_profile_terms))
-    query_text = "\n".join(query_lines)
-    if not query_text:
-        query_text = build_structured_query_text(
-            raw_text=case_payload.get("raw_text") or case_payload.get("raw_request") or "",
-            case_summary=case_payload.get("case_summary"),
-            problem_list=problem_items,
-            known_facts=known_fact_items,
-        )
+    query_text = "\n".join(line for line in query_lines if str(line).strip())
 
     payload_filters: dict[str, Any] = {
         "must": [],
@@ -454,17 +457,13 @@ def build_protocol_trial_query_profile(
         "must_not": [],
     }
     if trial_condition_terms:
+        must_condition_terms = list(trial_condition_terms)
+        if "atrial fibrillation" in {item.casefold() for item in trial_condition_terms}:
+            must_condition_terms = ["atrial fibrillation"]
         payload_filters["must"].append(
             {
                 "field": "condition_terms",
-                "values": [trial_condition_terms[0]],
-            }
-        )
-    if len(trial_condition_terms) > 1:
-        payload_filters["should"].append(
-            {
-                "field": "condition_terms",
-                "values": list(trial_condition_terms[1:]),
+                "values": must_condition_terms,
             }
         )
     if trial_intervention_terms:
@@ -553,9 +552,9 @@ def _normalize_backend_name(value: str | None) -> str:
 
 
 def _normalize_vector_store_name(value: str | None) -> str:
-    normalized = str(value or "faiss").strip().lower()
+    normalized = str(value or "qdrant").strip().lower()
     if not normalized:
-        normalized = "faiss"
+        normalized = "qdrant"
     return {
         "default": "auto",
         "automatic": "auto",
@@ -864,7 +863,7 @@ def _trial_level_rerank_payload(
                 "No trial condition term matched the case disease focus."
             )
         if query_intervention_terms and not matched_intervention_terms:
-            eligibility_penalty += 0.45
+            eligibility_penalty += 0.9
             eligibility_conflicts.append(
                 "No trial intervention term matched the case treatment focus."
             )
@@ -873,7 +872,7 @@ def _trial_level_rerank_payload(
             and query_intervention_terms
             and (not matched_condition_terms or not matched_intervention_terms)
         ):
-            eligibility_penalty += 0.2
+            eligibility_penalty += 0.45
             eligibility_conflicts.append(
                 "Disease and intervention anchors were not both satisfied for this trial."
             )
@@ -1062,10 +1061,13 @@ class TrialChunkRetrievalTool:
         *,
         vector_retriever: Any | None = None,
         backend: str = "hybrid",
+        lazy_bm25: bool = False,
     ) -> None:
         self.catalog = catalog
         self.vector_retriever = vector_retriever
-        self.keyword_retriever = TrialChunkKeywordRetriever(catalog)
+        self._lazy_bm25 = bool(lazy_bm25)
+        self._keyword_retriever: TrialChunkKeywordRetriever | None = None
+        self.keyword_retriever = None if self._lazy_bm25 else self._ensure_keyword_retriever()
         self._retriever = create_structured_retriever(
             catalog,
             bm25_retriever=self.keyword_retriever,
@@ -1076,12 +1078,28 @@ class TrialChunkRetrievalTool:
         )
         self.default_backend = self._retriever.resolve_backend(backend)
 
+    def _ensure_keyword_retriever(self) -> TrialChunkKeywordRetriever:
+        if self._keyword_retriever is None:
+            self._keyword_retriever = TrialChunkKeywordRetriever(self.catalog)
+        return self._keyword_retriever
+
+    def _ensure_bm25_backend(self) -> None:
+        if self._retriever.bm25_retriever is None:
+            self.keyword_retriever = self._ensure_keyword_retriever()
+            self._retriever.bm25_retriever = self.keyword_retriever
+
+    def _catalog_chunks_loaded(self) -> bool:
+        return getattr(self.catalog, "_chunks", None) is not None
+
     @property
     def available_backends(self) -> tuple[str, ...]:
         return self._retriever.available_backends
 
     def resolve_backend(self, backend: str | None = None) -> str:
-        return self._retriever.resolve_backend(backend or self.default_backend)
+        resolved = self._retriever.resolve_backend(backend or self.default_backend)
+        if self._lazy_bm25 and resolved == "hybrid":
+            return "vector"
+        return resolved
 
     def _retrieve_query_bundle(
         self,
@@ -1092,6 +1110,36 @@ class TrialChunkRetrievalTool:
         backend: str,
         retriever_options: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
+        if backend in {"bm25", "hybrid"}:
+            self._ensure_bm25_backend()
+        if self._lazy_bm25 and backend == "vector" and self.vector_retriever is not None:
+            rows = self._channel_rows(
+                query_text,
+                top_k=max(int(top_k), 1),
+                candidate_nct_ids=None,
+                backend="vector",
+                retriever_options=retriever_options,
+            )
+            if candidate_chunk_ids is not None:
+                rows = [
+                    row
+                    for row in rows
+                    if str(row.get("chunk_id") or row.get("document_id") or "").strip() in candidate_chunk_ids
+                ]
+            return {
+                "query_text": str(query_text or ""),
+                "backend_used": "vector",
+                "available_backends": list(self.available_backends),
+                "bm25_hits": [],
+                "vector_hits": rows[: max(int(top_k), 1)],
+                "candidate_ranking": rows[: max(int(top_k), 1)],
+                "hits": rows[: max(int(top_k), 1)],
+                "retrieved_ids": [
+                    str(row.get("document_id") or row.get("chunk_id") or "").strip()
+                    for row in rows[: max(int(top_k), 1)]
+                    if str(row.get("document_id") or row.get("chunk_id") or "").strip()
+                ],
+            }
         try:
             return self._retriever.retrieve_from_query(
                 query_text,
@@ -1123,8 +1171,34 @@ class TrialChunkRetrievalTool:
         retriever_options: Mapping[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         candidate_chunk_ids = self._resolve_candidate_chunk_ids(candidate_nct_ids)
+        if backend == "bm25":
+            self._ensure_bm25_backend()
         if backend == "vector" and self.vector_retriever is None:
             return []
+        if self._lazy_bm25 and backend == "vector":
+            try:
+                rows = self.vector_retriever.retrieve(
+                    query_text,
+                    top_k=max(int(top_k), 1),
+                    candidate_ids=candidate_chunk_ids,
+                    **dict(retriever_options or {}),
+                )
+            except TypeError:
+                rows = self.vector_retriever.retrieve(
+                    query_text,
+                    top_k=max(int(top_k), 1),
+                    candidate_pmids=candidate_chunk_ids,
+                    **dict(retriever_options or {}),
+                )
+            except Exception:
+                return []
+            return [
+                {
+                    **dict(row),
+                    "match_sources": sorted({*list(dict(row).get("match_sources") or []), "vector"}),
+                }
+                for row in list(rows or [])
+            ]
         try:
             bundle = self._retriever.retrieve_from_query(
                 query_text,
@@ -1154,7 +1228,21 @@ class TrialChunkRetrievalTool:
             nct_id = str(row.get("nct_id") or "").strip()
             if not nct_id:
                 continue
-            record = self.catalog.get_record(nct_id) or {"nct_id": nct_id}
+            record = self.catalog.get_record(nct_id) or {
+                "nct_id": nct_id,
+                "display_title": _normalize_whitespace(row.get("display_title") or row.get("title") or row.get("name") or nct_id),
+                "brief_summary": _normalize_whitespace(row.get("brief_summary") or row.get("summary")),
+                "overall_status": _normalize_whitespace(row.get("overall_status")),
+                "study_type": _normalize_whitespace(row.get("study_type")),
+                "phase": _normalize_whitespace(row.get("phase")),
+                "primary_purpose": _normalize_whitespace(row.get("primary_purpose")),
+                "conditions": list(row.get("conditions") or []),
+                "interventions": list(row.get("interventions") or []),
+                "gender": _normalize_whitespace(row.get("gender")),
+                "age_floor_years": row.get("age_floor_years"),
+                "age_ceiling_years": row.get("age_ceiling_years"),
+                "source_url": _normalize_whitespace(row.get("source_url")),
+            }
             status_meta = _map_protocol_trial_status(record)
             display_title = _normalize_whitespace(
                 record.get("display_title") or record.get("brief_title") or record.get("official_title") or nct_id
@@ -1340,12 +1428,14 @@ class TrialChunkRetrievalTool:
                 "candidate_ranking": [],
             }
 
-        bm25_rows = self._channel_rows(
-            query_text,
-            top_k=max(int(chunk_top_k), 1),
-            candidate_nct_ids=candidate_nct_ids,
-            backend="bm25",
-        )
+        bm25_rows: list[dict[str, Any]] = []
+        if resolved_backend in {"bm25", "hybrid"}:
+            bm25_rows = self._channel_rows(
+                query_text,
+                top_k=max(int(chunk_top_k), 1),
+                candidate_nct_ids=candidate_nct_ids,
+                backend="bm25",
+            )
 
         vector_rows: list[dict[str, Any]] = []
         if self.vector_retriever is not None and resolved_backend != "bm25":
@@ -1542,12 +1632,14 @@ class TrialChunkRetrievalTool:
                 "candidate_ranking": [],
             }
 
-        bm25_rows = self._channel_rows(
-            query_text,
-            top_k=max(int(chunk_top_k), 1),
-            candidate_nct_ids=coarse_candidate_ids,
-            backend="bm25",
-        )
+        bm25_rows: list[dict[str, Any]] = []
+        if resolved_backend in {"bm25", "hybrid"}:
+            bm25_rows = self._channel_rows(
+                query_text,
+                top_k=max(int(chunk_top_k), 1),
+                candidate_nct_ids=coarse_candidate_ids,
+                backend="bm25",
+            )
         vector_rows: list[dict[str, Any]] = []
         if self.vector_retriever is not None and resolved_backend != "bm25":
             vector_rows = self._channel_rows(
@@ -1664,21 +1756,21 @@ class TrialChunkRetrievalTool:
             for item in list(candidate_nct_ids or [])
             if str(item).strip()
         }
+        if not self._catalog_chunks_loaded():
+            return None
         candidate_chunk_ids: set[str] = set()
         for nct_id in normalized_nct_ids:
             candidate_chunk_ids.update(self.catalog.chunk_index_by_trial.get(nct_id, set()))
         return candidate_chunk_ids
 
-    def _hydrate_chunk_rows(self, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        hydrated: list[dict[str, Any]] = []
-        for row in list(rows or []):
-            chunk_id = str(row.get("chunk_id") or row.get("document_id") or "").strip()
-            if not chunk_id:
-                continue
-            document = self.catalog.get(chunk_id)
-            if document is None:
-                continue
-            candidate = {
+    def _row_document_payload(self, row: Mapping[str, Any]) -> dict[str, Any] | None:
+        chunk_id = str(row.get("chunk_id") or row.get("document_id") or "").strip()
+        if not chunk_id:
+            return None
+
+        document = self.catalog.get(chunk_id) if self._catalog_chunks_loaded() else None
+        if document is not None:
+            return {
                 "chunk_id": chunk_id,
                 "nct_id": document.nct_id,
                 "title": document.title,
@@ -1686,6 +1778,53 @@ class TrialChunkRetrievalTool:
                 "text": document.text,
                 "source_fields": list(document.source_fields),
                 "rank_weight": float(document.rank_weight),
+                "record": self.catalog.get_record(document.nct_id) or {"nct_id": document.nct_id},
+            }
+
+        nct_id = _normalize_whitespace(row.get("nct_id") or row.get("trial_id"))
+        if not nct_id:
+            return None
+        chunk_type = _normalize_whitespace(row.get("chunk_type"))
+        text = _normalize_whitespace(row.get("text") or row.get("summary") or row.get("eligibility"))
+        title = _normalize_whitespace(row.get("title") or row.get("display_title") or nct_id)
+        return {
+            "chunk_id": chunk_id,
+            "nct_id": nct_id,
+            "title": title,
+            "chunk_type": chunk_type,
+            "text": text,
+            "source_fields": list(row.get("source_fields") or []),
+            "rank_weight": float(row.get("rank_weight") or 1.0),
+            "record": self.catalog.get_record(nct_id) or {
+                "nct_id": nct_id,
+                "display_title": _normalize_whitespace(row.get("display_title") or row.get("title") or nct_id),
+                "overall_status": _normalize_whitespace(row.get("overall_status")),
+                "study_type": _normalize_whitespace(row.get("study_type")),
+                "phase": _normalize_whitespace(row.get("phase")),
+                "primary_purpose": _normalize_whitespace(row.get("primary_purpose")),
+                "conditions": list(row.get("conditions") or []),
+                "interventions": list(row.get("interventions") or []),
+                "gender": _normalize_whitespace(row.get("gender")),
+                "age_floor_years": row.get("age_floor_years"),
+                "age_ceiling_years": row.get("age_ceiling_years"),
+                "source_url": _normalize_whitespace(row.get("source_url")),
+            },
+        }
+
+    def _hydrate_chunk_rows(self, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        hydrated: list[dict[str, Any]] = []
+        for row in list(rows or []):
+            payload = self._row_document_payload(row)
+            if payload is None:
+                continue
+            candidate = {
+                "chunk_id": payload["chunk_id"],
+                "nct_id": payload["nct_id"],
+                "title": payload["title"],
+                "chunk_type": payload["chunk_type"],
+                "text": payload["text"],
+                "source_fields": list(payload["source_fields"]),
+                "rank_weight": float(payload["rank_weight"]),
                 "score": float(row.get("score") or 0.0),
                 "match_sources": sorted(set(list(row.get("match_sources") or []))),
             }
@@ -1704,6 +1843,7 @@ class TrialChunkRetrievalTool:
         normalized_bm25_scores = _normalize_scores(bm25_rows)
         normalized_vector_scores = _normalize_scores(vector_rows)
         grouped_chunks: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        grouped_records: dict[str, dict[str, Any]] = {}
         merged: dict[str, dict[str, Any]] = {}
 
         for row in list(bm25_rows or []):
@@ -1721,16 +1861,18 @@ class TrialChunkRetrievalTool:
             merged[chunk_id]["vector_row"] = dict(row)
 
         for chunk_id, raw_bundle in merged.items():
-            document = self.catalog.get(chunk_id)
-            if document is None:
+            source_row = dict(raw_bundle.get("bm25_row") or raw_bundle.get("vector_row") or {})
+            payload = self._row_document_payload(source_row)
+            if payload is None:
                 continue
+            grouped_records.setdefault(str(payload["nct_id"]), dict(payload.get("record") or {}))
             combined_score = float(normalized_bm25_scores.get(chunk_id) or 0.0) + float(
                 normalized_vector_scores.get(chunk_id) or 0.0
             )
-            weighted_score = combined_score * float(document.rank_weight)
+            weighted_score = combined_score * float(payload["rank_weight"])
             chunk_payload = {
                 "chunk_id": chunk_id,
-                "chunk_type": document.chunk_type,
+                "chunk_type": payload["chunk_type"],
                 "score": float(weighted_score),
                 "bm25_score": float((raw_bundle.get("bm25_row") or {}).get("score") or 0.0),
                 "vector_score": float((raw_bundle.get("vector_row") or {}).get("score") or 0.0),
@@ -1740,14 +1882,14 @@ class TrialChunkRetrievalTool:
                         *list((raw_bundle.get("vector_row") or {}).get("match_sources") or []),
                     }
                 ),
-                "source_fields": list(document.source_fields),
-                "text": document.text,
+                "source_fields": list(payload["source_fields"]),
+                "text": payload["text"],
             }
-            grouped_chunks[document.nct_id].append(chunk_payload)
+            grouped_chunks[payload["nct_id"]].append(chunk_payload)
 
         ranked_trials: list[dict[str, Any]] = []
         for nct_id, chunk_rows in grouped_chunks.items():
-            record = self.catalog.get_record(nct_id) or {"nct_id": nct_id}
+            record = self.catalog.get_record(nct_id) or grouped_records.get(nct_id) or {"nct_id": nct_id}
             status_meta = _map_protocol_trial_status(record)
             chunk_rows.sort(
                 key=lambda row: (
@@ -1836,7 +1978,7 @@ def create_trial_chunk_retrieval_tool(
     output_root: str | Path | None = None,
     backend: str = "hybrid",
     vector_retriever: Any | None = None,
-    vector_store: str = "faiss",
+    vector_store: str = "qdrant",
     qdrant_collection_name: str | None = None,
     qdrant_url: str | None = None,
     qdrant_api_key: str | None = None,
@@ -1872,7 +2014,13 @@ def create_trial_chunk_retrieval_tool(
         if cached is not None:
             return cached
 
-    catalog = TrialChunkCatalog.from_output_root(resolved_root)
+    explicit_qdrant_url = bool(qdrant_url and str(qdrant_url).strip())
+    use_qdrant_server = bool(explicit_qdrant_url and resolved_qdrant_url and not resolved_qdrant_path)
+    normalized_backend = "vector" if use_qdrant_server and normalized_backend == "hybrid" else normalized_backend
+    catalog = TrialChunkCatalog.from_output_root(
+        resolved_root,
+        load_documents=not (use_qdrant_server and normalized_backend == "vector"),
+    )
     resolved_vector_retriever = vector_retriever
     if resolved_vector_retriever is None and normalized_backend in {"vector", "hybrid"}:
         if normalized_vector_store == "qdrant":
@@ -1900,6 +2048,7 @@ def create_trial_chunk_retrieval_tool(
         catalog,
         vector_retriever=resolved_vector_retriever,
         backend="bm25" if resolved_vector_retriever is None else normalized_backend,
+        lazy_bm25=use_qdrant_server and normalized_backend == "vector" and resolved_vector_retriever is not None,
     )
     if should_cache:
         with _CACHE_LOCK:

@@ -10,6 +10,7 @@ from typing import Any
 
 
 _CACHE_LOCK = threading.RLock()
+_CACHE_KEY_LOCKS: dict[tuple[str, str], threading.Lock] = {}
 _MEDCPT_RESOURCE_CACHE: dict[tuple[str, str, str], tuple[Any, Any, Any]] = {}
 
 
@@ -21,6 +22,55 @@ def _document_field(document: Any, name: str) -> Any:
     if isinstance(document, Mapping):
         return document.get(name)
     return getattr(document, name, None)
+
+
+def _get_cache_key_lock(namespace: str, cache_key: Any) -> threading.Lock:
+    normalized_key = (str(namespace), str(cache_key))
+    with _CACHE_LOCK:
+        lock = _CACHE_KEY_LOCKS.get(normalized_key)
+        if lock is None:
+            lock = threading.Lock()
+            _CACHE_KEY_LOCKS[normalized_key] = lock
+    return lock
+
+
+def clear_medcpt_resource_cache() -> None:
+    with _CACHE_LOCK:
+        _CACHE_KEY_LOCKS.clear()
+        _MEDCPT_RESOURCE_CACHE.clear()
+
+
+def load_shared_medcpt_resources(
+    *,
+    device: str,
+    query_model_name: str,
+    doc_model_name: str,
+    AutoModel: Any,
+    AutoTokenizer: Any,
+) -> tuple[Any, Any, Any]:
+    cache_key = (str(device), str(query_model_name), str(doc_model_name))
+    with _CACHE_LOCK:
+        cached = _MEDCPT_RESOURCE_CACHE.get(cache_key)
+    if cached is not None:
+        return cached
+
+    with _get_cache_key_lock("medcpt_resources", cache_key):
+        with _CACHE_LOCK:
+            cached = _MEDCPT_RESOURCE_CACHE.get(cache_key)
+        if cached is not None:
+            return cached
+
+        query_encoder = AutoModel.from_pretrained(query_model_name).to(device)
+        doc_encoder = AutoModel.from_pretrained(doc_model_name).to(device)
+        tokenizer = AutoTokenizer.from_pretrained(query_model_name)
+        if hasattr(query_encoder, "eval"):
+            query_encoder.eval()
+        if hasattr(doc_encoder, "eval"):
+            doc_encoder.eval()
+
+        with _CACHE_LOCK:
+            cached = _MEDCPT_RESOURCE_CACHE.setdefault(cache_key, (query_encoder, doc_encoder, tokenizer))
+        return cached
 
 
 def _document_to_brief(document: Any) -> dict[str, Any]:
@@ -156,23 +206,13 @@ class MedCPTRetriever:
         self._index = self._load_or_build_index()
 
     def _load_shared_resources(self, *, AutoModel: Any, AutoTokenizer: Any) -> tuple[Any, Any, Any]:
-        cache_key = (self._device, self.QUERY_MODEL_NAME, self.DOC_MODEL_NAME)
-        with _CACHE_LOCK:
-            cached = _MEDCPT_RESOURCE_CACHE.get(cache_key)
-            if cached is not None:
-                return cached
-
-        query_encoder = AutoModel.from_pretrained(self.QUERY_MODEL_NAME).to(self._device)
-        doc_encoder = AutoModel.from_pretrained(self.DOC_MODEL_NAME).to(self._device)
-        tokenizer = AutoTokenizer.from_pretrained(self.QUERY_MODEL_NAME)
-        if hasattr(query_encoder, "eval"):
-            query_encoder.eval()
-        if hasattr(doc_encoder, "eval"):
-            doc_encoder.eval()
-
-        with _CACHE_LOCK:
-            cached = _MEDCPT_RESOURCE_CACHE.setdefault(cache_key, (query_encoder, doc_encoder, tokenizer))
-        return cached
+        return load_shared_medcpt_resources(
+            device=self._device,
+            query_model_name=self.QUERY_MODEL_NAME,
+            doc_model_name=self.DOC_MODEL_NAME,
+            AutoModel=AutoModel,
+            AutoTokenizer=AutoTokenizer,
+        )
 
     def _load_or_build_index(self):
         cache_paths = self.catalog.dense_index_cache_paths(

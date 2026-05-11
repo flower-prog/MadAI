@@ -460,6 +460,7 @@ class TrialRetrievalToolTests(unittest.TestCase):
                     "title": "Primary Trial",
                     "status": "trial_matched",
                     "enrollment_open": True,
+                    "eligibility_inclusion_text": "- Age >= 18 years",
                     "actions": ["Confirm site enrollment."],
                 },
                 {
@@ -500,10 +501,157 @@ class TrialRetrievalToolTests(unittest.TestCase):
         self.assertEqual(result.treatment_bundle["trial_candidates"][0]["nct_id"], "NCT5001")
         self.assertEqual(result.treatment_bundle["trial_selection"]["selected_trial"]["nct_id"], "NCT5001")
         self.assertEqual(result.treatment_bundle["trial_selection"]["trial_status_assessment"]["overall_status"], "")
+        self.assertIn("eligibility_assessment_bundle", result.treatment_bundle)
+        self.assertEqual(result.final_output["eligibility_assessment_bundle"]["assessed_trial_count"], 2)
+        self.assertEqual(
+            result.treatment_bundle["eligibility_assessment_bundle"],
+            result.final_output["eligibility_assessment_bundle"],
+        )
+        self.assertIn("calculator_evidence_bundle", result.treatment_bundle)
+        self.assertIn("medical_knowledge_bundle", result.treatment_bundle)
+        self.assertEqual(result.treatment_bundle["medical_knowledge_bundle"]["schema_version"], 1)
+        self.assertEqual(result.treatment_bundle["medical_knowledge_bundle"]["status"], "not_configured")
         self.assertTrue(result.treatment_bundle["trial_selection"]["selection_reason"])
         self.assertEqual(result.treatment_recommendations[0].linked_trials, ["NCT5001", "NCT5002"])
         self.assertEqual(result.protocol_recommendations[0].linked_trials, ["NCT5001", "NCT5002"])
         self.assertEqual(len(fake_retriever.calls), 1)
+
+    def test_protocol_node_prefers_criterion_level_eligible_trial(self) -> None:
+        trial_bundle = {
+            "query_text": "melanoma",
+            "backend_used": "hybrid",
+            "available_backends": ["bm25", "vector", "hybrid"],
+            "department_tags": ["肿瘤科"],
+            "fallback_to_full_catalog": False,
+            "coarse_candidate_ids": ["NCTINELIGIBLE", "NCTELIGIBLE"],
+            "bm25_top5": [],
+            "vector_top5": [],
+            "candidate_ranking": [
+                {
+                    "nct_id": "NCTINELIGIBLE",
+                    "title": "Female Only Trial",
+                    "status": "trial_matched",
+                    "overall_status": "Recruiting",
+                    "enrollment_open": True,
+                    "eligibility_inclusion_text": "- Sex Female",
+                },
+                {
+                    "nct_id": "NCTELIGIBLE",
+                    "title": "Adult Trial",
+                    "status": "trial_matched",
+                    "overall_status": "Recruiting",
+                    "enrollment_open": True,
+                    "eligibility_inclusion_text": "- Age >= 18 years",
+                },
+            ],
+        }
+        fake_retriever = _FakeTrialRetriever(trial_bundle)
+        state = GraphState(
+            request="整理病例",
+            structured_case_json={
+                "raw_text": "62-year-old male with melanoma.",
+                "case_summary": "melanoma",
+                "problem_list": ["melanoma"],
+            },
+            calculation_results=[
+                CalculationArtifact(
+                    name="risk_result",
+                    category="risk_score",
+                    status="completed",
+                    linked_calculator="PMID-1",
+                )
+            ],
+            calculation_bundle={"mode": "baseline"},
+            tool_registry={"trial_retriever": fake_retriever},
+            department="肿瘤科",
+            department_tags=["肿瘤科"],
+        )
+
+        result = protocol_node(state)
+
+        self.assertEqual(result.treatment_bundle["trial_selection"]["selected_trial"]["nct_id"], "NCTELIGIBLE")
+        self.assertEqual(result.treatment_recommendations[0].linked_trials, ["NCTELIGIBLE"])
+        alternatives = result.treatment_bundle["trial_selection"]["alternatives"]
+        self.assertEqual(alternatives[0]["nct_id"], "NCTINELIGIBLE")
+        self.assertEqual(alternatives[0]["eligibility_aggregate_status"], "ineligible")
+
+    def test_protocol_node_uses_env_configured_trial_limits(self) -> None:
+        fake_retriever = _FakeTrialRetriever(
+            {
+                "query_text": "melanoma",
+                "backend_used": "bm25",
+                "available_backends": ["bm25"],
+                "department_tags": ["肿瘤科"],
+                "fallback_to_full_catalog": False,
+                "coarse_candidate_ids": ["NCT5001", "NCT5002", "NCT5003"],
+                "bm25_top5": [],
+                "vector_top5": [],
+                "candidate_ranking": [
+                    {"nct_id": "NCT5001", "title": "Trial 1"},
+                    {"nct_id": "NCT5002", "title": "Trial 2"},
+                    {"nct_id": "NCT5003", "title": "Trial 3"},
+                ],
+            }
+        )
+        state = GraphState(
+            request="整理病例",
+            structured_case_json={"case_summary": "melanoma"},
+            tool_registry={"trial_retriever": fake_retriever},
+            department="肿瘤科",
+            department_tags=["肿瘤科"],
+        )
+
+        with patch.dict(
+            "os.environ",
+            {
+                "MEDAI_PROTOCOL_TRIAL_COARSE_TOP_K": "1000",
+                "MEDAI_PROTOCOL_TRIAL_TOP_K": "50",
+                "MEDAI_PROTOCOL_ELIGIBILITY_LIMIT": "2",
+            },
+            clear=False,
+        ):
+            result = protocol_node(state)
+
+        self.assertEqual(fake_retriever.calls[0]["kwargs"]["coarse_top_k"], 1000)
+        self.assertEqual(fake_retriever.calls[0]["kwargs"]["top_k"], 50)
+        self.assertEqual(result.final_output["eligibility_assessment_bundle"]["assessed_trial_count"], 2)
+        trace_tool_calls = result.final_output["execution_trace"]["agents"][-1]["tool_calls"]
+        self.assertEqual(trace_tool_calls[0]["input"]["eligibility_limit"], 2)
+
+    def test_protocol_node_can_skip_trial_agent_for_protocol_terminology_testing(self) -> None:
+        fake_retriever = _FakeTrialRetriever(
+            {
+                "query_text": "melanoma",
+                "backend_used": "bm25",
+                "available_backends": ["bm25"],
+                "department_tags": ["肿瘤科"],
+                "fallback_to_full_catalog": False,
+                "coarse_candidate_ids": ["NCT5001"],
+                "bm25_top5": [],
+                "vector_top5": [],
+                "candidate_ranking": [{"nct_id": "NCT5001", "title": "Trial 1"}],
+            }
+        )
+        state = GraphState(
+            request="整理病例",
+            structured_case_json={"case_summary": "melanoma", "problem_list": ["melanoma"]},
+            tool_registry={"trial_retriever": fake_retriever},
+            department="肿瘤科",
+            department_tags=["肿瘤科"],
+        )
+
+        with patch.dict("os.environ", {"MEDAI_PROTOCOL_SKIP_TRIAL_AGENT": "true"}, clear=False):
+            result = protocol_node(state)
+
+        self.assertEqual(len(fake_retriever.calls), 0)
+        self.assertEqual(result.trial_retrieval_bundle["status"], "skipped")
+        self.assertEqual(result.final_output["eligibility_assessment_bundle"]["status"], "skipped")
+        self.assertEqual(
+            result.final_output["protocol_decision_bundle"]["branch_status"]["trial_agent"],
+            "skipped",
+        )
+        self.assertIn("patient_evidence_bundle", result.treatment_bundle)
+        self.assertIn("protocol_decision_bundle", result.treatment_bundle)
 
     def test_protocol_node_adds_trial_candidate_review_without_calculation_signal(self) -> None:
         fake_retriever = _FakeTrialRetriever(

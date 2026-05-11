@@ -20,6 +20,12 @@ def default_trial_qdrant_server_url() -> str:
 
 def default_trial_qdrant_storage_path() -> Path:
     project_root = Path(__file__).resolve().parents[3]
+    organized_path = project_root / "vector_stores" / "trials" / "full" / "qdrant_embedded"
+    if organized_path.exists():
+        return organized_path
+    legacy_path = project_root / "outputs" / "qdrant_trial_chunks_full"
+    if legacy_path.exists():
+        return legacy_path
     return project_root / "outputs" / "qdrant_trial_chunks"
 
 
@@ -33,9 +39,11 @@ def resolve_trial_qdrant_runtime_config(
     enable_default_path: bool = False,
 ) -> dict[str, Any]:
     default_qdrant_path = default_trial_qdrant_storage_path()
-    requested_url = _normalize_whitespace(url or os.getenv("MEDAI_TRIAL_QDRANT_URL")) or None
     resolved_api_key = _normalize_whitespace(api_key or os.getenv("MEDAI_TRIAL_QDRANT_API_KEY")) or None
     requested_path = _normalize_whitespace(path or os.getenv("MEDAI_TRIAL_QDRANT_PATH"))
+    requested_url = _normalize_whitespace(url or os.getenv("MEDAI_TRIAL_QDRANT_URL")) or None
+    if requested_path:
+        requested_url = None
     resolved_collection_name = (
         _normalize_whitespace(collection_name or os.getenv("MEDAI_TRIAL_QDRANT_COLLECTION"))
         or DEFAULT_QDRANT_COLLECTION_NAME

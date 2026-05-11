@@ -17,6 +17,8 @@ sys.path.insert(0, PROJECT_ROOT_STR)
 
 
 from agent.config.env import load_dotenv_if_present
+from agent.clinical_tool_agent import prewarm_clinical_tool_job
+from agent.graph.types import ClinicalToolJob
 from agent.workflow import run_workflow
 
 if __package__ in {None, ""}:
@@ -235,6 +237,18 @@ def main() -> int:
         raise SystemExit(
             "Unable to resolve riskcalcs / pmid metadata paths. Pass --riskcalcs-path and --pmid-metadata-path explicitly."
         )
+
+    prewarm_clinical_tool_job(
+        ClinicalToolJob(
+            mode="question",
+            riskcalcs_path=resolved_riskcalcs_path,
+            pmid_metadata_path=resolved_pmid_metadata_path,
+            retriever_backend=args.retriever_backend,
+            llm_model=args.llm_model,
+            top_k=args.top_k or 30,
+            max_selected_tools=1,
+        )
+    )
 
     total = len(selected_entries)
     worker_count = max(1, min(int(args.workers), total))

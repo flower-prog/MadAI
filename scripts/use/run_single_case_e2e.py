@@ -103,8 +103,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--trial-vector-store",
         choices=("auto", "faiss", "qdrant", "qdrant_local"),
-        default="auto",
-        help="Explicit trial vector store for the injected trial retriever.",
+        default="qdrant",
+        help="Explicit trial vector store for the injected trial retriever. Defaults to remote/server Qdrant.",
     )
     parser.add_argument(
         "--trial-qdrant-collection",

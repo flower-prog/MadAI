@@ -6,6 +6,7 @@ from .snapshots import FileSnapshotStore
 from .nodes import (
     clinical_assisstment_node,
     orchestrator_node,
+    protocol_entry_node,
     protocol_node,
     reporter_node,
 )
@@ -16,9 +17,13 @@ class SimpleAgentGraph:
     """MedAI 的轻量路由图。
 
     当前流程遵循固定主链路：
-    `orchestrator -> clinical_assisstment -> protocol -> reporter`
+    `orchestrator -> protocol_entry -> reporter`
 
     其中 calculator 仍然作为 `clinical_assisstment` 节点下的子执行器。
+    `protocol_entry` 默认在内部 fan-out/fan-in 执行 protocol preflight
+    和 clinical_assisstment/calculator 分支，然后调用最终 protocol 汇总；
+    也可以根据环境变量或状态开关跳过 clinical/calculator 分支或 protocol 分支，
+    便于模块化测试。
     `reporter` 节点负责判断本轮结果是否通过，并在需要时回退到
     `orchestrator`，最多执行三轮总迭代。
     """
@@ -27,6 +32,7 @@ class SimpleAgentGraph:
         """注册这个轻量图中可用的 MedAI 路由节点。"""
         self.node_map: dict[AgentName, Callable[[GraphState], GraphState]] = {
             "orchestrator": orchestrator_node,
+            "protocol_entry": protocol_entry_node,
             "clinical_assisstment": clinical_assisstment_node,
             "protocol": protocol_node,
             "reporter": reporter_node,

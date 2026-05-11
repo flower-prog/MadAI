@@ -14,7 +14,12 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 
-from agent.trial_vector_kb import build_trial_chunks, build_trial_record_from_xml_bytes, build_trial_vector_kb
+from agent.trial_vector_kb import (
+    build_trial_chunks,
+    build_trial_record_from_xml_bytes,
+    build_trial_vector_kb,
+    split_eligibility_sections_with_metadata,
+)
 
 
 def _trial_xml(
@@ -164,6 +169,8 @@ class TrialVectorKbBuildTests(unittest.TestCase):
         self.assertIn("Pembrolizumab", record["intervention_terms"])
         self.assertIn("Histologically confirmed melanoma", record["eligibility_inclusion_text"])
         self.assertIn("Active autoimmune disease", record["eligibility_exclusion_text"])
+        self.assertEqual(record["eligibility_section_parse_status"], "parsed")
+        self.assertEqual(record["eligibility_unsplit_text"], "")
         self.assertIn("title: Pembrolizumab for Metastatic Melanoma", record["overview_text"])
 
         chunk_types = {chunk["chunk_type"] for chunk in chunks}
@@ -245,6 +252,61 @@ class TrialVectorKbBuildTests(unittest.TestCase):
             if line.strip()
         ]
         self.assertTrue(chunk_rows)
+
+    def test_split_eligibility_sections_supports_key_heading_variants(self) -> None:
+        split = split_eligibility_sections_with_metadata(
+            "Key Inclusion Criteria: adults with melanoma Key Exclusion Criteria: active infection",
+            nct_id="NCTKEY001",
+        )
+
+        self.assertEqual(split.parse_status, "parsed")
+        self.assertEqual(split.inclusion_text, "adults with melanoma")
+        self.assertEqual(split.exclusion_text, "active infection")
+        self.assertEqual([section.section_type for section in split.sections], ["inclusion", "exclusion"])
+        self.assertEqual(split.sections[0].heading_text, "Key Inclusion Criteria")
+
+    def test_split_eligibility_sections_handles_single_inclusion_heading(self) -> None:
+        split = split_eligibility_sections_with_metadata(
+            "Patients must meet all of the following: age at least 18; ECOG 0-1",
+            nct_id="NCTINC001",
+        )
+
+        self.assertEqual(split.parse_status, "inclusion_only")
+        self.assertIn("age at least 18", split.inclusion_text)
+        self.assertEqual(split.exclusion_text, "")
+        self.assertIn("exclusion_section_heading_not_found", split.warnings)
+
+    def test_split_eligibility_sections_handles_single_exclusion_heading(self) -> None:
+        split = split_eligibility_sections_with_metadata(
+            "Patients will be excluded if: active pregnancy or uncontrolled infection",
+            nct_id="NCTEXC001",
+        )
+
+        self.assertEqual(split.parse_status, "exclusion_only")
+        self.assertEqual(split.inclusion_text, "")
+        self.assertIn("active pregnancy", split.exclusion_text)
+        self.assertIn("inclusion_section_heading_not_found", split.warnings)
+
+    def test_split_eligibility_sections_keeps_unheaded_text_unsplit(self) -> None:
+        split = split_eligibility_sections_with_metadata(
+            "Adults with melanoma and adequate organ function. No known active infection.",
+            nct_id="NCTUNS001",
+        )
+
+        self.assertEqual(split.parse_status, "unsplit")
+        self.assertEqual(split.inclusion_text, "")
+        self.assertEqual(split.exclusion_text, "")
+        self.assertIn("Adults with melanoma", split.unsplit_text)
+
+    def test_split_eligibility_sections_handles_reversed_order(self) -> None:
+        split = split_eligibility_sections_with_metadata(
+            "Exclusion Criteria: active autoimmune disease Inclusion Criteria: confirmed melanoma",
+            nct_id="NCTREV001",
+        )
+
+        self.assertEqual(split.parse_status, "parsed")
+        self.assertEqual(split.inclusion_text, "confirmed melanoma")
+        self.assertEqual(split.exclusion_text, "active autoimmune disease")
 
 
 if __name__ == "__main__":

@@ -1,9 +1,16 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
-from agent.graph.nodes import clinical_assisstment_node, orchestrator_node, protocol_node, reporter_node
-from agent.graph.types import ClinicalToolJob, GraphState, RetrievalQuery, ensure_state
+from agent.graph.nodes import (
+    clinical_assisstment_node,
+    orchestrator_node,
+    protocol_entry_node,
+    protocol_node,
+    reporter_node,
+)
+from agent.graph.types import CalculationArtifact, ClinicalToolJob, GraphState, RetrievalQuery, ensure_state
 from agent.graph.types import TreatmentRecommendation
 
 
@@ -113,6 +120,73 @@ class OrchestratorStateTests(unittest.TestCase):
         self.assertEqual(result.department_tags, ["精神心理科", "儿科"])
         self.assertEqual(result.orchestrator_result["department"], "精神心理科")
         self.assertEqual(result.orchestrator_result["department_tags"], ["精神心理科", "儿科"])
+        self.assertEqual(result.next_agent, "protocol_entry")
+
+    def test_protocol_entry_defaults_to_clinical_then_protocol(self) -> None:
+        state = GraphState(request="整理病例")
+
+        with patch.dict("os.environ", {"MEDAI_PROTOCOL_ASYNC_FANOUT": "false"}, clear=False), patch(
+            "agent.graph.nodes.clinical_assisstment_node",
+            side_effect=lambda branch_state: branch_state,
+        ) as clinical_mock, patch(
+            "agent.graph.nodes.protocol_node",
+            side_effect=lambda branch_state, preflight=False: branch_state,
+        ) as protocol_mock:
+            result = protocol_entry_node(state)
+
+        self.assertEqual(result.next_agent, "reporter")
+        self.assertEqual(result.protocol_branch_bundle["mode"], "clinical_then_protocol")
+        self.assertFalse(result.protocol_branch_bundle["skip_clinical_assisstment"])
+        self.assertFalse(result.protocol_branch_bundle["skip_protocol"])
+        self.assertEqual(clinical_mock.call_count, 1)
+        self.assertEqual(protocol_mock.call_count, 1)
+
+    def test_protocol_entry_defaults_to_async_fanout(self) -> None:
+        state = GraphState(request="整理病例", structured_case_json={"case_summary": "summary"})
+
+        with patch.dict("os.environ", {"MEDAI_PROTOCOL_ASYNC_FANOUT": "true"}, clear=False), patch(
+            "agent.graph.nodes.clinical_assisstment_node",
+            side_effect=lambda branch_state: branch_state,
+        ) as clinical_mock, patch(
+            "agent.graph.nodes.protocol_node",
+            side_effect=lambda branch_state, preflight=False: branch_state,
+        ) as protocol_mock:
+            result = protocol_entry_node(state)
+
+        self.assertEqual(result.next_agent, "reporter")
+        self.assertEqual(result.protocol_branch_bundle["mode"], "async_fanout")
+        self.assertTrue(result.protocol_branch_bundle["async_fanout"])
+        self.assertEqual(clinical_mock.call_count, 1)
+        self.assertEqual(protocol_mock.call_count, 2)
+        self.assertTrue(protocol_mock.call_args_list[0].kwargs["preflight"])
+
+    def test_protocol_entry_can_skip_clinical_for_direct_protocol(self) -> None:
+        state = GraphState(request="整理病例")
+
+        with patch.dict("os.environ", {"MEDAI_PROTOCOL_DIRECT": "true"}, clear=False), patch(
+            "agent.graph.nodes.protocol_node",
+            side_effect=lambda branch_state, preflight=False: branch_state,
+        ) as protocol_mock:
+            result = protocol_entry_node(state)
+
+        self.assertEqual(result.next_agent, "reporter")
+        self.assertEqual(result.protocol_branch_bundle["mode"], "direct_protocol")
+        self.assertTrue(result.protocol_branch_bundle["skip_clinical_assisstment"])
+        self.assertEqual(protocol_mock.call_count, 1)
+
+    def test_protocol_entry_can_route_calculator_only(self) -> None:
+        state = GraphState(request="整理病例")
+
+        with patch.dict("os.environ", {"MEDAI_CALCULATOR_ONLY": "1"}, clear=False), patch(
+            "agent.graph.nodes.clinical_assisstment_node",
+            side_effect=lambda branch_state: branch_state,
+        ) as clinical_mock:
+            entry_state = protocol_entry_node(state)
+
+        self.assertEqual(entry_state.next_agent, "reporter")
+        self.assertEqual(entry_state.protocol_branch_bundle["mode"], "calculator_only")
+        self.assertTrue(entry_state.protocol_branch_bundle["skip_protocol"])
+        self.assertEqual(clinical_mock.call_count, 1)
 
     def test_orchestrator_node_classifies_department_via_chat_client_when_missing(self) -> None:
         chat_client = _FakeChatClient(
@@ -308,6 +382,44 @@ class OrchestratorStateTests(unittest.TestCase):
         self.assertTrue(reporter_state.reporter_result)
         self.assertTrue(reporter_state.review_report)
         self.assertIsInstance(reporter_state.clinical_answer, list)
+
+    def test_reporter_accepts_calculator_only_without_protocol_recommendations(self) -> None:
+        state = GraphState(
+            request="计算器单通路测试",
+            structured_case_json={"case_summary": "summary"},
+            clinical_tool_job=ClinicalToolJob(mode="question", text="demo question"),
+            protocol_branch_bundle={
+                "mode": "calculator_only",
+                "skip_protocol": True,
+                "skip_clinical_assisstment": False,
+            },
+            skip_protocol=True,
+            calculation_bundle={"mode": "clinical_tool_agent"},
+            calculation_results=[
+                CalculationArtifact(
+                    name="demo_score",
+                    category="risk_score",
+                    status="completed",
+                    value=3,
+                    source="calculation_subagent",
+                    linked_calculator="123456",
+                )
+            ],
+        )
+
+        result = reporter_node(state)
+
+        self.assertTrue(result.review_report["passed"])
+        self.assertTrue(result.review_passed)
+        self.assertEqual(result.status, "completed")
+        self.assertEqual(result.next_agent, "FINISH")
+        protocol_check = next(
+            check
+            for check in result.review_report["checks"]
+            if check["name"] == "protocol_recommendations_present"
+        )
+        self.assertTrue(protocol_check["passed"])
+        self.assertIn("intentionally skipped", protocol_check["detail"])
 
 
 if __name__ == "__main__":

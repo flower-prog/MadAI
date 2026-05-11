@@ -15,7 +15,11 @@ from typing import Any
 from agent.corpus_paths import discover_complete_corpus_pair
 from agent.graph.types import RetrievalQuery
 from agent.retrieval import FieldedBM25Index, HybridRetriever, MedCPTRetriever, tokenize_bm25_text
-from agent.retrieval.vector import _retrieve_dense_scored_pmids
+from agent.retrieval.vector import (
+    _retrieve_dense_scored_pmids,
+    clear_medcpt_resource_cache,
+    load_shared_medcpt_resources,
+)
 
 from .execution_tools import (
     ChatClient,
@@ -32,7 +36,6 @@ _RETRIEVER_CACHE: dict[tuple[str, str], Any] = {}
 _CACHE_LOCK = threading.RLock()
 _CACHE_KEY_LOCKS: dict[tuple[str, str], threading.Lock] = {}
 _RISKCALCS_PAYLOAD_CACHE: dict[str, dict[str, dict[str, Any]]] = {}
-_MEDCPT_RESOURCE_CACHE: dict[tuple[str, str, str], tuple[Any, Any, Any]] = {}
 _PARAMETER_RETRIEVER_CACHE: dict[
     tuple[str, tuple[tuple[str, float], ...]],
     "RiskCalcParameterRetrievalTool",
@@ -53,11 +56,11 @@ def clear_runtime_caches() -> None:
         _RETRIEVER_CACHE.clear()
         _CACHE_KEY_LOCKS.clear()
         _RISKCALCS_PAYLOAD_CACHE.clear()
-        _MEDCPT_RESOURCE_CACHE.clear()
         _PARAMETER_RETRIEVER_CACHE.clear()
         _INLINE_MEDCPT_RETRIEVER_CACHE.clear()
         _DEPARTMENT_PMID_CACHE.clear()
         _RETRIEVAL_TOOL_CACHE.clear()
+        clear_medcpt_resource_cache()
 
 
 def _resolve_hybrid_branch_top_k(top_k: int) -> int:
@@ -2145,29 +2148,13 @@ class _InlineMedCPTRetriever:
         self._index = self._load_or_build_index()
 
     def _load_shared_resources(self, *, AutoModel: Any, AutoTokenizer: Any) -> tuple[Any, Any, Any]:
-        cache_key = (self._device, self.QUERY_MODEL_NAME, self.DOC_MODEL_NAME)
-        with _CACHE_LOCK:
-            cached = _MEDCPT_RESOURCE_CACHE.get(cache_key)
-        if cached is not None:
-            return cached
-
-        with _get_cache_key_lock("medcpt_resources", cache_key):
-            with _CACHE_LOCK:
-                cached = _MEDCPT_RESOURCE_CACHE.get(cache_key)
-            if cached is not None:
-                return cached
-
-            query_encoder = AutoModel.from_pretrained(self.QUERY_MODEL_NAME).to(self._device)
-            doc_encoder = AutoModel.from_pretrained(self.DOC_MODEL_NAME).to(self._device)
-            tokenizer = AutoTokenizer.from_pretrained(self.QUERY_MODEL_NAME)
-            if hasattr(query_encoder, "eval"):
-                query_encoder.eval()
-            if hasattr(doc_encoder, "eval"):
-                doc_encoder.eval()
-
-            with _CACHE_LOCK:
-                cached = _MEDCPT_RESOURCE_CACHE.setdefault(cache_key, (query_encoder, doc_encoder, tokenizer))
-            return cached
+        return load_shared_medcpt_resources(
+            device=self._device,
+            query_model_name=self.QUERY_MODEL_NAME,
+            doc_model_name=self.DOC_MODEL_NAME,
+            AutoModel=AutoModel,
+            AutoTokenizer=AutoTokenizer,
+        )
 
     def _load_or_build_index(self):
         cache_paths = None
