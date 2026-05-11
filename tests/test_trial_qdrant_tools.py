@@ -115,12 +115,14 @@ class _FakeQdrantClient:
         self.upsert_calls: list[dict[str, object]] = []
         self.search_calls: list[dict[str, object]] = []
         self.hits = list(hits or [])
+        self.points_by_collection: dict[str, dict[str, object]] = {}
 
     def collection_exists(self, collection_name: str) -> bool:
         return collection_name in self.collections
 
     def create_collection(self, *, collection_name: str, vectors_config: object) -> None:
         self.collections.add(collection_name)
+        self.points_by_collection.setdefault(collection_name, {})
         self.create_collection_calls.append(
             {
                 "collection_name": collection_name,
@@ -130,6 +132,7 @@ class _FakeQdrantClient:
 
     def delete_collection(self, *, collection_name: str) -> None:
         self.collections.discard(collection_name)
+        self.points_by_collection.pop(collection_name, None)
         self.delete_collection_calls.append(collection_name)
 
     def create_payload_index(self, *, collection_name: str, field_name: str, field_schema=None, field_type=None) -> None:
@@ -143,6 +146,9 @@ class _FakeQdrantClient:
         )
 
     def upsert(self, *, collection_name: str, points: list[object], wait: bool) -> None:
+        bucket = self.points_by_collection.setdefault(collection_name, {})
+        for point in list(points):
+            bucket[str(getattr(point, "id", "") or "")] = point
         self.upsert_calls.append(
             {
                 "collection_name": collection_name,
@@ -150,6 +156,43 @@ class _FakeQdrantClient:
                 "wait": wait,
             }
         )
+
+    def count(self, *, collection_name: str, exact: bool = False, count_filter=None, query_filter=None):
+        del exact
+        active_filter = count_filter if count_filter is not None else query_filter
+        bucket = self.points_by_collection.get(collection_name, {})
+        if active_filter is None:
+            return SimpleNamespace(count=len(bucket))
+
+        must = list(getattr(active_filter, "must", []) or [])
+        chunk_id_matches: set[str] | None = None
+        for entry in must:
+            if getattr(entry, "key", "") != "chunk_id":
+                continue
+            match = getattr(entry, "match", None)
+            values = list(getattr(match, "any", []) or [])
+            chunk_id_matches = set(values)
+
+        if not chunk_id_matches:
+            return SimpleNamespace(count=0)
+
+        matched = 0
+        for point in bucket.values():
+            payload = dict(getattr(point, "payload", {}) or {})
+            if str(payload.get("chunk_id") or "") in chunk_id_matches:
+                matched += 1
+        return SimpleNamespace(count=matched)
+
+    def retrieve(self, *, collection_name: str, ids: list[str], with_payload: bool = False, with_vectors: bool = False):
+        del with_payload, with_vectors
+        bucket = self.points_by_collection.get(collection_name, {})
+        rows: list[object] = []
+        for point_id in list(ids or []):
+            point = bucket.get(str(point_id))
+            if point is None:
+                continue
+            rows.append(SimpleNamespace(id=str(getattr(point, "id", "") or "")))
+        return rows
 
     def search(
         self,
@@ -172,6 +215,34 @@ class _FakeQdrantClient:
             }
         )
         return list(self.hits[:limit])
+
+
+class _StreamingOnlyCatalog:
+    def __init__(self, documents: list[object], *, output_root: Path, trial_count: int = 1) -> None:
+        self._documents = list(documents)
+        self.output_root = Path(output_root).resolve()
+        self._trial_count = max(int(trial_count), 0)
+
+    def documents(self) -> list[object]:
+        raise AssertionError("sync_catalog should not materialize the full catalog via documents()")
+
+    def trial_count(self) -> int:
+        return self._trial_count
+
+    def document_count(self) -> int:
+        return len(self._documents)
+
+    def document_at(self, index: int):
+        target_index = int(index)
+        if target_index < 0 or target_index >= len(self._documents):
+            return None
+        return self._documents[target_index]
+
+    def iter_documents(self, *, start_offset: int = 0, stop_offset: int | None = None):
+        normalized_start = max(int(start_offset), 0)
+        normalized_stop = len(self._documents) if stop_offset is None else max(int(stop_offset), 0)
+        for document in self._documents[normalized_start:normalized_stop]:
+            yield document
 
 
 class TrialQdrantToolsTests(unittest.TestCase):
@@ -285,6 +356,68 @@ class TrialQdrantToolsTests(unittest.TestCase):
                 _qdrant_point_id("NCTMEL001::eligibility_inclusion::0"),
             ],
         )
+
+    def test_index_manager_can_resume_from_existing_prefix_count(self) -> None:
+        fake_client = _FakeQdrantClient()
+        fake_client.collections.add("trial_chunks_test")
+        fake_embedder = _FakeEmbedder()
+        manager = QdrantTrialChunkIndexManager(
+            self.catalog,
+            collection_name="trial_chunks_test",
+            client=fake_client,
+            models=_FakeModels,
+            embedding_function=fake_embedder,
+        )
+
+        first_doc = self.catalog.get("NCTMEL001::overview::0")
+        self.assertIsNotNone(first_doc)
+        first_point = _FakeModels.PointStruct(
+            id=_qdrant_point_id("NCTMEL001::overview::0"),
+            vector=[1.0, 0.0, 0.5],
+            payload=build_qdrant_trial_chunk_payload(first_doc),
+        )
+        fake_client.upsert(collection_name="trial_chunks_test", points=[first_point], wait=True)
+        fake_client.upsert_calls.clear()
+
+        summary = manager.sync_catalog(resume_prefix_count=True, batch_size=1)
+
+        self.assertEqual(summary["existing_point_count"], 1)
+        self.assertEqual(summary["start_offset"], 1)
+        self.assertEqual(summary["point_count"], 1)
+        self.assertEqual(summary["batch_count"], 1)
+        self.assertEqual(
+            [point.id for call in fake_client.upsert_calls for point in call["points"]],
+            [_qdrant_point_id("NCTMEL001::eligibility_inclusion::0")],
+        )
+
+    def test_index_manager_streams_batches_and_logs_progress(self) -> None:
+        streaming_catalog = _StreamingOnlyCatalog(
+            self.catalog.documents(),
+            output_root=self.temp_root,
+        )
+        fake_client = _FakeQdrantClient()
+        fake_embedder = _FakeEmbedder()
+        manager = QdrantTrialChunkIndexManager(
+            streaming_catalog,
+            collection_name="trial_chunks_test",
+            client=fake_client,
+            models=_FakeModels,
+            embedding_function=fake_embedder,
+        )
+
+        with self.assertLogs("agent.retrieval.qdrant.trial_chunk", level="INFO") as captured_logs:
+            summary = manager.sync_catalog(recreate=True, batch_size=1)
+
+        self.assertEqual(summary["point_count"], 2)
+        self.assertEqual(summary["batch_count"], 2)
+        self.assertEqual(fake_embedder.document_calls, [["NCTMEL001::overview::0"], ["NCTMEL001::eligibility_inclusion::0"]])
+        joined_logs = "\n".join(captured_logs.output)
+        self.assertIn("requested_start_offset=0", joined_logs)
+        self.assertIn("batch_start_offset=0", joined_logs)
+        self.assertIn("batch_end_offset=1", joined_logs)
+        self.assertIn("embedding_seconds=", joined_logs)
+        self.assertIn("upsert_seconds=", joined_logs)
+        self.assertIn("current_collection_count=1", joined_logs)
 
     def test_qdrant_retriever_builds_has_id_filter_and_serializes_hits(self) -> None:
         fake_client = _FakeQdrantClient(
@@ -411,6 +544,23 @@ class TrialQdrantToolsTests(unittest.TestCase):
 
         self.assertIs(tool.vector_retriever, sentinel_vector_retriever)
         mocked_factory.assert_called_once()
+
+    def test_trial_chunk_factory_defaults_to_server_qdrant(self) -> None:
+        sentinel_vector_retriever = object()
+        with patch(
+            "agent.tools.trial_vector_retrieval_tools.create_qdrant_trial_chunk_retriever",
+            return_value=sentinel_vector_retriever,
+        ) as mocked_factory:
+            tool = create_trial_chunk_retrieval_tool(
+                output_root=self.temp_root,
+                backend="hybrid",
+            )
+
+        self.assertIs(tool.vector_retriever, sentinel_vector_retriever)
+        mocked_factory.assert_called_once()
+        _, kwargs = mocked_factory.call_args
+        self.assertEqual(kwargs["collection_name"], "trial_chunks_medcpt_full")
+        self.assertEqual(kwargs["url"], "http://127.0.0.1:6333")
 
 
 if __name__ == "__main__":

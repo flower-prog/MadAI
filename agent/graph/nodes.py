@@ -1,9 +1,20 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
+from copy import deepcopy
 from dataclasses import asdict
+import os
 import re
 from typing import Any
 
+from agent.protocol import (
+    ProtocolGraphConfig,
+    ProtocolGraphState,
+    build_protocol_trial_selection,
+    build_treatment_recommendations,
+    run_protocol_subgraph,
+    to_protocol_recommendations,
+)
 from agent.prompt import build_agent_run_spec
 from agent.tools import (
     RiskCalcComputationRetrievalTool,
@@ -63,8 +74,41 @@ _QUESTION_INSTRUCTION_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^\s*end your final answer with the format", re.IGNORECASE),
     re.compile(r"^\s*answer\s*:\s*<letter>", re.IGNORECASE),
 )
-_PROTOCOL_TRIAL_COARSE_TOP_K = 30
-_PROTOCOL_TRIAL_TOP_K = 10
+_PROTOCOL_CONFIG = ProtocolGraphConfig.from_env
+
+
+def _env_flag(*names: str, default: bool = False) -> bool:
+    for name in names:
+        raw_value = os.getenv(name)
+        if raw_value is None:
+            continue
+        normalized = str(raw_value).strip().lower()
+        if not normalized:
+            continue
+        if normalized in {"1", "true", "yes", "y", "on"}:
+            return True
+        if normalized in {"0", "false", "no", "n", "off"}:
+            return False
+    return default
+
+
+def _skip_clinical_assisstment_enabled(state: GraphState) -> bool:
+    return bool(state.skip_clinical_assisstment) or _env_flag(
+        "MEDAI_PROTOCOL_DIRECT",
+        "MEDAI_SKIP_CLINICAL_ASSISSTMENT",
+        "MEDAI_SKIP_CLINICAL_ASSESSMENT",
+    )
+
+
+def _skip_protocol_enabled(state: GraphState) -> bool:
+    return bool(state.skip_protocol) or _env_flag(
+        "MEDAI_CALCULATOR_ONLY",
+        "MEDAI_SKIP_PROTOCOL",
+    )
+
+
+def _protocol_async_fanout_enabled() -> bool:
+    return _env_flag("MEDAI_PROTOCOL_ASYNC_FANOUT", default=True)
 
 
 def _mark_step(state: GraphState, agent_name: AgentName, *, status: str, result: str | None = None) -> None:
@@ -99,7 +143,11 @@ def _record_agent_prompt(
 
 def _build_prompt_specs() -> dict[str, dict[str, Any]]:
     """为核心工作流中的每个 agent 预构建默认 prompt 规格。"""
-    return {agent_name: build_agent_run_spec(agent_name) for agent_name in TEAM_MEMBERS}
+    return {
+        agent_name: build_agent_run_spec(agent_name)
+        for agent_name in TEAM_MEMBERS
+        if agent_name != "protocol_entry"
+    }
 
 
 def _normalize_department_tag(value: Any) -> str:
@@ -203,17 +251,27 @@ def _default_tool_specs() -> list[ToolSpec]:
 
 
 def _build_default_plan() -> list[PlanStep]:
-    """构建默认的四步 MedAI 工作流计划。"""
+    """构建默认的 MedAI 工作流计划。"""
     return [
         PlanStep(
             step_id=1,
             agent_name="orchestrator",
             title="Initialize MedAI core workflow",
-            description="Create the workflow contract and publish the role map for the four-agent graph.",
+            description="Create the workflow contract and publish the role map for the agent graph.",
             note="This node coordinates only; it does not make medical decisions.",
         ),
         PlanStep(
             step_id=2,
+            agent_name="protocol_entry",
+            title="Protocol entry: branch routing",
+            description=(
+                "Route the post-orchestrator workflow through clinical/calculator, "
+                "direct protocol, or calculator-only testing paths."
+            ),
+            note="This node is rule-based and exists to support modular workflow testing.",
+        ),
+        PlanStep(
+            step_id=3,
             agent_name="clinical_assisstment",
             title="Clinical Assisstment: intake plus child calculator dispatch",
             description=(
@@ -223,14 +281,14 @@ def _build_default_plan() -> list[PlanStep]:
             note="This node combines agent1 intake work with agent2 coordination.",
         ),
         PlanStep(
-            step_id=3,
+            step_id=4,
             agent_name="protocol",
             title="Agent3: Treatment and clinical-trial decision",
             description="Map calculation outputs to treatment paths, similar-case fallbacks, or direct advice.",
             note="This node performs treatment reasoning but does not compile the final physician-facing report.",
         ),
         PlanStep(
-            step_id=4,
+            step_id=5,
             agent_name="reporter",
             title="Agent4: Report and iteration review",
             description="汇总报告，判断当前结果是否成立；若不通过，则回退到 orchestrator，最多执行三轮总迭代。",
@@ -1237,10 +1295,12 @@ def _resolve_trial_retriever(state: GraphState):
         return trial_retriever
 
     backend = state.clinical_tool_job.retriever_backend if state.clinical_tool_job is not None else "hybrid"
-    return create_trial_chunk_retrieval_tool(
+    trial_retriever = create_trial_chunk_retrieval_tool(
         backend=backend,
         vector_store="auto",
     )
+    state.tool_registry["trial_retriever"] = trial_retriever
+    return trial_retriever
 
 
 def _retrieve_trial_candidates(state: GraphState) -> dict[str, Any]:
@@ -1260,13 +1320,14 @@ def _retrieve_trial_candidates(state: GraphState) -> dict[str, Any]:
         }
 
     backend = state.clinical_tool_job.retriever_backend if state.clinical_tool_job is not None else "hybrid"
+    config = _PROTOCOL_CONFIG()
     trial_retriever = _resolve_trial_retriever(state)
 
     if hasattr(trial_retriever, "retrieve_from_structured_case"):
         return trial_retriever.retrieve_from_structured_case(
             structured_case,
-            top_k=_PROTOCOL_TRIAL_TOP_K,
-            coarse_top_k=_PROTOCOL_TRIAL_COARSE_TOP_K,
+            top_k=config.fine_top_k,
+            coarse_top_k=config.coarse_top_k,
             department_tags=list(state.department_tags),
             backend=backend,
         )
@@ -1275,8 +1336,8 @@ def _retrieve_trial_candidates(state: GraphState) -> dict[str, Any]:
     if callable(candidate_tool):
         return candidate_tool(
             structured_case=structured_case,
-            top_k=_PROTOCOL_TRIAL_TOP_K,
-            coarse_top_k=_PROTOCOL_TRIAL_COARSE_TOP_K,
+            top_k=config.fine_top_k,
+            coarse_top_k=config.coarse_top_k,
             department_tags=list(state.department_tags),
             backend=backend,
         )
@@ -1286,462 +1347,31 @@ def _retrieve_trial_candidates(state: GraphState) -> dict[str, Any]:
     )
 
 
-def _top_non_abandoned_trial_ids(trial_bundle: dict[str, Any], *, limit: int = 3) -> list[str]:
-    selected_ids: list[str] = []
-    for candidate in list(trial_bundle.get("candidate_ranking") or []):
-        if str(candidate.get("status") or "").strip() == "abandoned":
-            continue
-        nct_id = str(candidate.get("nct_id") or "").strip()
-        if not nct_id or nct_id in selected_ids:
-            continue
-        selected_ids.append(nct_id)
-        if len(selected_ids) >= max(int(limit), 1):
-            break
-    return selected_ids
-
-
-def _trial_review_actions(trial_bundle: dict[str, Any], *, limit: int = 3) -> list[str]:
-    actions: list[str] = []
-    for candidate in list(trial_bundle.get("candidate_ranking") or [])[: max(int(limit), 1)]:
-        for action in list(candidate.get("actions") or []):
-            text = str(action).strip()
-            if text and text not in actions:
-                actions.append(text)
-    return actions
-
-
-def _normalize_trial_text_list(value: Any) -> list[str]:
-    if value is None:
-        return []
-    if isinstance(value, str):
-        raw_items = [value]
-    else:
-        try:
-            raw_items = list(value)
-        except TypeError:
-            raw_items = [value]
-    deduped: list[str] = []
-    seen: set[str] = set()
-    for item in raw_items:
-        normalized = " ".join(str(item or "").split()).strip()
-        if not normalized:
-            continue
-        key = normalized.casefold()
-        if key in seen:
-            continue
-        seen.add(key)
-        deduped.append(normalized)
-    return deduped
-
-
-def _trial_candidate_text(candidate: dict[str, Any]) -> str:
-    text_parts = [
-        str(candidate.get("title") or ""),
-        str(candidate.get("brief_summary") or ""),
-        str(candidate.get("best_evidence_text") or ""),
-        " ; ".join(_normalize_trial_text_list(candidate.get("conditions"))),
-        " ; ".join(_normalize_trial_text_list(candidate.get("interventions"))),
-        str(candidate.get("primary_purpose") or ""),
-    ]
-    return " ".join(part for part in text_parts if str(part).strip())
-
-
-def _candidate_matches_term(candidate: dict[str, Any], term: str) -> bool:
-    normalized_term = str(term or "").strip().casefold()
-    if not normalized_term:
-        return False
-    candidate_text = _trial_candidate_text(candidate).casefold()
-    return normalized_term in candidate_text
-
-
-def _coerce_optional_float(value: Any) -> float | None:
-    if value in {None, ""}:
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None
-
-
-def _select_protocol_trial_candidate(trial_bundle: dict[str, Any]) -> dict[str, Any]:
-    candidates = [
-        dict(item)
-        for item in list(trial_bundle.get("candidate_ranking") or [])
-        if isinstance(item, dict)
-    ]
-    if not candidates:
-        return {}
-    for candidate in candidates:
-        if str(candidate.get("status") or "").strip() != "abandoned":
-            return candidate
-    return candidates[0]
-
-
-def _assess_protocol_trial_candidate(
-    candidate: dict[str, Any],
-    *,
-    query_profile: dict[str, Any],
-) -> dict[str, Any]:
-    matching_signals: list[str] = []
-    conflicts: list[str] = []
-    missing_information: list[str] = []
-
-    for term in list(query_profile.get("trial_condition_terms") or []):
-        if _candidate_matches_term(candidate, term):
-            matching_signals.append(f"Matched condition focus: {term}.")
-    for term in list(query_profile.get("trial_intervention_terms") or []):
-        if _candidate_matches_term(candidate, term):
-            matching_signals.append(f"Matched intervention focus: {term}.")
-    for term in list(query_profile.get("trial_intent_terms") or []):
-        if _candidate_matches_term(candidate, term):
-            matching_signals.append(f"Matched trial intent: {term}.")
-        elif term.casefold() == "stroke prevention" and str(candidate.get("primary_purpose") or "").casefold() == "prevention":
-            matching_signals.append("Primary purpose aligns with stroke prevention intent.")
-
-    for term in list(query_profile.get("patient_negative_terms") or []):
-        if term in {"diabetes", "congestive heart failure"} and _candidate_matches_term(candidate, term):
-            conflicts.append(
-                f"Trial focus appears to include {term}, which the case explicitly says is absent."
-            )
-
-    age_years = _coerce_optional_float(query_profile.get("age_years"))
-    age_floor = _coerce_optional_float(candidate.get("age_floor_years"))
-    age_ceiling = _coerce_optional_float(candidate.get("age_ceiling_years"))
-    if age_years is not None:
-        if age_floor is not None and age_years < age_floor:
-            conflicts.append(f"Case age {int(age_years)} is below the recorded minimum age {int(age_floor)}.")
-        elif age_floor is None:
-            missing_information.append("Minimum age is not structured on the trial record.")
-        if age_ceiling is not None and age_years > age_ceiling:
-            conflicts.append(f"Case age {int(age_years)} is above the recorded maximum age {int(age_ceiling)}.")
-        elif age_ceiling is None:
-            missing_information.append("Maximum age is not structured on the trial record.")
-
-    patient_gender = str(query_profile.get("gender") or "").strip()
-    trial_gender = str(candidate.get("gender") or "").strip()
-    if patient_gender:
-        if trial_gender and trial_gender not in {"All", patient_gender}:
-            conflicts.append(f"Trial gender restriction is {trial_gender}, while the case is {patient_gender}.")
-        elif not trial_gender:
-            missing_information.append("Trial gender eligibility is not structured on the record.")
-
-    if not str(candidate.get("best_evidence_text") or "").strip():
-        missing_information.append("No matched eligibility/evidence chunk was surfaced for manual review.")
-
-    next_checks = _normalize_trial_text_list(candidate.get("actions"))
-    if not next_checks:
-        next_checks = ["Review the trial inclusion and exclusion criteria against the case manually."]
-    if conflicts:
-        next_checks.append("Verify whether the apparent mismatch is a true exclusion or just noisy retrieval overlap.")
-
-    fit = "possible_match"
-    if str(candidate.get("status") or "").strip() == "abandoned":
-        fit = "not_current_option"
-    elif conflicts:
-        fit = "needs_manual_review"
-    elif matching_signals:
-        fit = "likely_match"
-
-    return {
-        "fit": fit,
-        "matching_signals": _normalize_trial_text_list(matching_signals),
-        "conflicts": _normalize_trial_text_list(conflicts),
-        "missing_information": _normalize_trial_text_list(missing_information),
-        "next_checks": _normalize_trial_text_list(next_checks),
-    }
-
-
-def _build_protocol_trial_selection(
-    trial_bundle: dict[str, Any],
-    *,
-    structured_case: dict[str, Any],
-) -> dict[str, Any]:
-    del structured_case
-    selected_trial = _select_protocol_trial_candidate(trial_bundle)
-    if not selected_trial:
-        return {
-            "selected_trial": None,
-            "selection_reason": "No trial candidate survived retrieval for the current case.",
-            "eligibility_assessment": {
-                "fit": "not_available",
-                "matching_signals": [],
-                "conflicts": [],
-                "missing_information": ["No ranked trial candidates were returned."],
-                "next_checks": ["Adjust the protocol query profile or broaden the trial corpus before retrying."],
-            },
-            "trial_status_assessment": {},
-            "evidence": [],
-            "alternatives": [],
-        }
-
-    query_profile = dict(trial_bundle.get("query_profile") or {})
-    eligibility_assessment = _assess_protocol_trial_candidate(
-        selected_trial,
-        query_profile=query_profile,
-    )
-    status_assessment = {
-        "status": str(selected_trial.get("status") or ""),
-        "overall_status": str(selected_trial.get("overall_status") or ""),
-        "enrollment_open": bool(selected_trial.get("enrollment_open")),
-        "status_reason": str(selected_trial.get("status_reason") or ""),
-    }
-
-    evidence: list[str] = []
-    for item in list(eligibility_assessment.get("matching_signals") or []):
-        if item not in evidence:
-            evidence.append(str(item))
-    best_evidence_text = str(selected_trial.get("best_evidence_text") or "").strip()
-    if best_evidence_text:
-        evidence.append(best_evidence_text[:240])
-    brief_summary = str(selected_trial.get("brief_summary") or "").strip()
-    if brief_summary:
-        evidence.append(brief_summary[:240])
-
-    focus_terms = _normalize_trial_text_list(
-        list(query_profile.get("trial_condition_terms") or [])
-        + list(query_profile.get("trial_intent_terms") or [])
-    )
-    selection_reason = (
-        f"Selected {selected_trial.get('title') or selected_trial.get('nct_id') or 'the top-ranked trial'} "
-        f"because it remained the highest-ranked non-abandoned candidate and matched the protocol focus terms "
-        f"{', '.join(focus_terms[:3]) or 'from the structured case'}."
-    )
-    if status_assessment["overall_status"]:
-        selection_reason += f" Current study status: {status_assessment['overall_status']}."
-
-    alternatives: list[dict[str, Any]] = []
-    for candidate in list(trial_bundle.get("candidate_ranking") or []):
-        if not isinstance(candidate, dict):
-            continue
-        if str(candidate.get("nct_id") or "").strip() == str(selected_trial.get("nct_id") or "").strip():
-            continue
-        alternatives.append(
-            {
-                "nct_id": str(candidate.get("nct_id") or ""),
-                "title": str(candidate.get("title") or ""),
-                "status": str(candidate.get("status") or ""),
-                "overall_status": str(candidate.get("overall_status") or ""),
-                "why_not_selected": (
-                    "Lower final ranking or weaker fit than the selected trial."
-                    if str(candidate.get("status") or "").strip() != "abandoned"
-                    else "Not selected because the trial is not a current option."
-                ),
-            }
-        )
-        if len(alternatives) >= 3:
-            break
-
-    return {
-        "selected_trial": dict(selected_trial),
-        "selection_reason": selection_reason,
-        "eligibility_assessment": eligibility_assessment,
-        "trial_status_assessment": status_assessment,
-        "evidence": evidence[:5],
-        "alternatives": alternatives,
-    }
-
-
-def _augment_treatment_recommendations_with_trials(
-    recommendations: list[TreatmentRecommendation],
-    trial_bundle: dict[str, Any],
-    *,
-    has_completed_results: bool,
-) -> list[TreatmentRecommendation]:
-    """把 protocol trial retrieval 的结果并入治疗建议。"""
-    top_trial_ids = _top_non_abandoned_trial_ids(trial_bundle, limit=3)
-    if has_completed_results and top_trial_ids:
-        for recommendation in recommendations:
-            recommendation.linked_trials = list(top_trial_ids)
-
-    if has_completed_results or not list(trial_bundle.get("candidate_ranking") or []):
-        return recommendations
-
-    candidate_ranking = list(trial_bundle.get("candidate_ranking") or [])
-    top_candidate = dict(candidate_ranking[0] or {}) if candidate_ranking else {}
-    trial_review_actions = _trial_review_actions(trial_bundle, limit=3)
-    if "Review trial eligibility and enrollment details before surfacing any specific study." not in trial_review_actions:
-        trial_review_actions.append(
-            "Review trial eligibility and enrollment details before surfacing any specific study."
-        )
-    recommendations.insert(
-        0,
-        TreatmentRecommendation(
-            name="trial candidate review",
-            strategy="trial_candidate_review",
-            source="trial_retrieval",
-            status="manual_review",
-            rationale=(
-                "Local trial retrieval surfaced candidate studies for the current case, but there is no usable "
-                "calculator-backed risk output strong enough to promote a direct trial match. "
-                f"Top candidate: {top_candidate.get('title') or top_candidate.get('name') or top_candidate.get('nct_id') or 'unknown trial'}."
-            ),
-            linked_trials=list(top_trial_ids),
-            actions=trial_review_actions,
-        ),
-    )
-    return recommendations
-
-
-def _build_treatment_recommendations(
+def _assess_trial_eligibility_candidates(
     state: GraphState,
     *,
-    trial_bundle: dict[str, Any] | None = None,
-) -> list[TreatmentRecommendation]:
-    """把计算结果翻译成治疗层面的建议列表。"""
-    completed_results = [item for item in state.calculation_results if item.status == "completed"]
-    partial_results = [item for item in state.calculation_results if item.status == "partial"]
-    estimated_results = [item for item in state.calculation_results if item.status == "estimated"]
-    effective_trial_bundle = dict(trial_bundle or {})
+    trial_bundle: dict[str, Any],
+    limit: int | None = None,
+) -> dict[str, Any]:
+    """对 protocol 检索出的候选试验做保守的入排标准资格评估。"""
+    if not list(trial_bundle.get("candidate_ranking") or []):
+        return {
+            "schema_version": 1,
+            "assessed_trial_count": 0,
+            "assessed_trials": [],
+        }
 
-    if completed_results:
-        recommendations: list[TreatmentRecommendation] = []
-        for artifact in completed_results[:3]:
-            recommendations.append(
-                TreatmentRecommendation(
-                    name=f"{artifact.name} guided treatment",
-                    strategy="risk_informed_treatment",
-                    source="protocol_reasoning",
-                    status="manual_review",
-                    rationale=(
-                        "A usable risk result is available, so protocol can now derive a treatment direction. "
-                        "Any final trial or regimen match still needs explicit downstream evidence."
-                    ),
-                    linked_calculators=[artifact.linked_calculator] if artifact.linked_calculator else [],
-                    actions=[
-                        "Map the risk output to treatment thresholds or protocol branches.",
-                        "Keep any regimen or trial recommendation evidence-linked and explicitly reviewable.",
-                    ],
-                )
-            )
-        return _augment_treatment_recommendations_with_trials(
-            recommendations,
-            effective_trial_bundle,
-            has_completed_results=True,
-        )
+    trial_retriever = _resolve_trial_retriever(state)
+    from agent.protocol import assess_trial_eligibility_candidates
 
-    if partial_results:
-        recommendations = [
-            TreatmentRecommendation(
-                name="partial calculator result requires parameter completion",
-                strategy="similar_case_fallback",
-                source="partial_parameter_gap",
-                status="similar_case_fallback",
-                rationale=(
-                    "A calculator produced only a provisional result because key parameters are still missing, "
-                    "so treatment and trial routing should remain provisional until those inputs are completed."
-                ),
-                linked_calculators=[
-                    artifact.linked_calculator for artifact in partial_results if artifact.linked_calculator
-                ],
-                actions=[
-                    "Collect the listed missing calculator inputs before treating the score as final.",
-                    "Use the current calculator text only as a provisional lower-bound or partial interpretation.",
-                ],
-            )
-        ]
-        return _augment_treatment_recommendations_with_trials(
-            recommendations,
-            effective_trial_bundle,
-            has_completed_results=False,
-        )
-
-    if estimated_results:
-        recommendations = [
-            TreatmentRecommendation(
-                name="similar-case treatment fallback",
-                strategy="similar_case_fallback",
-                source="estimated_parameter_gap",
-                status="similar_case_fallback",
-                rationale=(
-                    "Calculation is close but not fully executable, so treatment should be chosen only after "
-                    "validating the estimated parameter against similar cases."
-                ),
-                linked_calculators=[
-                    artifact.linked_calculator for artifact in estimated_results if artifact.linked_calculator
-                ],
-                actions=[
-                    "Review the estimated parameter against one or more similar cases.",
-                    "Keep the treatment recommendation provisional until the missing value is validated.",
-                ],
-            )
-        ]
-        return _augment_treatment_recommendations_with_trials(
-            recommendations,
-            effective_trial_bundle,
-            has_completed_results=False,
-        )
-
-    if state.calculator_matches:
-        recommendations = [
-            TreatmentRecommendation(
-                name="similar-case assisted recommendation",
-                strategy="similar_case_fallback",
-                source="calculator_candidates_without_execution",
-                status="similar_case_fallback",
-                rationale=(
-                    "Candidate calculators were found, but no risk value was strong enough to anchor treatment. "
-                    "A clinician should review similar cases and trial options directly."
-                ),
-                linked_calculators=[match.pmid for match in state.calculator_matches[:3] if match.pmid],
-                actions=[
-                    "Use retrieved candidate calculators and their eligibility notes as a screening aid.",
-                    "Search similar cases or evidence sources before escalating treatment.",
-                ],
-            )
-        ]
-        return _augment_treatment_recommendations_with_trials(
-            recommendations,
-            effective_trial_bundle,
-            has_completed_results=False,
-        )
-
-    recommendations = [
-        TreatmentRecommendation(
-            name="direct treatment advice",
-            strategy="direct_advice",
-            source="no_calculation_signal",
-            status="advice_only",
-            rationale=(
-                "Neither executable calculators nor valid fallback signals are available, so the graph can only "
-                "return a clinician-reviewed recommendation path."
-            ),
-            actions=[
-                "Collect more structured parameters before rerunning MedAI.",
-                "If treatment must proceed now, provide direct conservative treatment advice and mark it as low confidence.",
-            ],
-        )
-    ]
-    return _augment_treatment_recommendations_with_trials(
-        recommendations,
-        effective_trial_bundle,
-        has_completed_results=False,
+    return assess_trial_eligibility_candidates(
+        structured_case=dict(state.structured_case_json or {}),
+        calculation_results=list(state.calculation_results or []),
+        calculator_matches=list(state.calculator_matches or []),
+        trial_bundle=dict(trial_bundle or {}),
+        trial_retriever=trial_retriever,
+        limit=limit or _PROTOCOL_CONFIG().eligibility_limit,
     )
-
-
-def _to_protocol_recommendations(
-    recommendations: list[TreatmentRecommendation],
-) -> list[ProtocolRecommendation]:
-    """把治疗建议转换成 protocol 阶段使用的摘要对象。"""
-    protocol_recommendations: list[ProtocolRecommendation] = []
-    for recommendation in recommendations:
-        if recommendation.status in {"matched", "trial_matched"}:
-            status = "matched"
-        elif recommendation.status == "abandoned":
-            status = "insufficient_data"
-        else:
-            status = "needs_revision"
-        protocol_recommendations.append(
-            ProtocolRecommendation(
-                name=recommendation.name,
-                category=recommendation.strategy,
-                status=status,
-                rationale=recommendation.rationale,
-                linked_calculators=list(recommendation.linked_calculators),
-                linked_trials=list(recommendation.linked_trials),
-                corrections=list(recommendation.actions),
-            )
-        )
-    return protocol_recommendations
 
 
 def _reset_iteration_outputs(state: GraphState) -> None:
@@ -1765,6 +1395,10 @@ def _reset_iteration_outputs(state: GraphState) -> None:
 def _build_report_review(state: GraphState, report_payload: dict[str, Any], *, attempt: int) -> dict[str, Any]:
     """评估当前这一轮输出是否足够完整、可以直接保留。"""
     calculation_bundle = dict(state.calculation_bundle or {})
+    branch_bundle = dict(state.protocol_branch_bundle or {})
+    branch_mode = str(branch_bundle.get("mode") or "").strip()
+    protocol_skipped = bool(branch_bundle.get("skip_protocol")) or bool(state.skip_protocol)
+    calculator_only = protocol_skipped or branch_mode == "calculator_only"
     calculation_error = str(calculation_bundle.get("error") or "").strip()
     has_failed_calculation = any(item.status == "failed" for item in state.calculation_results)
     has_recommendations = bool(state.treatment_recommendations)
@@ -1777,8 +1411,12 @@ def _build_report_review(state: GraphState, report_payload: dict[str, Any], *, a
         },
         {
             "name": "protocol_recommendations_present",
-            "passed": has_recommendations,
-            "detail": "protocol must return at least one treatment recommendation.",
+            "passed": True if calculator_only else has_recommendations,
+            "detail": (
+                "protocol was intentionally skipped for calculator-only validation."
+                if calculator_only
+                else "protocol must return at least one treatment recommendation."
+            ),
         },
         {
             "name": "no_calculation_runtime_error",
@@ -1800,7 +1438,7 @@ def _build_report_review(state: GraphState, report_payload: dict[str, Any], *, a
     for check in checks:
         if check["passed"]:
             continue
-        blocking = check["name"] != "calculation_artifacts_present"
+        blocking = check["name"] != "calculation_artifacts_present" or calculator_only
         severity = "critical" if blocking else "warning"
         issues.append(_issue(severity, str(check["detail"]), str(check["name"]), blocking=blocking))
 
@@ -1815,6 +1453,59 @@ def _build_report_review(state: GraphState, report_payload: dict[str, Any], *, a
         "issues": [asdict(issue) for issue in issues],
         "report_outcome": report_payload.get("outcome"),
     }
+
+
+def _merge_clinical_branch_state(target: GraphState, clinical_state: GraphState) -> None:
+    target.problem_list = list(clinical_state.problem_list)
+    target.retrieval_queries = list(clinical_state.retrieval_queries)
+    target.calculator_matches = list(clinical_state.calculator_matches)
+    target.assessment_bundle = dict(clinical_state.assessment_bundle or {})
+    target.calculation_bundle = dict(clinical_state.calculation_bundle or {})
+    target.calculation_tasks = list(clinical_state.calculation_tasks)
+    target.calculation_results = list(clinical_state.calculation_results)
+    target.structured_case_json = dict(clinical_state.structured_case_json or {})
+    target.clinical_tool_job = clinical_state.clinical_tool_job
+    target.errors = list(clinical_state.errors)
+    target.safety_issues = list(clinical_state.safety_issues)
+    for key, value in dict(clinical_state.final_output or {}).items():
+        if key == "execution_trace":
+            continue
+        target.final_output[key] = value
+
+
+def _merge_protocol_branch_state(target: GraphState, protocol_state: GraphState) -> None:
+    target.protocol_recommendations = list(protocol_state.protocol_recommendations)
+    target.trial_retrieval_bundle = dict(protocol_state.trial_retrieval_bundle or {})
+    target.treatment_bundle = dict(protocol_state.treatment_bundle or {})
+    target.treatment_recommendations = list(protocol_state.treatment_recommendations)
+    for key in (
+        "trial_retrieval_bundle",
+        "eligibility_assessment_bundle",
+        "patient_evidence_bundle",
+        "calculator_evidence_bundle",
+        "medical_knowledge_bundle",
+        "missing_data_bundle",
+        "protocol_decision_bundle",
+        "treatment_bundle",
+    ):
+        if key in protocol_state.final_output:
+            target.final_output[key] = protocol_state.final_output[key]
+
+
+def _append_branch_trace(target: GraphState, branch_state: GraphState, *, branch_name: str) -> None:
+    branch_trace = dict((branch_state.final_output or {}).get("execution_trace") or {})
+    for item in list(branch_trace.get("agents") or []):
+        payload = dict(item)
+        payload.setdefault("metadata", {})
+        if isinstance(payload["metadata"], dict):
+            payload["metadata"].setdefault("branch", branch_name)
+        append_agent_trace(target.final_output, payload)
+
+
+def _run_protocol_preflight_branch(state: GraphState) -> GraphState:
+    branch_state = deepcopy(state)
+    branch_state.skip_protocol = False
+    return protocol_node(branch_state, preflight=True)
 
 
 def orchestrator_node(state: GraphState) -> GraphState:  # 定义 orchestrator 节点；输入是共享状态，输出还是更新后的共享状态
@@ -1852,7 +1543,7 @@ def orchestrator_node(state: GraphState) -> GraphState:  # 定义 orchestrator �
         "department_tags": list(state.department_tags),
         "department_tag_library": list(DEPARTMENT_TAG_LIBRARY),
         "notes": [
-            "The graph now centers on orchestrate -> assess(+child calculator) -> protocol -> report/review.",
+            "The graph now centers on orchestrate -> protocol_entry -> optional assess(+child calculator) -> protocol -> report/review.",
             "The reporter node is responsible for iteration control and can trigger up to three total passes.",
         ],
     }
@@ -1881,8 +1572,101 @@ def orchestrator_node(state: GraphState) -> GraphState:  # 定义 orchestrator �
         ),
     )
 
-    state.next_agent = "clinical_assisstment"  # 指定下一跳节点为 clinical_assisstment，把控制权交出去
+    state.next_agent = "protocol_entry"  # 指定下一跳节点为 protocol_entry，让它根据分支开关决定后续路径
     return state  # 返回更新后的共享状态，供 graph 继续执行
+
+
+def protocol_entry_node(state: GraphState) -> GraphState:
+    """根据分支开关执行 post-orchestrator fan-out/fan-in。"""
+    _mark_step(state, "protocol_entry", status="in_progress")
+
+    skip_clinical = _skip_clinical_assisstment_enabled(state)
+    skip_protocol = _skip_protocol_enabled(state)
+    fanout_enabled = _protocol_async_fanout_enabled()
+    state.skip_clinical_assisstment = skip_clinical
+    state.skip_protocol = skip_protocol
+    if skip_clinical and skip_protocol:
+        state.errors.append(
+            "Both MEDAI_SKIP_CLINICAL_ASSISSTMENT/MEDAI_PROTOCOL_DIRECT and MEDAI_SKIP_PROTOCOL/MEDAI_CALCULATOR_ONLY are enabled; "
+            "protocol_entry will stop at reporter with the current state."
+        )
+
+    if skip_clinical and skip_protocol:
+        next_agent: AgentName = "reporter"
+        branch_mode = "report_only"
+    elif skip_clinical:
+        protocol_state = protocol_node(deepcopy(state))
+        _merge_protocol_branch_state(state, protocol_state)
+        _append_branch_trace(state, protocol_state, branch_name="direct_protocol")
+        next_agent = "reporter"
+        branch_mode = "direct_protocol"
+    elif skip_protocol:
+        clinical_state = clinical_assisstment_node(deepcopy(state))
+        _merge_clinical_branch_state(state, clinical_state)
+        _append_branch_trace(state, clinical_state, branch_name="calculator_only")
+        next_agent = "reporter"
+        branch_mode = "calculator_only"
+    else:
+        branch_mode = "async_fanout" if fanout_enabled else "clinical_then_protocol"
+        if fanout_enabled:
+            with ThreadPoolExecutor(max_workers=2, thread_name_prefix="medai-protocol-entry") as executor:
+                protocol_future = executor.submit(_run_protocol_preflight_branch, state)
+                clinical_future = executor.submit(clinical_assisstment_node, deepcopy(state))
+                preflight_state = protocol_future.result()
+                clinical_state = clinical_future.result()
+            state.final_output["protocol_preflight_bundle"] = dict(
+                preflight_state.final_output.get("protocol_preflight_bundle") or {}
+            )
+            _merge_clinical_branch_state(state, clinical_state)
+            _append_branch_trace(state, preflight_state, branch_name="protocol_preflight")
+            _append_branch_trace(state, clinical_state, branch_name="clinical_calculator")
+        else:
+            clinical_state = clinical_assisstment_node(deepcopy(state))
+            _merge_clinical_branch_state(state, clinical_state)
+            _append_branch_trace(state, clinical_state, branch_name="clinical_calculator")
+
+        final_protocol_state = protocol_node(deepcopy(state))
+        _merge_protocol_branch_state(state, final_protocol_state)
+        _append_branch_trace(state, final_protocol_state, branch_name="protocol_final")
+        next_agent = "reporter"
+
+    branch_bundle = {
+        "schema_version": 1,
+        "status": "completed",
+        "mode": branch_mode,
+        "skip_clinical_assisstment": skip_clinical,
+        "skip_protocol": skip_protocol,
+        "async_fanout": fanout_enabled and not skip_clinical and not skip_protocol,
+        "next_agent": next_agent,
+        "notes": [
+            "Default mode fans out protocol preflight and clinical_assisstment/calculator, then fans in to final protocol aggregation.",
+            "Direct protocol mode skips clinical_assisstment/calculator and consumes existing structured_case_json.",
+            "Calculator-only mode runs clinical_assisstment/calculator and then routes directly to reporter.",
+            "The final protocol risk-evidence subagent waits for clinical_assisstment/calculator results before aggregation.",
+        ],
+    }
+    state.protocol_branch_bundle = branch_bundle
+    state.final_output["protocol_branch_bundle"] = dict(branch_bundle)
+
+    _mark_step(
+        state,
+        "protocol_entry",
+        status="completed",
+        result=f"Workflow branch selected: {branch_mode}.",
+    )
+    append_agent_trace(
+        state.final_output,
+        build_agent_trace(
+            "protocol_entry",
+            status="completed",
+            summary=f"Workflow branch selected: {branch_mode}.",
+            output_payload=branch_bundle,
+            tool_calls=[],
+        ),
+    )
+
+    state.next_agent = next_agent
+    return state
 
 def clinical_assisstment_node(state: GraphState) -> GraphState:
     """完成 intake 归一化、检索准备和计算器协调。"""
@@ -2118,24 +1902,80 @@ def clinical_assisstment_node(state: GraphState) -> GraphState:
             + delegated_tool_calls,
         ),
     )
-    state.next_agent = "protocol"
+    state.next_agent = "reporter" if _skip_protocol_enabled(state) else "protocol"
     return state
 
 
-def protocol_node(state: GraphState) -> GraphState:
+def protocol_node(state: GraphState, *, preflight: bool = False) -> GraphState:
     """把计算结果整理成治疗与试验推荐包。"""
     _mark_step(state, "protocol", status="in_progress")
 
-    trial_retrieval_bundle = _retrieve_trial_candidates(state)
-    trial_selection = _build_protocol_trial_selection(
+    backend = state.clinical_tool_job.retriever_backend if state.clinical_tool_job is not None else "hybrid"
+    protocol_config = _PROTOCOL_CONFIG()
+    protocol_state = run_protocol_subgraph(
+        ProtocolGraphState(
+            request=state.request,
+            structured_case_json=dict(state.structured_case_json or {}),
+            calculation_results=list(state.calculation_results or []),
+            calculator_matches=list(state.calculator_matches or []),
+            calculation_bundle=dict(state.calculation_bundle or {}),
+            department_tags=list(state.department_tags),
+            trial_retriever=_resolve_trial_retriever(state),
+            medical_knowledge_retriever=state.tool_registry.get("medical_knowledge_retriever"),
+            retriever_backend=backend,
+        ),
+        config=protocol_config,
+    )
+    trial_retrieval_bundle = protocol_state.trial_retrieval_bundle
+    eligibility_assessment_bundle = protocol_state.eligibility_assessment_bundle
+    if preflight:
+        preflight_bundle = {
+            "schema_version": 1,
+            "status": "completed",
+            "mode": "protocol_preflight",
+            "trial_retrieval_bundle": trial_retrieval_bundle,
+            "eligibility_assessment_bundle": eligibility_assessment_bundle,
+            "medical_knowledge_bundle": protocol_state.medical_knowledge_bundle,
+            "protocol_decision_bundle": protocol_state.protocol_decision_bundle,
+        }
+        state.final_output["protocol_preflight_bundle"] = preflight_bundle
+        state.trial_retrieval_bundle = trial_retrieval_bundle
+        append_agent_trace(
+            state.final_output,
+            build_agent_trace(
+                "protocol",
+                status="completed",
+                summary="Protocol preflight branch completed.",
+                output_payload=preflight_bundle,
+                tool_calls=[
+                    build_tool_call(
+                        "protocol_preflight",
+                        input_payload={
+                            "structured_case": dict(state.structured_case_json),
+                            "department_tags": list(state.department_tags),
+                            "top_k": protocol_config.fine_top_k,
+                            "coarse_top_k": protocol_config.coarse_top_k,
+                            "eligibility_limit": protocol_config.eligibility_limit,
+                        },
+                        output_payload=preflight_bundle,
+                    )
+                ],
+            ),
+        )
+        state.next_agent = "reporter"
+        return state
+
+    trial_selection = build_protocol_trial_selection(
         trial_retrieval_bundle,
         structured_case=dict(state.structured_case_json or {}),
+        eligibility_assessment_bundle=eligibility_assessment_bundle,
     )
-    recommendations = _build_treatment_recommendations(
+    recommendations = build_treatment_recommendations(
         state,
         trial_bundle=trial_retrieval_bundle,
+        eligibility_assessment_bundle=eligibility_assessment_bundle,
     )
-    protocol_recommendations = _to_protocol_recommendations(recommendations)
+    protocol_recommendations = to_protocol_recommendations(recommendations)
     trial_candidates = [
         dict(item)
         for item in list(trial_retrieval_bundle.get("candidate_ranking") or [])
@@ -2150,6 +1990,12 @@ def protocol_node(state: GraphState) -> GraphState:
             if str(item.get("nct_id") or "").strip()
         ],
         "trial_selection": trial_selection,
+        "eligibility_assessment_bundle": eligibility_assessment_bundle,
+        "patient_evidence_bundle": protocol_state.patient_evidence_bundle,
+        "calculator_evidence_bundle": protocol_state.calculator_evidence_bundle,
+        "medical_knowledge_bundle": protocol_state.medical_knowledge_bundle,
+        "missing_data_bundle": protocol_state.missing_data_bundle,
+        "protocol_decision_bundle": protocol_state.protocol_decision_bundle,
         "note": "This node now owns treatment and clinical-trial judgment in the core MedAI workflow.",
     }
 
@@ -2158,6 +2004,12 @@ def protocol_node(state: GraphState) -> GraphState:
     state.trial_retrieval_bundle = trial_retrieval_bundle
     state.treatment_bundle = treatment_bundle
     state.final_output["trial_retrieval_bundle"] = trial_retrieval_bundle
+    state.final_output["eligibility_assessment_bundle"] = eligibility_assessment_bundle
+    state.final_output["patient_evidence_bundle"] = protocol_state.patient_evidence_bundle
+    state.final_output["calculator_evidence_bundle"] = protocol_state.calculator_evidence_bundle
+    state.final_output["medical_knowledge_bundle"] = protocol_state.medical_knowledge_bundle
+    state.final_output["missing_data_bundle"] = protocol_state.missing_data_bundle
+    state.final_output["protocol_decision_bundle"] = protocol_state.protocol_decision_bundle
     state.final_output["treatment_bundle"] = treatment_bundle
 
     _record_agent_prompt(
@@ -2169,6 +2021,11 @@ def protocol_node(state: GraphState) -> GraphState:
             "calculation_results": [asdict(item) for item in state.calculation_results],
             "calculator_matches": [asdict(item) for item in state.calculator_matches],
             "trial_retrieval_bundle": dict(trial_retrieval_bundle),
+            "patient_evidence_bundle": dict(protocol_state.patient_evidence_bundle),
+            "calculator_evidence_bundle": dict(protocol_state.calculator_evidence_bundle),
+            "medical_knowledge_bundle": dict(protocol_state.medical_knowledge_bundle),
+            "missing_data_bundle": dict(protocol_state.missing_data_bundle),
+            "protocol_decision_bundle": dict(protocol_state.protocol_decision_bundle),
         },
     )
     _mark_step(state, "protocol", status="completed", result="Treatment decision bundle generated.")
@@ -2185,8 +2042,12 @@ def protocol_node(state: GraphState) -> GraphState:
                     input_payload={
                         "structured_case": dict(state.structured_case_json),
                         "department_tags": list(state.department_tags),
-                        "top_k": _PROTOCOL_TRIAL_TOP_K,
-                        "coarse_top_k": _PROTOCOL_TRIAL_COARSE_TOP_K,
+                        "top_k": protocol_config.fine_top_k,
+                        "coarse_top_k": protocol_config.coarse_top_k,
+                        "eligibility_limit": protocol_config.eligibility_limit,
+                        "skip_trial_agent": protocol_config.skip_trial_agent,
+                        "skip_medical_knowledge_agent": protocol_config.skip_medical_knowledge_agent,
+                        "skip_patient_calculator_evidence_agent": protocol_config.skip_patient_calculator_evidence_agent,
                     },
                     output_payload=trial_retrieval_bundle,
                 ),

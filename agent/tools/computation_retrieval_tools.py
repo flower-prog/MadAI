@@ -11,6 +11,7 @@ from .retrieval_tools import (
     _catalog_runtime_cache_key,
     _clean_text,
     _coerce_text_list,
+    _get_cache_key_lock,
     _load_riskcalcs_payload_index,
     _sanitize_parameter_names,
     build_case_query_text,
@@ -488,10 +489,16 @@ def create_computation_retrieval_tool(catalog: Any) -> RiskCalcComputationRetrie
     if cached is not None:
         return cached
 
-    tool_instance = RiskCalcComputationRetrievalTool(catalog)
-    with _CACHE_LOCK:
-        cached = _COMPUTATION_TOOL_CACHE.setdefault(cache_key, tool_instance)
-    return cached
+    with _get_cache_key_lock("computation_retrieval_tool", cache_key):
+        with _CACHE_LOCK:
+            cached = _COMPUTATION_TOOL_CACHE.get(cache_key)
+        if cached is not None:
+            return cached
+
+        tool_instance = RiskCalcComputationRetrievalTool(catalog)
+        with _CACHE_LOCK:
+            cached = _COMPUTATION_TOOL_CACHE.setdefault(cache_key, tool_instance)
+        return cached
 
 
 __all__ = [

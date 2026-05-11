@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,18 @@ from agent.trial_vector_kb import DEFAULT_CHUNK_CHAR_LIMIT, build_trial_vector_k
 
 from .runtime import public_trial_qdrant_runtime_config, resolve_trial_qdrant_runtime_config
 from .trial_chunk import QdrantTrialChunkIndexManager
+
+
+def _configure_cli_logging() -> None:
+    root_logger = logging.getLogger()
+    if root_logger.handlers:
+        if root_logger.level > logging.INFO:
+            root_logger.setLevel(logging.INFO)
+        return
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s - %(message)s",
+    )
 
 
 def _normalize_input_paths(values: Sequence[str | Path] | None) -> list[Path] | None:
@@ -43,6 +56,8 @@ def sync_trial_chunk_kb_to_qdrant(
     path: str | Path | None = None,
     recreate: bool = False,
     batch_size: int = 64,
+    start_offset: int = 0,
+    resume_prefix_count: bool = False,
     qdrant_client: Any | None = None,
     models: Any | None = None,
     embedding_function: Any | None = None,
@@ -56,7 +71,10 @@ def sync_trial_chunk_kb_to_qdrant(
         collection_name=collection_name,
         enable_default_url=True,
     )
-    catalog = TrialChunkCatalog.from_output_root(resolved_output_dir)
+    catalog = TrialChunkCatalog.from_output_root(
+        resolved_output_dir,
+        load_documents=False,
+    )
     manager = QdrantTrialChunkIndexManager(
         catalog,
         collection_name=str(runtime_config["collection_name"] or ""),
@@ -70,6 +88,8 @@ def sync_trial_chunk_kb_to_qdrant(
     sync_summary = manager.sync_catalog(
         recreate=bool(recreate),
         batch_size=max(int(batch_size), 1),
+        start_offset=max(int(start_offset), 0),
+        resume_prefix_count=bool(resume_prefix_count),
     )
     return {
         "output_dir": str(resolved_output_dir),
@@ -90,6 +110,8 @@ def build_and_sync_trial_chunk_kb_to_qdrant(
     path: str | Path | None = None,
     recreate: bool = False,
     batch_size: int = 64,
+    start_offset: int = 0,
+    resume_prefix_count: bool = False,
     qdrant_client: Any | None = None,
     models: Any | None = None,
     embedding_function: Any | None = None,
@@ -109,6 +131,8 @@ def build_and_sync_trial_chunk_kb_to_qdrant(
         path=path,
         recreate=recreate,
         batch_size=batch_size,
+        start_offset=start_offset,
+        resume_prefix_count=resume_prefix_count,
         qdrant_client=qdrant_client,
         models=models,
         embedding_function=embedding_function,
@@ -122,6 +146,7 @@ def build_and_sync_trial_chunk_kb_to_qdrant(
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    _configure_cli_logging()
     parser = argparse.ArgumentParser(
         description="Build the XML-derived trial chunk KB and sync it into a Qdrant collection.",
     )
@@ -184,7 +209,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         default=64,
         help="Number of chunk vectors to upsert per batch.",
     )
+    parser.add_argument(
+        "--start-offset",
+        type=int,
+        default=0,
+        help="Explicit 0-based chunk offset to start syncing from. Use only when the collection already contains an exact prefix.",
+    )
+    parser.add_argument(
+        "--resume-prefix-count",
+        action="store_true",
+        help="Resume from the current Qdrant point count, assuming the collection already contains an exact prefix of the chunk catalog.",
+    )
     args = parser.parse_args(list(argv) if argv is not None else None)
+
+    if args.start_offset < 0:
+        parser.error("--start-offset must be non-negative.")
+    if args.resume_prefix_count and args.start_offset:
+        parser.error("Do not combine --resume-prefix-count with --start-offset.")
 
     kwargs = {
         "output_dir": args.output_dir or None,
@@ -194,6 +235,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "path": args.qdrant_path or None,
         "recreate": bool(args.recreate),
         "batch_size": max(int(args.batch_size), 1),
+        "start_offset": max(int(args.start_offset), 0),
+        "resume_prefix_count": bool(args.resume_prefix_count),
     }
     if args.skip_build:
         bundle = sync_trial_chunk_kb_to_qdrant(**kwargs)

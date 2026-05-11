@@ -7,6 +7,7 @@ from typing import Any, Literal, cast
 
 AgentName = Literal[
     "orchestrator",
+    "protocol_entry",
     "clinical_assisstment",
     "protocol",
     "reporter",
@@ -31,6 +32,7 @@ TreatmentRecommendationStatus = Literal[
 
 TEAM_MEMBERS: tuple[AgentName, ...] = (
     "orchestrator",
+    "protocol_entry",
     "clinical_assisstment",
     "protocol",
     "reporter",
@@ -40,6 +42,7 @@ OPTIONS: tuple[str, ...] = TEAM_MEMBERS + ("FINISH",)
 _AGENT_NAME_ALIASES: dict[str, AgentName] = {
     "planner": "orchestrator",
     "clinical_assessment": "clinical_assisstment",
+    "protocol_router": "protocol_entry",
 }
 
 _LEGACY_RETRIEVER_BACKEND_MAP: dict[str, RetrieverBackend] = {
@@ -222,6 +225,7 @@ class GraphState:
     orchestrator_result: dict[str, Any] = field(default_factory=dict)  # orchestrator 的结构化结果，直接放在主状态里
     assessment_bundle: dict[str, Any] = field(default_factory=dict)  # clinical_assisstment 的结构化产物
     calculation_bundle: dict[str, Any] = field(default_factory=dict)  # calculator 阶段的汇总结果
+    protocol_branch_bundle: dict[str, Any] = field(default_factory=dict)  # protocol_entry 记录的分支执行策略
     trial_retrieval_bundle: dict[str, Any] = field(default_factory=dict)  # protocol 阶段的 trial 检索包
     treatment_bundle: dict[str, Any] = field(default_factory=dict)  # protocol 阶段的治疗决策包
     reporter_result: dict[str, Any] = field(default_factory=dict)  # reporter 生成的完整报告结果
@@ -233,6 +237,8 @@ class GraphState:
     search_before_planning: bool = False  # 是否在规划前先做检索
     pass_through_expert: bool = False  # 是否走 expert 直通路径，跳过部分默认流程
     auto_accepted_plan: bool = False  # 是否自动接受计划而不等待额外确认
+    skip_clinical_assisstment: bool = False  # 是否跳过 clinical_assisstment/calculator 分支，直接进入 protocol
+    skip_protocol: bool = False  # 是否跳过 protocol 分支，便于单测 clinical/calculator 能力
     next_agent: AgentName | Literal["FINISH"] | None = None  # 下一跳节点；FINISH 表示流程结束
     status: GraphStatus = "pending"  # 图整体执行状态
     errors: list[str] = field(default_factory=list)  # 运行过程中累计的错误信息
@@ -960,6 +966,7 @@ def ensure_state(data: GraphState | dict[str, Any]) -> GraphState:
         orchestrator_result=dict(data.get("orchestrator_result") or {}),
         assessment_bundle=dict(data.get("assessment_bundle") or {}),
         calculation_bundle=dict(data.get("calculation_bundle") or {}),
+        protocol_branch_bundle=dict(data.get("protocol_branch_bundle") or {}),
         trial_retrieval_bundle=dict(data.get("trial_retrieval_bundle") or {}),
         treatment_bundle=dict(data.get("treatment_bundle") or {}),
         reporter_result=dict(data.get("reporter_result") or {}),
@@ -972,6 +979,8 @@ def ensure_state(data: GraphState | dict[str, Any]) -> GraphState:
         search_before_planning=bool(data.get("search_before_planning", False)),
         pass_through_expert=bool(data.get("pass_through_expert", False)),
         auto_accepted_plan=bool(data.get("auto_accepted_plan", False)),
+        skip_clinical_assisstment=bool(data.get("skip_clinical_assisstment", False)),
+        skip_protocol=bool(data.get("skip_protocol", False)),
         next_agent=_coerce_next_agent(data.get("next_agent")),
         status=str(data.get("status") or "pending"),
         errors=[str(item) for item in list(data.get("errors") or []) if str(item).strip()],

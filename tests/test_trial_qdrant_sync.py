@@ -17,6 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 
 from agent.retrieval.qdrant import default_trial_qdrant_server_url
+from agent.retrieval.trial_chunks import resolve_trial_vector_output_root
 from agent.retrieval.qdrant.trial_chunk_sync import (
     build_and_sync_trial_chunk_kb_to_qdrant,
     main,
@@ -96,13 +97,22 @@ class _FakeManager:
             "has_api_key": bool(self.api_key),
         }
 
-    def sync_catalog(self, *, recreate: bool = False, batch_size: int = 64) -> dict[str, object]:
+    def sync_catalog(
+        self,
+        *,
+        recreate: bool = False,
+        batch_size: int = 64,
+        start_offset: int = 0,
+        resume_prefix_count: bool = False,
+    ) -> dict[str, object]:
         return {
             "collection_name": self.collection_name,
             "point_count": len(self.catalog.documents()),
             "chunk_count": len(self.catalog.documents()),
             "batch_size": int(batch_size),
             "recreated": bool(recreate),
+            "start_offset": int(start_offset),
+            "resume_prefix_count": bool(resume_prefix_count),
         }
 
 
@@ -113,6 +123,19 @@ class TrialQdrantSyncTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         shutil.rmtree(self.temp_root, ignore_errors=True)
+
+    def test_resolve_trial_vector_output_root_prefers_full_catalog_by_default(self) -> None:
+        fake_project_root = self.temp_root / "fake-project"
+        fake_module_path = fake_project_root / "agent" / "retrieval" / "trial_chunks.py"
+        full_root = fake_project_root / "outputs" / "trial_vector_kb_full"
+        part1_root = fake_project_root / "outputs" / "trial_vector_kb_part1_caseprobe"
+        full_root.mkdir(parents=True, exist_ok=True)
+        part1_root.mkdir(parents=True, exist_ok=True)
+
+        with patch("agent.retrieval.trial_chunks.__file__", str(fake_module_path)):
+            resolved_root = resolve_trial_vector_output_root()
+
+        self.assertEqual(resolved_root, full_root.resolve())
 
     def test_sync_trial_chunk_kb_to_qdrant_uses_existing_jsonl_catalog(self) -> None:
         kb_root = self.temp_root / "kb"
@@ -152,6 +175,19 @@ class TrialQdrantSyncTests(unittest.TestCase):
         self.assertEqual(bundle["qdrant_config"]["path"], str(local_path.resolve()))
         self.assertIsNone(_FakeManager.last_init["url"])
         self.assertEqual(_FakeManager.last_init["path"], str(local_path.resolve()))
+
+    def test_sync_trial_chunk_kb_to_qdrant_can_request_prefix_resume(self) -> None:
+        kb_root = self.temp_root / "kb-resume"
+        _write_sample_trial_kb(kb_root)
+
+        with patch("agent.retrieval.qdrant.trial_chunk_sync.QdrantTrialChunkIndexManager", _FakeManager):
+            bundle = sync_trial_chunk_kb_to_qdrant(
+                output_dir=kb_root,
+                resume_prefix_count=True,
+            )
+
+        self.assertTrue(bundle["qdrant_sync"]["resume_prefix_count"])
+        self.assertEqual(bundle["qdrant_sync"]["start_offset"], 0)
 
     def test_build_and_sync_trial_chunk_kb_to_qdrant_runs_build_first(self) -> None:
         build_root = self.temp_root / "built-kb"
@@ -206,6 +242,28 @@ class TrialQdrantSyncTests(unittest.TestCase):
         self.assertEqual(payload["output_dir"], str(kb_root.resolve()))
         self.assertEqual(payload["qdrant_sync"]["point_count"], 1)
         self.assertEqual(payload["qdrant_sync"]["batch_size"], 5)
+
+    def test_cli_main_supports_prefix_resume_mode(self) -> None:
+        kb_root = self.temp_root / "kb-cli-resume"
+        _write_sample_trial_kb(kb_root)
+        stdout = io.StringIO()
+
+        with (
+            patch("agent.retrieval.qdrant.trial_chunk_sync.QdrantTrialChunkIndexManager", _FakeManager),
+            contextlib.redirect_stdout(stdout),
+        ):
+            exit_code = main(
+                [
+                    "--skip-build",
+                    "--output-dir",
+                    str(kb_root),
+                    "--resume-prefix-count",
+                ]
+            )
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(payload["qdrant_sync"]["resume_prefix_count"])
 
 
 if __name__ == "__main__":

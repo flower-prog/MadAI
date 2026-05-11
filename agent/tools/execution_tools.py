@@ -14,6 +14,7 @@ from typing import Any, Callable, Protocol
 
 
 _MISSING = object()
+DEFAULT_OPENAI_USER_AGENT = "OpenAI/Python 2.16.0"
 
 
 @dataclass(frozen=True, slots=True)
@@ -224,7 +225,9 @@ class OpenAIChatClient:
             default="2024-12-01-preview",
         )
         self.base_url = base_url or _first_env("OPENAI_BASE_URL")
-        self.default_headers = {"User-Agent": "OpenAI/Python 2.16.0"}
+        self.default_headers = {
+            "User-Agent": _first_env("OPENAI_USER_AGENT", default=DEFAULT_OPENAI_USER_AGENT)
+        }
         self._client = self._build_client()
 
     def _build_client(self):

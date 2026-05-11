@@ -7,7 +7,7 @@ import re
 import zipfile
 from collections import Counter
 from collections.abc import Iterable, Iterator, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -19,7 +19,7 @@ DEFAULT_INPUT_PATHS = (
     Path("/home/yuanzy/MadAI/数据/totrials/corpus_2021_2022"),
     Path("/home/yuanzy/MadAI/数据/totrials/corpus_2023"),
 )
-DEFAULT_OUTPUT_DIR = Path("/home/yuanzy/MadAI/outputs/trial_vector_kb_part1_caseprobe")
+DEFAULT_OUTPUT_DIR = Path("/home/yuanzy/MadAI/vector_stores/trials/part1_caseprobe/kb")
 _CORPUS_PRIORITY = {
     "totrials_2021_2022": 1,
     "totrials_2023": 2,
@@ -41,6 +41,28 @@ class TrialXmlSource:
     source_archive: str
     source_member_path: str
     input_path: str
+
+
+@dataclass(slots=True)
+class EligibilitySection:
+    nct_id: str
+    section_type: str
+    heading_text: str
+    raw_text: str
+    start_offset: int | None = None
+    end_offset: int | None = None
+    parse_status: str = "parsed"
+    warnings: list[str] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class EligibilitySectionSplit:
+    inclusion_text: str = ""
+    exclusion_text: str = ""
+    unsplit_text: str = ""
+    parse_status: str = "empty"
+    warnings: list[str] = field(default_factory=list)
+    sections: list[EligibilitySection] = field(default_factory=list)
 
 
 def _normalize_whitespace(value: Any) -> str:
@@ -176,32 +198,136 @@ def _parse_age_to_years(value: str) -> float | None:
     return round(amount * factor, 4)
 
 
-def _split_eligibility_sections(text: str) -> tuple[str, str]:
+_INCLUSION_HEADING_PATTERNS: tuple[str, ...] = (
+    r"Key\s+Inclusion\s+Criteria",
+    r"Main\s+Inclusion\s+Criteria",
+    r"Inclusion\s+Criteria",
+    r"Criteria\s+for\s+Inclusion",
+    r"Patients\s+must\s+meet\s+all\s+of\s+the\s+following",
+    r"Inclusion",
+)
+_EXCLUSION_HEADING_PATTERNS: tuple[str, ...] = (
+    r"Key\s+Exclusion\s+Criteria",
+    r"Main\s+Exclusion\s+Criteria",
+    r"Exclusion\s+Criteria",
+    r"Criteria\s+for\s+Exclusion",
+    r"Patients\s+will\s+be\s+excluded\s+if",
+    r"Exclusion",
+)
+_ELIGIBILITY_HEADING_PATTERN = re.compile(
+    r"(?P<prefix>^|[\n\r]|(?:^|[\s.;]))"
+    r"(?P<heading>"
+    + "|".join([*_INCLUSION_HEADING_PATTERNS, *_EXCLUSION_HEADING_PATTERNS])
+    + r")"
+    r"\s*:?",
+    flags=re.IGNORECASE,
+)
+_INCLUSION_HEADING_CLASSIFIER = re.compile(
+    r"^(?:"
+    + "|".join(_INCLUSION_HEADING_PATTERNS)
+    + r")$",
+    flags=re.IGNORECASE,
+)
+_EXCLUSION_HEADING_CLASSIFIER = re.compile(
+    r"^(?:"
+    + "|".join(_EXCLUSION_HEADING_PATTERNS)
+    + r")$",
+    flags=re.IGNORECASE,
+)
+
+
+def _heading_section_type(heading_text: str) -> str:
+    normalized = _normalize_whitespace(heading_text).rstrip(":")
+    if _INCLUSION_HEADING_CLASSIFIER.match(normalized):
+        return "inclusion"
+    if _EXCLUSION_HEADING_CLASSIFIER.match(normalized):
+        return "exclusion"
+    return "unknown"
+
+
+def _iter_eligibility_heading_matches(text: str) -> list[re.Match[str]]:
+    matches: list[re.Match[str]] = []
+    for match in _ELIGIBILITY_HEADING_PATTERN.finditer(text):
+        heading_start = match.start("heading")
+        if heading_start > 0 and text[heading_start - 1].isalnum():
+            continue
+        heading_end = match.end("heading")
+        if heading_end < len(text) and text[heading_end].isalnum():
+            continue
+        matches.append(match)
+    return matches
+
+
+def split_eligibility_sections_with_metadata(text: str, *, nct_id: str = "") -> EligibilitySectionSplit:
     normalized = _normalize_block_text(text)
     if not normalized:
-        return "", ""
+        return EligibilitySectionSplit(parse_status="empty", warnings=["eligibility_text_empty"])
 
-    inclusion_match = re.search(r"\bInclusion Criteria:?\b", normalized, flags=re.IGNORECASE)
-    exclusion_match = re.search(r"\bExclusion Criteria:?\b", normalized, flags=re.IGNORECASE)
+    heading_matches = _iter_eligibility_heading_matches(normalized)
+    if not heading_matches:
+        return EligibilitySectionSplit(
+            unsplit_text=normalized,
+            parse_status="unsplit",
+            warnings=["eligibility_section_headings_not_found"],
+        )
 
-    if inclusion_match and exclusion_match:
-        if inclusion_match.start() <= exclusion_match.start():
-            inclusion = normalized[inclusion_match.end() : exclusion_match.start()].strip(" -:\n")
-            exclusion = normalized[exclusion_match.end() :].strip(" -:\n")
-            return (_normalize_block_text(inclusion), _normalize_block_text(exclusion))
-        exclusion = normalized[exclusion_match.end() : inclusion_match.start()].strip(" -:\n")
-        inclusion = normalized[inclusion_match.end() :].strip(" -:\n")
-        return (_normalize_block_text(inclusion), _normalize_block_text(exclusion))
+    sections: list[EligibilitySection] = []
+    for index, match in enumerate(heading_matches):
+        section_type = _heading_section_type(match.group("heading"))
+        next_start = heading_matches[index + 1].start("heading") if index + 1 < len(heading_matches) else len(normalized)
+        raw_text = normalized[match.end() : next_start].strip(" -:\n")
+        sections.append(
+            EligibilitySection(
+                nct_id=nct_id,
+                section_type=section_type,
+                heading_text=_normalize_whitespace(match.group("heading")),
+                raw_text=_normalize_block_text(raw_text),
+                start_offset=match.start("heading"),
+                end_offset=next_start,
+                parse_status="parsed",
+                warnings=[],
+            )
+        )
 
-    if inclusion_match:
-        inclusion = normalized[inclusion_match.end() :].strip(" -:\n")
-        return (_normalize_block_text(inclusion), "")
+    inclusion_sections = [section for section in sections if section.section_type == "inclusion"]
+    exclusion_sections = [section for section in sections if section.section_type == "exclusion"]
+    unknown_sections = [section for section in sections if section.section_type == "unknown"]
+    warnings: list[str] = []
+    if unknown_sections:
+        warnings.append("unknown_eligibility_section_heading")
+    if len(inclusion_sections) > 1:
+        warnings.append("multiple_inclusion_sections")
+    if len(exclusion_sections) > 1:
+        warnings.append("multiple_exclusion_sections")
 
-    if exclusion_match:
-        exclusion = normalized[exclusion_match.end() :].strip(" -:\n")
-        return ("", _normalize_block_text(exclusion))
+    if inclusion_sections and exclusion_sections:
+        parse_status = "parsed"
+    elif inclusion_sections:
+        parse_status = "inclusion_only"
+        warnings.append("exclusion_section_heading_not_found")
+    elif exclusion_sections:
+        parse_status = "exclusion_only"
+        warnings.append("inclusion_section_heading_not_found")
+    else:
+        return EligibilitySectionSplit(
+            unsplit_text=normalized,
+            parse_status="unsplit",
+            warnings=["recognized_headings_did_not_map_to_sections"],
+            sections=sections,
+        )
 
-    return (normalized, "")
+    return EligibilitySectionSplit(
+        inclusion_text=_normalize_block_text("\n\n".join(section.raw_text for section in inclusion_sections)),
+        exclusion_text=_normalize_block_text("\n\n".join(section.raw_text for section in exclusion_sections)),
+        parse_status=parse_status,
+        warnings=warnings,
+        sections=sections,
+    )
+
+
+def _split_eligibility_sections(text: str) -> tuple[str, str]:
+    split = split_eligibility_sections_with_metadata(text)
+    return split.inclusion_text, split.exclusion_text
 
 
 def _paragraphs(text: str) -> list[str]:
@@ -402,7 +528,6 @@ def _build_trial_record_from_root(
     source_snapshot_date = _find_text(root, "./required_header/download_date")
     overall_status = _find_text(root, "./overall_status")
     eligibility_text = _find_block_text(root, "./eligibility/criteria/textblock")
-    eligibility_inclusion_text, eligibility_exclusion_text = _split_eligibility_sections(eligibility_text)
     conditions = _find_all_texts(root, "./condition")
     condition_mesh_terms = _find_all_texts(root, "./condition_browse/mesh_term")
     keywords = _find_all_texts(root, "./keyword")
@@ -412,6 +537,7 @@ def _build_trial_record_from_root(
     official_title = _find_text(root, "./official_title")
     nct_id = _find_text(root, "./id_info/nct_id") or Path(source_member_path).stem
     display_title = brief_title or official_title or nct_id
+    eligibility_split = split_eligibility_sections_with_metadata(eligibility_text, nct_id=nct_id)
 
     record = {
         "nct_id": nct_id,
@@ -474,8 +600,23 @@ def _build_trial_record_from_root(
         "condition_terms": _normalize_text_list([*conditions, *condition_mesh_terms, *keywords]),
         "intervention_terms": _normalize_text_list([*interventions, *intervention_mesh_terms]),
         "title_text": " ".join(item for item in (display_title, _find_text(root, "./acronym")) if item).strip(),
-        "eligibility_inclusion_text": eligibility_inclusion_text,
-        "eligibility_exclusion_text": eligibility_exclusion_text,
+        "eligibility_inclusion_text": eligibility_split.inclusion_text,
+        "eligibility_exclusion_text": eligibility_split.exclusion_text,
+        "eligibility_unsplit_text": eligibility_split.unsplit_text,
+        "eligibility_section_parse_status": eligibility_split.parse_status,
+        "eligibility_section_parse_warnings": list(eligibility_split.warnings),
+        "eligibility_sections": [
+            {
+                "section_type": section.section_type,
+                "heading_text": section.heading_text,
+                "raw_text": section.raw_text,
+                "start_offset": section.start_offset,
+                "end_offset": section.end_offset,
+                "parse_status": section.parse_status,
+                "warnings": list(section.warnings),
+            }
+            for section in eligibility_split.sections
+        ],
         "has_results_references": bool(_find_all_texts(root, "./reference/citation") or _find_all_texts(root, "./reference/PMID")),
         "age_floor_years": _parse_age_to_years(_find_text(root, "./eligibility/minimum_age")),
         "age_ceiling_years": _parse_age_to_years(_find_text(root, "./eligibility/maximum_age")),

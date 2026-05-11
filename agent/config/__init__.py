@@ -13,6 +13,7 @@ from .env import (
 
 TEAM_MEMBERS = [
     "orchestrator",
+    "protocol_entry",
     "clinical_assisstment",
     "protocol",
     "reporter",
