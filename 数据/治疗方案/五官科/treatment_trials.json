@@ -1,0 +1,159 @@
+{
+  "NCT00403325": {
+    "name": "Intravitreal Ranibizumab Treatment of Central Serous Chorioretinopathy",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 五官科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00403325"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00403325",
+    "department_tag": "五官科",
+    "department_role": "primary",
+    "department_tags": [
+      "五官科"
+    ],
+    "primary_department": "五官科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Intravitreal Ranibizumab Treatment of Central Serous Chorioretinopathy",
+    "official_title": "Phase I Study of Intravitreally Administered Ranibizumab in Subjects With Unresolving CSC and Subfoveal Fluid.",
+    "conditions": [
+      "Central Serous Chorioretinopathy"
+    ],
+    "mesh_terms": [
+      "Central Serous Chorioretinopathy"
+    ],
+    "keywords": [
+      "Central Serous Chorioretinopathy"
+    ],
+    "interventions": [
+      "rhuFab V2 [ranibizumab] ( Lucentis )"
+    ],
+    "brief_summary": "The purpose of this study is to examine the effects of Lucentis for active Central Serous Chorioretinopathy.",
+    "eligibility_text": "Inclusion Criteria: - A history of persistent central serous chorioretinopathy present for at least 3 months Best-corrected visual acuity (BCVA) of 20/40 (73 letters on the ETDRS chart) to light perception as measured by ETDRS protocol refraction. - No signs of choroidal neovascularization - Documented subfoveal fluid by OCT - Active leak associated with the subfoveal fluid - The ability and willingness to provide written informed consent Exclusion Criteria: - Prior treatment with laser or PDT - Have uncontrolled hypertension - Have a history of thromboembolic events including stroke, transient ischemic attacks, and myocardial infarction - Have use of or need for continued anticoagulation therapy, except aspirin 325 mg/day. - Are receiving or require chronic concomitant therapy with systemic (> 5 mg) or topical ocular corticosteroids. Chronic concomitant therapy is defined as multiple doses taken daily for 14 or more consecutive days at any time within 6 months prior to screening - Previously vitrectomized eyes. - Had allergic reactions to fluorescein dye or lack of venous access. - Any other additional ocular diseases which could irreversibly compromise the visual acuity of the study eye including amblyopia, anterior ischemic optic neuropathy (AION), age related macular degeneration (AMD), retinal detachment, severe cataracts, etc. - An anticipated need for ocular surgery during the duration of the trial. - Within 1 month prior to screening, have had intra ocular surgeries (including cataract surgery) in the study eye. - Intravitreal triamcinolone or bevacizumab in the previous 2 months - Uncontrolled glaucoma (IOP > 24 mmHg) on greater than 3 medications. - Within 1 month prior to screening had YAG laser capsulotomy in the study eye - Have received any other systemic experimental drug within 12 weeks prior to enrollment. - Rubeosis iridis or neovascular glaucoma - Any untreated rhegmatogenous retinal detachment. - A visual acuity of worse than 20/400 in the fellow eye. - Unwilling or unable to follow or comply with all study related procedures.",
+    "study_type": "Interventional",
+    "phase": "Phase 1",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00403325.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0040xxxx/NCT00403325.xml"
+  },
+  "NCT00135629": {
+    "name": "Factors Predicting Efficacy of Allergen Injection Immunotherapy for Grass Pollen Hayfever",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "manual_review",
+    "rationale": "ClinicalTrials.gov overall_status=Unknown status; aligned to MedAI status=manual_review for department tag 五官科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00135629"
+    ],
+    "actions": [
+      "Review the full XML and the current ClinicalTrials.gov record manually before use.",
+      "Do not promote this trial to a direct recommendation until the lifecycle status is confirmed."
+    ],
+    "nct_id": "NCT00135629",
+    "department_tag": "五官科",
+    "department_role": "primary",
+    "department_tags": [
+      "五官科"
+    ],
+    "primary_department": "五官科",
+    "secondary_departments": [],
+    "overall_status": "Unknown status",
+    "status_reason": "The trial lifecycle is unclear, so MedAI should require manual review before using it in protocol recommendations.",
+    "enrollment_open": false,
+    "brief_title": "Factors Predicting Efficacy of Allergen Injection Immunotherapy for Grass Pollen Hayfever",
+    "official_title": "Factors Predicting Efficacy of Allergen Injection Immunotherapy for Grass Pollen Hayfever: A Pilot Study. (Up-dosing Study)",
+    "conditions": [
+      "Rhinitis, Allergic, Seasonal"
+    ],
+    "mesh_terms": [
+      "Rhinitis",
+      "Rhinitis, Allergic",
+      "Rhinitis, Allergic, Seasonal"
+    ],
+    "keywords": [
+      "Hayfever",
+      "Sublingual Immunotherapy",
+      "Grass pollen immunotherapy",
+      "Late cutaneous response",
+      "Intradermal allergen challenge",
+      "Seasonal Allergic Rhinoconjunctivitis"
+    ],
+    "interventions": [
+      "Sublingual Alutard SQ grass pollen tablets (Phleum pratense)",
+      "Venepuncture: 100ml blood sample taken on 12 separate visits"
+    ],
+    "brief_summary": "The purpose of this study is to determine at which point in the dosing regime grass pollen immunotherapy causes a significant reduction in the late skin response to allergen challenge. A once weekly cluster regimen of 2 injections per visit was employed during the up-dosing phase, followed by monthly maintenance injections of 100,000 SQ units. Symptom scores and need of rescue medication were recorded by patients during the study period. The size of early and late cutaneous response to allergen challenge was recorded and measured by a physician.",
+    "eligibility_text": "Inclusion Criteria: - Male and female 18-65 years of age - Written informed consent obtained before entering the trial - A clinical history of grass pollen induced allergic rhinoconjunctivitis of two years or more requiring treatment during the grass pollen season - A clinical history of severe rhinoconjunctivitis symptoms (interfering with usual daily activities or sleep), which remain troublesome despite treatment with anti-allergic drugs during the grass pollen season - Positive Skin Prick Test (SPT) response (wheal diameter ≥ 3 mm) to Phleum pratense - Positive specific IgE against Phleum pratense (≥ IgE Class 2) - Physical examination with no clinically relevant findings - If pre-menopausal female of childbearing potential, the subject must test negative on standard urine pregnancy test and must be willing to practice appropriate contraceptive methods for the duration of the trial - Willingness to comply with this protocol Exclusion Criteria: - FEV1 < 70% of predicted value - A clinical history of symptomatic seasonal allergic rhinitis and/or asthma due to tree pollen or weed pollen adjacent to the start of - and potentially overlapping - the grass pollen season - A clinical history of significant symptomatic perennial allergic rhinitis and/or asthma caused by an allergen to which the subject is regularly exposed - A clinical history of significant recurrent acute sinusitis (defined as 2 episodes per year for the last two years all of which required antibiotic treatment) or chronic sinusitis - At randomisation, current symptoms of, or treatment for, upper respiratory tract infection, acute sinusitis, acute otitis media or other relevant infectious process (serous otitis media is not an exclusion criterion) - History of emergency visit or admission for asthma in the previous 12 months - Use of an investigational drug within 30 days prior to screening - Previous treatment by immunotherapy with grass pollen allergen or any other allergen within the previous 5 years - History of anaphylaxis, including anaphylactic food allergy, bee venom anaphylaxis, exercise anaphylaxis or drug induced anaphylaxis - History of angioedema - Any of the following underlying conditions known or suspected to be present: - Cystic fibrosis - Malignancy - Insulin-dependent diabetes - Malabsorption or malnutrition - Renal or hepatic insufficiency - Chronic infection - Drug dependency or alcoholism - Ischemic heart disease or angina requiring current daily medication or with any evidence of disease making implementation of the protocol or interpretation of the protocol results difficult or jeopardising the safety of the subject (e.g. clinically significant cardiovascular, serious immunopathologic, immunodeficiency whether acquired or not, hepatic, neurologic, psychiatric, endocrine, or other major systemic disease) - Immunosuppressive treatment - History of hypersensitivity to the excipients of the trial medications - History of allergy, hypersensitivity or intolerance to trial medications or rescue medications - A mental condition rendering the subject unable to understand the nature, scope and possible consequences of the trial, and/or evidence of an uncooperative attitude - Unlikely to be able to complete the trial, for any reason, or likely to travel for extended periods of time during the grass pollen season",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00135629.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0013xxxx/NCT00135629.xml"
+  },
+  "NCT00803803": {
+    "name": "Dose, Effects and Characteristics of Pilocarpine",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 五官科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00803803"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00803803",
+    "department_tag": "五官科",
+    "department_role": "primary",
+    "department_tags": [
+      "五官科"
+    ],
+    "primary_department": "五官科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Dose, Effects and Characteristics of Pilocarpine",
+    "official_title": "Dose, Effects and Characteristics of Pilocarpine",
+    "conditions": [
+      "Open-angle Glaucoma"
+    ],
+    "mesh_terms": [
+      "Glaucoma",
+      "Glaucoma, Open-Angle"
+    ],
+    "keywords": [
+      "Pilocarpine",
+      "POAG",
+      "IOP",
+      "Concentration",
+      "Frequency",
+      "Primary open-angle glaucoma",
+      "Primary open-angle glaucoma suspect"
+    ],
+    "interventions": [
+      "Pilocarpine Concentration",
+      "Pilocarpine Frequency"
+    ],
+    "brief_summary": "The purpose of this investigation, in which pilocarpine was given in repeated doses, was to evaluate: Part I - the effects of different concentrations of pilocarpine hydrochloride on intraocular pressure. Part II -the effects on intraocular pressure of glaucomatous patients to pilocarpine 2% when given once, twice and four daily. In addition, we studied various attributes of the eye which may serve as indicators of responsiveness of individual patients to pilocarpine.",
+    "eligibility_text": "Inclusion Criteria: - Primary open-angle glaucoma - Primary open-angle glaucoma suspect",
+    "study_type": "Interventional",
+    "phase": "Phase 4",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00803803.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0080xxxx/NCT00803803.xml"
+  }
+}

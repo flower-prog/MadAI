@@ -14,6 +14,9 @@ class ToolSpecExportTests(unittest.TestCase):
         self.assertIn("structured_vector_retriever", spec_by_name)
         self.assertIn("trial_coarse_retriever", spec_by_name)
         self.assertIn("trial_candidate_retriever", spec_by_name)
+        self.assertIn("pubmed_realtime_search", spec_by_name)
+        self.assertIn("wikidata_entity_graph_search", spec_by_name)
+        self.assertIn("live_medical_knowledge_retriever", spec_by_name)
         self.assertIn("riskcalc_coarse_retriever", spec_by_name)
         self.assertIn("riskcalc_computation_retriever", spec_by_name)
         self.assertIn("riskcalc_executor", spec_by_name)
@@ -36,6 +39,10 @@ class ToolSpecExportTests(unittest.TestCase):
         self.assertEqual(
             spec_by_name["trial_candidate_retriever"].input_schema["coarse_top_k"],
             "int",
+        )
+        self.assertEqual(
+            spec_by_name["live_medical_knowledge_retriever"].input_schema["concepts"],
+            "list[dict] | list[str] | None",
         )
         self.assertEqual(
             spec_by_name["riskcalc_coarse_retriever"].input_schema["structured_case"]["raw_text"],

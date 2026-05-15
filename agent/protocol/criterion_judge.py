@@ -202,10 +202,11 @@ def judge_criterion(
     if spans:
         return _assessment(
             criterion,
-            label="met",
-            confidence=0.55,
+            label="unknown",
+            confidence=0.35,
             evidence_spans=spans[:2],
-            rationale="找到与该标准相关的病例证据；第一版规则将其作为支持证据，需人工复核。",
+            rationale="找到与该标准相关的病例证据，但当前规则无法严格确认满足该入排标准；保留为待核验证据。",
+            missing_data=[criterion.condition or criterion.raw_text[:80]],
         )
 
     return _assessment(

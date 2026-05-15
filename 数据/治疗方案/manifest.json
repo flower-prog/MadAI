@@ -1,0 +1,138 @@
+{
+  "created_at_utc": "2026-04-16T08:34:14.641793+00:00",
+  "sample_size": 50,
+  "seed": 42,
+  "min_per_department": 2,
+  "labels_path": "/home/yuanzy/trial-classifier/labels/train_labels.jsonl",
+  "input_dir": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1",
+  "output_dir": "/home/yuanzy/trial-classifier/outputs/medai_smoke_50",
+  "missing_xml_for_labeled_ids": [],
+  "available_distribution": {
+    "五官科": 25,
+    "传染科": 50,
+    "儿科": 23,
+    "内科": 140,
+    "医学影像科": 16,
+    "外科": 28,
+    "妇产科": 15,
+    "皮肤性病科": 16,
+    "精神心理科": 58,
+    "肿瘤科": 110,
+    "麻醉医学科": 19
+  },
+  "selected_distribution": {
+    "五官科": 3,
+    "传染科": 5,
+    "儿科": 3,
+    "内科": 10,
+    "医学影像科": 3,
+    "外科": 4,
+    "妇产科": 3,
+    "皮肤性病科": 3,
+    "精神心理科": 5,
+    "肿瘤科": 8,
+    "麻醉医学科": 3
+  },
+  "overall_status_distribution": {
+    "Active, not recruiting": 1,
+    "Completed": 37,
+    "Terminated": 6,
+    "Unknown status": 6
+  },
+  "medai_status_distribution": {
+    "abandoned": 6,
+    "manual_review": 6,
+    "trial_matched": 38
+  },
+  "department_payload_distribution": {
+    "五官科": 3,
+    "传染科": 5,
+    "儿科": 7,
+    "内科": 16,
+    "医学影像科": 5,
+    "外科": 8,
+    "妇产科": 5,
+    "皮肤性病科": 3,
+    "精神心理科": 6,
+    "肿瘤科": 9,
+    "麻醉医学科": 4
+  },
+  "department_status_distribution": {
+    "五官科": {
+      "manual_review": 1,
+      "trial_matched": 2
+    },
+    "传染科": {
+      "abandoned": 1,
+      "trial_matched": 4
+    },
+    "儿科": {
+      "trial_matched": 7
+    },
+    "内科": {
+      "abandoned": 3,
+      "manual_review": 3,
+      "trial_matched": 10
+    },
+    "医学影像科": {
+      "manual_review": 1,
+      "trial_matched": 4
+    },
+    "外科": {
+      "trial_matched": 8
+    },
+    "妇产科": {
+      "abandoned": 1,
+      "trial_matched": 4
+    },
+    "皮肤性病科": {
+      "trial_matched": 3
+    },
+    "精神心理科": {
+      "trial_matched": 6
+    },
+    "肿瘤科": {
+      "abandoned": 3,
+      "manual_review": 1,
+      "trial_matched": 5
+    },
+    "麻醉医学科": {
+      "abandoned": 1,
+      "trial_matched": 3
+    }
+  },
+  "department_payload_filename": "treatment_trials.json",
+  "medai_status_mapping": {
+    "open_or_preopen": {
+      "trial_statuses": [
+        "Enrolling by invitation",
+        "Not yet recruiting",
+        "Recruiting"
+      ],
+      "medai_status": "trial_matched"
+    },
+    "evidence_ready": {
+      "trial_statuses": [
+        "Active, not recruiting",
+        "Completed"
+      ],
+      "medai_status": "trial_matched"
+    },
+    "abandoned": {
+      "trial_statuses": [
+        "No longer available",
+        "Suspended",
+        "Temporarily not available",
+        "Terminated",
+        "Withdrawn"
+      ],
+      "medai_status": "abandoned"
+    },
+    "manual_review": {
+      "trial_statuses": [
+        "Unknown status"
+      ],
+      "medai_status": "manual_review"
+    }
+  }
+}

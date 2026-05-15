@@ -7,7 +7,10 @@ from .criteria_parser import parse_trial_criteria
 from .criterion_judge import judge_criterion
 from .eligibility_aggregator import aggregate_trial_eligibility
 from .evidence_retriever import build_patient_evidence_index, find_evidence_for_criterion
+from .llm_eligibility import judge_trials_with_llm
 from .missing_data import generate_missing_questions
+from .patient_card import build_patient_evidence_card
+from .trial_card import build_trial_card, build_trial_card_text
 from .types import to_plain_dict
 
 
@@ -88,6 +91,10 @@ def assess_trial_eligibility_candidates(
     trial_bundle: Mapping[str, Any],
     trial_retriever: Any = None,
     limit: int = 3,
+    trial_search_intent: Mapping[str, Any] | None = None,
+    patient_evidence_bundle: Mapping[str, Any] | None = None,
+    eligibility_chat_client: Any = None,
+    llm_model: str | None = None,
 ) -> dict[str, Any]:
     evidence_index = build_patient_evidence_index(
         structured_case,
@@ -95,10 +102,32 @@ def assess_trial_eligibility_candidates(
         calculator_matches=list(calculator_matches or []),
         calculator_evidence_bundle=calculator_evidence_bundle,
     )
+    resolved_patient_evidence_bundle = dict(patient_evidence_bundle or {})
+    if not resolved_patient_evidence_bundle:
+        resolved_patient_evidence_bundle = {
+            "schema_version": 1,
+            "status": "completed",
+            "evidence_spans": [to_plain_dict(item) for item in evidence_index],
+            "evidence_span_count": len(evidence_index),
+        }
+    resolved_trial_search_intent = dict(
+        trial_search_intent
+        or (structured_case.get("trial_search_intent") if isinstance(structured_case, Mapping) else {})
+        or {}
+    )
+    patient_evidence_card = build_patient_evidence_card(
+        structured_case,
+        trial_search_intent=resolved_trial_search_intent,
+        patient_evidence_bundle=resolved_patient_evidence_bundle,
+    )
 
     assessed_trials = []
+    trial_cards: list[dict[str, Any]] = []
     for candidate in _candidate_trials(trial_bundle, limit=limit):
         trial_record = _resolve_trial_record(trial_retriever, candidate)
+        trial_card = build_trial_card(trial_record, candidate=candidate)
+        trial_card["card_text"] = build_trial_card_text(trial_card)
+        trial_cards.append(trial_card)
         criteria = parse_trial_criteria(trial_record)
         assessments = []
         for criterion in criteria:
@@ -122,11 +151,31 @@ def assess_trial_eligibility_candidates(
         assessment_payload["eligibility_unsplit_text_present"] = bool(
             _normalize_text(trial_record.get("eligibility_unsplit_text"))
         )
+        assessment_payload["trial_card"] = trial_card
         assessed_trials.append(assessment_payload)
+
+    llm_bundle = judge_trials_with_llm(
+        patient_evidence_card=patient_evidence_card,
+        trial_cards=trial_cards,
+        chat_client=eligibility_chat_client,
+        model=llm_model,
+    )
+    llm_by_nct = {
+        _normalize_text(item.get("nct_id")): dict(item)
+        for item in list(llm_bundle.get("results") or [])
+        if isinstance(item, Mapping) and _normalize_text(item.get("nct_id"))
+    }
+    if llm_by_nct:
+        for trial in assessed_trials:
+            llm_result = llm_by_nct.get(_normalize_text(trial.get("nct_id")))
+            if llm_result:
+                trial["llm_eligibility_assessment"] = llm_result
 
     return {
         "schema_version": 1,
         "assessed_trial_count": len(assessed_trials),
         "assessed_trials": assessed_trials,
         "parse_warning_stats": _parse_warning_stats(assessed_trials),
+        "patient_evidence_card": patient_evidence_card,
+        "llm_eligibility_bundle": llm_bundle,
     }

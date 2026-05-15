@@ -95,6 +95,29 @@ class _SelectionAwareClinicalToolRunner:
         }
 
 
+class _FakeTrialRetriever:
+    def retrieve_from_structured_case(
+        self,
+        structured_case,
+        *,
+        top_k=20,
+        coarse_top_k=300,
+        department_tags=None,
+        backend="hybrid",
+    ):
+        return {
+            "query_text": str(structured_case.get("case_summary") or ""),
+            "backend_used": backend,
+            "available_backends": ["bm25"],
+            "department_tags": list(department_tags or []),
+            "fallback_to_full_catalog": False,
+            "coarse_candidate_ids": [],
+            "bm25_top5": [],
+            "vector_top5": [],
+            "candidate_ranking": [],
+        }
+
+
 class OrchestratorStateTests(unittest.TestCase):
     def test_ensure_state_loads_orchestrator_result_and_department(self) -> None:
         state = ensure_state(
@@ -361,6 +384,7 @@ class OrchestratorStateTests(unittest.TestCase):
             calculation_bundle={"mode": "baseline"},
             calculation_results=[],
             calculator_matches=[],
+            tool_registry={"trial_retriever": _FakeTrialRetriever()},
         )
 
         protocol_state = protocol_node(state)

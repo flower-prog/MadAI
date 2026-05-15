@@ -1,0 +1,157 @@
+{
+  "NCT00871052": {
+    "name": "Calcipotriol and Polymorphic Light Eruption",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 皮肤性病科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00871052"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00871052",
+    "department_tag": "皮肤性病科",
+    "department_role": "primary",
+    "department_tags": [
+      "皮肤性病科"
+    ],
+    "primary_department": "皮肤性病科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Calcipotriol and Polymorphic Light Eruption",
+    "official_title": "Calcipotriol in the Prevention of Polymorphic Light Eruption",
+    "conditions": [
+      "Polymorphic Light Eruption"
+    ],
+    "mesh_terms": [
+      "Exanthema",
+      "Dermatitis, Contact"
+    ],
+    "keywords": [
+      "Polymorphic light eruption",
+      "UV radiation",
+      "Vitamin D",
+      "Immune suppression",
+      "Prevention"
+    ],
+    "interventions": [
+      "Calcipotriol-containing cream"
+    ],
+    "brief_summary": "Polymorphic light eruption (PLE) is a photodermatosis with an extremely high prevalence, particularly among young women (up to 20%). The disease is characterized through itchy skin lesions on sun-exposed body sites occurring after sun exposure mostly in spring and early summer. Its etiopathogenesis is unknown but resistance to ultraviolet radiation (UVR)-induced immunosuppression with subsequent immune reactions against skin photoneoantigens has been suggested. The phenomenon of UVR-induced immunosuppression (suppression of CHS) has been well known for many years. Recent findings showed that regulatory T cells (CD4+CD25+FoxP3+) (Tregs), a subset of T helper cells, are crucial in UVR-induced immunosuppression. However, the requirements for the maintenance of peripheral CD4+CD25+ T cells, important in suppression of immune responses, are still incompletely understood. Recent work suggests that cutaneous RANKL might be the physiologic missing link that couples UVR to immunosuppression. Epidermal RANKL, expressed in keratinocytes of inflamed skin due to e.g. UVR exposure was shown to control the number of Tregs via activation of dendritic cells, hereby mediating UVR-induced immunosuppression (e.g. suppression of allergic contact hypersensitivity responses). In addition to the suppression of local cutaneous hyperallergic responses, the development of systemic autoimmunity is suppressed. A strong inducer of RANKL expression and of Tregs is vitamin D3 that has been reported to have immunosuppressive effects. Interestingly, patients with autoimmune disorders (e.g. lupus erythematosus) may exhibit reduced vitamin D3 blood levels. This randomized, double blinded left-right body side experimental comparison study was designed to assess the preventive effect of the vitamin D3 analogue calcipotriol in patients with PLE. The hypothesis is tested that treatment with a calcipotriol-containing cream can prevent the UVR-induced development of PLE skin lesions. Better insight into the pathogenesis of PLE may give clues to develop new therapeutic strategies.",
+    "eligibility_text": "Inclusion Criteria: - Diagnosis of PLE either by typical history and/or typical histology of lesions and/or positive phototesting results - Age > 18 years Exclusion Criteria: - Presence of or history of malignant skin tumors - Dysplastic melanocytic nevus syndrome - Photosensitive diseases such as porphyria, chronic actinic dermatitis, Xeroderma pigmentosum, basal cell nevus syndrome, and others - Autoimmune disorders such as Lupus erythematosus or dermatomyositis - Psychiatric disorders - Immune deficiency or systemic treatment with steroids and/or other immunosuppressive drugs - Pregnancy or lactation - Antinuclear antibodies - UV exposure in test fields within 8 weeks before study start - General poor health status - Severe liver or renal disease, disorders or therapy of the calcium metabolism with vitamin D containing drugs",
+    "study_type": "Interventional",
+    "phase": "N/A",
+    "primary_purpose": "Prevention",
+    "copied_xml_relpath": "xml/NCT00871052.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0087xxxx/NCT00871052.xml"
+  },
+  "NCT00640393": {
+    "name": "Safety and Efficacy of Combining nbUVB to Etanercept in Patients",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 皮肤性病科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00640393"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00640393",
+    "department_tag": "皮肤性病科",
+    "department_role": "primary",
+    "department_tags": [
+      "皮肤性病科"
+    ],
+    "primary_department": "皮肤性病科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Safety and Efficacy of Combining nbUVB to Etanercept in Patients",
+    "official_title": "A Randomized Study Combining Etanercept and Short Courses of Narrow-Band UVB in Patients With Psoriasis Vulgaris",
+    "conditions": [
+      "Psoriasis Vulgaris"
+    ],
+    "mesh_terms": [
+      "Psoriasis"
+    ],
+    "keywords": [
+      "Etanercept, UVB, Enbrel, Psoriasis."
+    ],
+    "interventions": [
+      "Etanercept",
+      "nbUVB"
+    ],
+    "brief_summary": "This study will provide data on the addition of narrow band ultra violet B (nbUVB) phototherapy to participants who have not shown an excellent response to three months of etanercept.",
+    "eligibility_text": "Inclusion Criteria: - Age 18 or older; - Patient with moderate to severe plaque psoriasis for whom a decision to use etanercept has been made; - At the investigator discretion, patient who would benefit from systemic therapy; - PASI (psoriasis area and severity index) ≥ 10 and BSA (body surface area affected by psoriasis) ≥ 10 at day 0; - Unless surgically sterile (or at least 1 year post-menopausal for women), abstinent or homosexual, patient (men and women) willing to use adequate contraceptive method for at least 30 days before Day 0 and until one month after the last drug administration; - Patient capable of giving informed consent; - Patient with normal or non clinically significant chest X ray within six months of screening; - Patient with negative purified protein derivative (PPD) within 3 months of Day 0; - Negative urine pregnancy test for women of childbearing potential Exclusion Criteria: - Patient used topical steroid, topical tar preparations, or other anti-psoriatic preparations except tar or salicylic acid shampoo or hydrocortisone for the face, scalp, genital and inframammary areas within two weeks of Day 0; - Patient with presence of erythrodermic, pustular or a predominantly guttate psoriasis; - At the investigator's discretion, patient with any significant infection within 30 days of screening or a patient at risk of septicemia; - Patient with evidence of any skin condition that would interfere with the evaluation of psoriasis; - Patient used investigational drugs within 12 weeks or three half-life of Day 0 whichever is longer; - Patient used systemic anti-psoriatic drugs such as steroids, retinoids, methotrexate, cyclosporine within four weeks of Day 0; - Patient used any biologic such as alefacept, etanercept, efalizumab, infliximab and adalimumab within 12 weeks of Day 0; - Patient used ultraviolet light therapy (UVB or nbUVB) within four weeks of Day 0 or PUVA (psoralen ultra violet A) within eight weeks of Day 0; - Patient with prior or concurrent use of cyclophosphamide; - Patient with concurrent sulfasalazine therapy or concurrent use of anakinra; - Patient with an unstable or serious medical condition as defined by the investigator or presence of any significant medical condition that might cause this study to be detrimental to the patient. - Uncontrolled or severe comorbidities such as diabetes mellitus requiring insulin; congestive heart failure (NYHA (New York Heart Association) class III or IV) or history of myocardial infarction or cerebrovascular accident or transient ischemic attack within three months of screening visit; unstable angina pectoris; uncontrolled hypertension, oxygen-dependent severe pulmonary disease; - Patient with a known sero-positivity for HIV (human immunodeficiency virus) or history of any other immunosuppressing disease; - Patient with active or chronic hepatitis B or C; - Patient with any active or chronic infection within four weeks before screening or between the screening and baseline visits; - Patient with any mycobacterial disease, patient with a positive PPD, a chest X-Ray suggestive of tuberculosis or patient taking anti-tuberculosis medication; - Patient with a known hypersensitivity to etanercept or one of its components or known to have antibodies to etanercept; - Patient who received a live attenuated vaccines within 12 weeks of Day 0 or plan to receive one during the study; - Current pregnancy or lactation; - At the investigator's discretion, patient with current or history of alcohol or drug abuse that would interfere with the ability of the patient to comply with the study protocol; - Patient with systemic lupus erythematosus or demyelinating disorder (optic neuritis, multiple sclerosis or other); - Patient with a history of cancer within five years of Day 0 or presence of cancer except for treated basal or squamous cell carcinoma and in situ cervix carcinoma; - Patient who failed to respond to nbUVB in the past; - Patient who have a contra-indication to nbUVB; - Patient with latex sensitivity (applicable only if they are using prefilled syringe or prefilled SureClickTM autoinjector presentations); - Patient with a history of non-compliance with other therapies.",
+    "study_type": "Interventional",
+    "phase": "Phase 4",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00640393.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0064xxxx/NCT00640393.xml"
+  },
+  "NCT00116675": {
+    "name": "Four Week Safety and Efficacy Study With a Topical Gel to Treat Common Warts in Pediatric Subjects",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 皮肤性病科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00116675"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00116675",
+    "department_tag": "皮肤性病科",
+    "department_role": "primary",
+    "department_tags": [
+      "皮肤性病科",
+      "儿科"
+    ],
+    "primary_department": "皮肤性病科",
+    "secondary_departments": [
+      "儿科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Four Week Safety and Efficacy Study With a Topical Gel to Treat Common Warts in Pediatric Subjects",
+    "official_title": "A Single-Blind, Dose-Escalating Study to Assess Efficacy and Safety of Resiquimod Gel Applied 3 Times Per Week for 4 Weeks for the Treatment of Common Warts in Pediatric Subjects",
+    "conditions": [
+      "Warts"
+    ],
+    "mesh_terms": [
+      "Warts"
+    ],
+    "keywords": [
+      "Common Wart(s)",
+      "Pediatric",
+      "Wart(s)",
+      "Children",
+      "3M Pharmaceuticals",
+      "Resiquimod"
+    ],
+    "interventions": [
+      "Resiquimod"
+    ],
+    "brief_summary": "The primary purpose of this study is to evaluate the effectiveness in pediatric subjects of three different strengths of resiquimod gel applied to common wart(s) three times a week for four weeks. A second purpose is to evaluate the safety of the drug.",
+    "eligibility_text": "Inclusion Criteria: - Diagnosis of common warts - Ages between 3 to 11 Exclusion Criteria: - Other types of wart(s), ie. plantar - Currently participating in another clinical study - Chronic viral hepatitis B or C",
+    "study_type": "Interventional",
+    "phase": "Phase 2",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00116675.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0011xxxx/NCT00116675.xml"
+  }
+}

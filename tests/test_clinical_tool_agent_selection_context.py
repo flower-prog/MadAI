@@ -89,9 +89,20 @@ class ClinicalToolAgentSelectionContextTests(unittest.TestCase):
             "retrieval_batches": [],
             "risk_hints": [],
         }
-        agent._assess_candidate_execution_gate = lambda *_args, **_kwargs: (_ for _ in ()).throw(
-            AssertionError("selection should not pre-run candidate execution gates")
-        )
+        gate_pmids: list[str] = []
+
+        def _assess_gate(_current_job, candidate):
+            gate_pmids.append(str(candidate.get("pmid")))
+            return (
+                {
+                    "pmid": str(candidate.get("pmid")),
+                    "gate_status": "passed",
+                    "execution_status": "ready",
+                },
+                None,
+            )
+
+        agent._assess_candidate_execution_gate = _assess_gate
 
         seen_pmids: list[list[str]] = []
 
@@ -118,6 +129,7 @@ class ClinicalToolAgentSelectionContextTests(unittest.TestCase):
         self.assertEqual(len(seen_pmids), 1)
         self.assertEqual(len(seen_pmids[0]), 6)
         self.assertEqual({str(index) for index in range(1, 7)}, set(seen_pmids[0]))
+        self.assertEqual(gate_pmids, ["6"])
         self.assertEqual(len(result["retrieved_tools"]), 6)
         self.assertEqual(result["selected_tool"]["pmid"], "6")
 
@@ -136,9 +148,20 @@ class ClinicalToolAgentSelectionContextTests(unittest.TestCase):
             "retrieval_batches": [],
             "risk_hints": ["stroke risk"],
         }
-        agent._assess_candidate_execution_gate = lambda *_args, **_kwargs: (_ for _ in ()).throw(
-            AssertionError("selection should not pre-run candidate execution gates")
-        )
+        gate_pmids: list[str] = []
+
+        def _assess_gate(_current_job, candidate):
+            gate_pmids.append(str(candidate.get("pmid")))
+            return (
+                {
+                    "pmid": str(candidate.get("pmid")),
+                    "gate_status": "passed",
+                    "execution_status": "ready",
+                },
+                None,
+            )
+
+        agent._assess_candidate_execution_gate = _assess_gate
 
         seen_pmids: list[list[str]] = []
         executed_pmids: list[str] = []
@@ -166,6 +189,7 @@ class ClinicalToolAgentSelectionContextTests(unittest.TestCase):
         self.assertEqual(len(seen_pmids), 1)
         self.assertEqual(len(seen_pmids[0]), 6)
         self.assertEqual({str(index) for index in range(1, 7)}, set(seen_pmids[0]))
+        self.assertEqual(gate_pmids, ["6"])
         self.assertEqual(len(result["retrieved_tools"]), 6)
         self.assertEqual(executed_pmids, ["6"])
         self.assertEqual(result["selected_tool"]["pmid"], "6")

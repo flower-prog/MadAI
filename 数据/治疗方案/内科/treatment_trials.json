@@ -1,0 +1,843 @@
+{
+  "NCT00365586": {
+    "name": "Ketoprofen Topical Patch, 20% in the Treatment of Pain Associated With Osteoarthritis Flare of the Knee",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00365586"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00365586",
+    "department_tag": "内科",
+    "department_role": "primary",
+    "department_tags": [
+      "内科"
+    ],
+    "primary_department": "内科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Ketoprofen Topical Patch, 20% in the Treatment of Pain Associated With Osteoarthritis Flare of the Knee",
+    "official_title": "A Phase III Study of the Efficacy, Tolerability and Safety of the Ketoprofen Topical Patch, 20% (KTP) in the Treatment of Pain Associated With Osteoarthritis Flare of the Knee, Including a Randomized, Double-Blind, Placebo-Controlled, Parallel Group Phase Followed by an Open-Label Treatment Phase",
+    "conditions": [
+      "Osteoarthritis"
+    ],
+    "mesh_terms": [
+      "Osteoarthritis"
+    ],
+    "keywords": [
+      "Pain",
+      "Osteoarthritis",
+      "Knee",
+      "NSAID"
+    ],
+    "interventions": [
+      "Ketoprofen Topical Patch , 20%"
+    ],
+    "brief_summary": "The purpose of this study is to evaluate the effect of a ketoprofen topical patch on the pain associated with Osteoarthritis Flare of the Knee.",
+    "eligibility_text": "Inclusion Criteria: - Males or females 18 years of age or older - Diagnosis of osteoarthritis of the knee (unilateral or bilateral) - Meet pain entry criteria - Willing to discontinue use of all analgesic medications (including over-the-counter [OTC] analgesics) except those provided as the study treatment and rescue medication specifically for study purposes. Exclusion Criteria: - Positive urine pregnancy test, pregnant or lactating. - Have fibromyalgia, inflammatory arthritis, gout, pseudo-gout or Paget's disease - Have any other type of clinically significant joint disease or have had joint replacement surgery at the index knee - Have received either a corticosteroid injection in the 4 weeks preceding the screening visit or hyaluronic acid within 6 months of the screening visit - Have a history or physical examination finding that is incompatible with safe participation in the study or study product use - Are taking medications or other substances contraindicated due to the nature of the study medication or the potential for drug interactions. - Have significant renal or hepatic impairment - Are taking a sleep medication at a dose that has not been stable for at least 3 months",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00365586.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0036xxxx/NCT00365586.xml"
+  },
+  "NCT00276250": {
+    "name": "Islet Transplantation Using Abatacept",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00276250"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00276250",
+    "department_tag": "内科",
+    "department_role": "primary",
+    "department_tags": [
+      "内科"
+    ],
+    "primary_department": "内科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Islet Transplantation Using Abatacept",
+    "official_title": "Development of Immunosuppression Regimens to Facilitate Single Donor Islet Transplantation Using Abatacept",
+    "conditions": [
+      "Type 1 Diabetes Mellitus"
+    ],
+    "mesh_terms": [
+      "Diabetes Mellitus, Type 1"
+    ],
+    "keywords": [],
+    "interventions": [
+      "Efalizumab",
+      "Abatacept",
+      "Belatacept"
+    ],
+    "brief_summary": "Islet transplantation in type 1 diabetics with hypoglycemic unawareness using abatacept as a part of a novel calcineurin-inhibitor-sparing immunosuppressive regimen.",
+    "eligibility_text": "Inclusion Criteria: - Male and Female patients age 18 to 65 years of age - Clinical history compatible with type 1 diabetes with onset of disease at <40 years of age and insulin-dependence for >5 years at the time of enrollment. - Body mass index less than or equal to 26 - 18 to 65 years of age - Absent stimulated C-peptide (<0.3ng/ml) in response to a mixed meal tolerance test (Boost® 6 mL/kg body weight to a maximum of 360 mL; another product with equivalent caloric and nutrient content may be substituted for Boost) measured at 90min after the end of consumption. - Compliance with an optimized diabetic management plan as assessed by an Emory University endocrinologist - Checking and recording blood sugars at least 3 times per day - Involvement in intensive diabetes management defined as self monitoring of glucose values no less than a mean of three times each day averaged over each week and by the administration of three or more insulin injections each day or insulin pump therapy. Such management must be under the direction of an endocrinologist, diabetologist, or diabetes specialist with at least 3 clinical evaluations during the previous 12 months. - At least one episode of severe hypoglycemia in the past 3 years defined as an event with symptoms compatible with hypoglycemia in which the subject required the assistance of another person and which was associated with either a blood glucose level <50 mg/dL [2.8 mmol/L] or prompt recovery after oral carbohydrate, intravenous glucose, or glucagon administration). - Reduced awareness of hypoglycemia as defined by a Clarke score of 4 or more and a HYPO score greater than or equal to the 90th percentile (1047) within the last 6 months prior to randomization; OR Marked glycemic lability characterized by wide swings in blood glucose despite optimal diabetes therapy and defined by a glycemic lability index (LI) score greater than or equal to the 90th percentile (433 mM2/h/wk) within the last 6 months prior to randomization; OR A composite of a Clarke score of 4 or more and a HYPO score greater than or equal to the 75th percentile (423) and a LI greater than of equal to the 75th percentile (329) within the last 6 months prior to randomization. Exclusion Criteria: - Severe co-existing cardiac disease, characterized by any one of these conditions: - Recent myocardial infarction (within past six months) - Left Ventricular Ejection Fraction < 30% - Evidence of ischemia on a functional echocardiogram - Active infection including hepatitis B, hepatitis C, HIV, or TB as determined by a positive skin test or clinical presentation, or under treatment for suspected TB. Positive tests are acceptable only if associated with a history of previous vaccination in the absence of any sign of active infection. Positive tests are otherwise not acceptable, even in the absence of any active infection at the time of evaluation - Invasive aspergillus infection within one year prior to study entry. - Negative screen for Epstein-Barr Virus (EBV) by IgG determination. - Administration of live vaccine within the past two months - Measured glomerular filtration rate using iohexol <70 mL/min/1.73 m2 for females and <80 mL/min/1.73 m2 for males (or a 24 hr. creatinine clearance with participants allergic to iodine <85mL/min/1.73m2). - Macroalbuminuria (urinary protein excretion rate >300 mg/24h) - Baseline Hgb below the lower limits of normal at the local laboratory; lymphopenia (<1,000/L), neutropenia (<1,500/L), or thrombocytopenia (platelets <100,000/ L). - Hyperlipidemia (fasting LDL cholesterol >130 mg/dL, treated or untreated; and/or fasting triglycerides >300 mg/dL) - Negative antibody test for Varicella zoster virus (subjects may be reconsidered if they receive the vaccination and convert to a positive antibody) - History of malignancy (except squamous or basal cell skin carcinoma) within the previous 5 years - Previous/concurrent organ transplantation - Presence of HLA Panel Reactive Antibodies >20% - Active peptic ulcer disease - Evidence of gallbladder disease including cholecystitis and cholelithiasis - Evidence of liver disease including: hepatic neoplasm, portal hypertension, or persistently abnormal liver function tests - Current use of systemic steroid medications - Evidence of insulin resistance (insulin requirements >0.8 units/kg/day) - Inability to provide informed consent - Severe unremitting diarrhea, vomiting or other gastrointestinal disorders potentially interfering with the ability to absorb oral medications. - Hyperlipidemia despite medical therapy (fasting LDL cholesterol >130 mg/dL, treated or untreated; and/or fasting triglycerides >200 mg/dL). - Acute or chronic pancreatitis. - Symptomatic peptic ulcer disease. - Use of any other investigational agents within 4 weeks of participation. - Any condition or any circumstance that makes it unsafe to undergo an islet cell transplant - Any coagulopathy or medical condition requiring long-term anticoagulant therapy (e.g., warfarin) after transplantation (low-dose aspirin treatment is allowed) or patients with an INR >1.5. - Sickle Cell Anemia (Subjects with Sickle Cell Anemia, trait HbSS, are at high risk for complications after transplantation related to immunosuppressive therapy. These complications include stroke and sickle cell crisis. Therefore, we will exclude these subjects from our study to minimize risks to study subjects.) - For female participants: Positive pregnancy test, presently breast-feeding, or unwillingness to use effective contraceptive measures for the duration of the study and 3 months after discontinuation. For male participants: intent to procreate during the duration of the study or within 3 months after discontinuation or unwillingness to use effective measures of contraception. Oral contraceptives, Norplant®, Depo-Provera®, and barrier devices with spermicide are acceptable contraceptive methods; condoms used alone are not acceptable. - Active alcohol or substance abuse. This includes cigarette smoking (must be abstinent for six months). Active alcohol abuse should be considered using the current NIAAA definitions, whereby alcohol abuse is defined by a pattern of drinking that is accompanied by one or more of the following situations within a 12-month period: - Failure to fulfill major work, school, or home responsibilities - Drinking in situations that are physically dangerous, such as while driving a car or operating machinery - Recurring alcohol-related legal problems, such as driving under the influence of alcohol or for causing physical harm to someone while intoxicated - Continued alcohol abuse despite having ongoing relationship problems that are caused or worsened by the effects of alcohol - Psychiatric disorder making the subject not a suitable candidate for transplantation, e.g., schizophrenia, bipolar disorder, or major depression that is unstable or uncontrolled on current medication. (A psychological or psychiatric consultation is required only if considered necessary by some current indication or history.)",
+    "study_type": "Interventional",
+    "phase": "Phase 2",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00276250.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0027xxxx/NCT00276250.xml"
+  },
+  "NCT00889707": {
+    "name": "Transperineal Intraprostatic Injection of PRX302 Under Ultrasound Guidance for Management of Prostatic Hyperplasia",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00889707"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00889707",
+    "department_tag": "内科",
+    "department_role": "primary",
+    "department_tags": [
+      "内科"
+    ],
+    "primary_department": "内科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Transperineal Intraprostatic Injection of PRX302 Under Ultrasound Guidance for Management of Prostatic Hyperplasia",
+    "official_title": "A Randomized, Double-blind, Placebo-controlled Phase II Study of Transperineal Intraprostatic Injection of PRX302 for the Treatment of Benign Prostatic Hyperplasia",
+    "conditions": [
+      "Benign Prostatic Hyperplasia"
+    ],
+    "mesh_terms": [
+      "Prostatic Hyperplasia",
+      "Hyperplasia"
+    ],
+    "keywords": [
+      "Benign Prostatic Hyperplasia",
+      "BPH",
+      "Enlarged Prostate"
+    ],
+    "interventions": [
+      "PRX302",
+      "Placebo"
+    ],
+    "brief_summary": "The purpose of this study is to determine whether PRX302 is safe and effective in the treatment of moderate to severe Benign Prostatic Hyperplasia (BPH).",
+    "eligibility_text": "Inclusion Criteria: - Males aged 40 to 80 years; - Lower urinary tract symptoms (LUTS), such as frequency, nocturia, urgency, weak urine stream, hesitancy, intermittency or post-void dribbling attributable to BPH for at least 6 months prior to dosing; - Untreated, intolerant or refractory to α-blockers; should not have received the medication for at least 2 weeks prior to screening and 4 weeks prior to dosing; - Subjects with PSA values 4 - 10 ng/mL should be assessed or medical records checked (e.g. biopsy report) to rule out the presence of prostate cancer; - Untreated, intolerant or intolerant to 5-α reductase inhibitors AND must be off medication for at least 6 months prior to dosing; - IPSS of 15 or higher; - Prostate volume at screening estimated at 30 to 100 mL as determined by TRUS; - Provided written Informed Consent for participation in the study. Exclusion Criteria: - Maximum urine flow rate (Qmax) of greater than 12 mL/sec; - Inability to void at least 150 mL of urine; - Post voiding residual urine volume (PVR) of greater than 200 mL; - Subjects unable to stand to void; - Subjects with acute or chronic bacterial prostatitis; - Using drugs (e.g. estrogen, androgen) that can produce androgen depression or anabolic steroids; - Penile prosthesis or artificial urinary sphincter; - Presence of prostatic cyst larger than 1 cm in diameter; - Unwilling to use condoms for 3 weeks post-treatment to prevent pregnancy and to avoid semen contact with partner(s); - Urethral stricture disease; - Bladder neck abnormalities/strictures; - Significant median lobe hyperplasia that contributes to outflow obstruction; - Confirmed or suspected neurogenic bladder dysfunction; - Systemic neurological disorders that may affect voiding function; - Previous pelvic surgery, trauma or radiation; - Active genitourinary infection within 7 days before screening; - Significant renal dysfunction (as evidenced by a serum creatinine > 1.6 mg/dL on the screening laboratory evaluation); - Abnormal liver function as evidenced by any of the following abnormal laboratory values being greater than 1.5 upper limit of normal (ULN) at screening: - alkaline phosphatase (ALP); - total bilirubin; - alanine transferase (ALT); and/or - aspartate aminotransferase (AST); - Abnormal Prothrombin Time (PT > 13 sec) / International Normalized Ratio (INR > 1.2); - Severe cardiovascular or hepatic disease (American Society of Anesthesiologists [ASA] > 3); Presence of suspected or confirmed malignancy other than non-melanomatous, cutaneous malignancies which have undergone curative interventions; - Receiving anticoagulants (Subjects receiving anticoagulants may be enrolled after discontinuation of anticoagulant therapy and return of INR level to within normal limits (INR < 1.2) before dosing day. Subjects receiving platelet inhibitors (including garlic) must be off the inhibitors for at least 6 days or more. Subjects unable to discontinue anticoagulant therapy may not be enrolled in this study); - Subjects who have received any treatment for BPH other than α-blockers, 5-α reductase inhibitors or phytotherapy; - Subjects taking α-blockers and phytotherapy within 2 weeks of screening and 4 weeks of dosing; - Subjects receiving 5-α reductase inhibitors within 6 months of dosing; - Subjects taking part in other experimental programs prior to the start of the study or during the study period; - Any medical, psychological or other condition or medical history of the subject that, in the opinion of the Investigator or the Sponsor's Medical Monitor, unduly increases the risk of subject's participation or that would unnecessarily confound the data to be collected in this study; - Unable or unwilling to comply with the requirements of the protocol.",
+    "study_type": "Interventional",
+    "phase": "Phase 2",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00889707.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0088xxxx/NCT00889707.xml"
+  },
+  "NCT00529087": {
+    "name": "Study Evaluating Subcutaneous MOA-728 for the Treatment of Opioid-Induced Constipation (OIC) in Subjects With Chronic Non-Malignant Pain",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00529087"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00529087",
+    "department_tag": "内科",
+    "department_role": "primary",
+    "department_tags": [
+      "内科"
+    ],
+    "primary_department": "内科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Study Evaluating Subcutaneous MOA-728 for the Treatment of Opioid-Induced Constipation (OIC) in Subjects With Chronic Non-Malignant Pain",
+    "official_title": "A Mulitcenter, Randomized, Double-Blind, Placebo-Controlled, Parallel-Group Study of Subcutaneous MOA-728 for the Treatment of Opioid-Induced Constipation in Subjects With Chronic Non-Malignant Pain",
+    "conditions": [
+      "Constipation"
+    ],
+    "mesh_terms": [
+      "Constipation"
+    ],
+    "keywords": [
+      "Opioid-Induced Constipation"
+    ],
+    "interventions": [
+      "N-methylnaltrexone bromide (MOA-728)",
+      "placebo"
+    ],
+    "brief_summary": "The primary purpose of the protocol is to evaluate the safety, efficacy, and tolerability of subcutaneous MOA-728 versus placebo in subjects with chronic non-malignant pain who have Opioid-Induced Constipation (OIC).",
+    "eligibility_text": "Inclusion Criteria: - Adult outpatients with opioid-induced constipation and chronic non-malignant pain. - Taking oral, transdermal, intravenous, or subcutaneous opioids. - Willingness to discontinue all pre-study laxative therapy and use only study permitted rescue laxatives. Exclusion Criteria - History of chronic constipation before the initiation of opioid therapy. - Other GI disorders known to affect bowel transit. - Women who are pregnant, breast-feeding, or plan to become pregnant.",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00529087.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0052xxxx/NCT00529087.xml"
+  },
+  "NCT00209586": {
+    "name": "A Study of AQUAVAN® Injection for Sedation in Elderly Patients Undergoing Flexible Bronchoscopy",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "abandoned",
+    "rationale": "ClinicalTrials.gov overall_status=Terminated; aligned to MedAI status=abandoned for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00209586"
+    ],
+    "actions": [
+      "Do not surface this trial as a direct option for the current patient.",
+      "Keep it only as historical context if the protocol remains clinically informative."
+    ],
+    "nct_id": "NCT00209586",
+    "department_tag": "内科",
+    "department_role": "secondary",
+    "department_tags": [
+      "麻醉医学科",
+      "内科"
+    ],
+    "primary_department": "麻醉医学科",
+    "secondary_departments": [
+      "内科"
+    ],
+    "overall_status": "Terminated",
+    "status_reason": "The trial lifecycle indicates that it is halted or unavailable, so MedAI should not treat it as a current treatment-trial option.",
+    "enrollment_open": false,
+    "brief_title": "A Study of AQUAVAN® Injection for Sedation in Elderly Patients Undergoing Flexible Bronchoscopy",
+    "official_title": "A Phase III, Randomized, Open-label Study to Assess the Safety and Efficacy of AQUAVAN® Injection Versus Midazolam HCl for Sedation in Patients Undergoing Flexible Bronchoscopy Procedures",
+    "conditions": [
+      "Flexible Bronchoscopy"
+    ],
+    "mesh_terms": [],
+    "keywords": [
+      "Bronchoscopy",
+      "Sedation"
+    ],
+    "interventions": [
+      "fospropofol disodium"
+    ],
+    "brief_summary": "This study was designed to demonstrate that AQUAVAN® is effective in providing adequate sedation in patients undergoing flexible bronchoscopy as well as to assess the safety profile of AQUAVAN versus that of midazolam. Prior to the procedure, patients receive fentanyl citrate for pain management followed five minutes later by either AQUAVAN® Injection or midazolam HCl for sedation. During the procedure, study personnel assess the patient's vital signs and depth of sedation. After the procedure, the patient, physician, and an evaluator are asked to complete satisfaction surveys.",
+    "eligibility_text": "Inclusion Criteria: 1. Patient provided signed/dated Informed Consent and HIPAA Authorization after receiving a full explanation of the extent and nature of the study. 2. Patient was at least 18 years of age at the time of screening. 3. Female patient must have been surgically sterile, postmenopausal, or not pregnant or lactating, and must have been using an acceptable method of birth control for at least 1 month prior to dosing, with a negative urine pregnancy test result at screening and predosing periods. 4. Patient met the American Society of Anesthesiologists (ASA) Physical Status Classification of I to III. Exclusion Criteria: 1. Patient had a history of allergic reaction or hypersensitivity to any anesthetic agent, narcotic or benzodiazepine. 2. Patient did not meet nils per os (NPO) status per ASA Guideline or institution's guideline. 3. Patient had condition(s) that, in the opinion of the Investigator, could interfere with appropriate airway management. 4. Patient required artificial ventilation prior to the initiation of bronchoscopy or was admitted to the intensive care unit. 5. Patient had a history of mental or visual impairment that would not permit successful measurement of cognitive evaluations. 6. Patient was unwilling to adhere to pre- and postprocedural instructions. 7. The use of fentanyl or midazolam was contraindicated for the patient. 8. Patient had participated in an investigational study within 1 month prior to study start.",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00209586.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0020xxxx/NCT00209586.xml"
+  },
+  "NCT00311896": {
+    "name": "Efficacy & Safety of Prophylaxis With Bemiparin in Cancer Patients With a Central Venous Catheter (BECAT)",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "abandoned",
+    "rationale": "ClinicalTrials.gov overall_status=Terminated; aligned to MedAI status=abandoned for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00311896"
+    ],
+    "actions": [
+      "Do not surface this trial as a direct option for the current patient.",
+      "Keep it only as historical context if the protocol remains clinically informative."
+    ],
+    "nct_id": "NCT00311896",
+    "department_tag": "内科",
+    "department_role": "secondary",
+    "department_tags": [
+      "肿瘤科",
+      "内科"
+    ],
+    "primary_department": "肿瘤科",
+    "secondary_departments": [
+      "内科"
+    ],
+    "overall_status": "Terminated",
+    "status_reason": "The trial lifecycle indicates that it is halted or unavailable, so MedAI should not treat it as a current treatment-trial option.",
+    "enrollment_open": false,
+    "brief_title": "Efficacy & Safety of Prophylaxis With Bemiparin in Cancer Patients With a Central Venous Catheter (BECAT)",
+    "official_title": "Multicentric, Randomized, Placebo Controlled and Double-blind Study to Evaluate the Efficacy and Safety of Antithrombotic Prophylaxis With Bemiparin (3,500 UI/Day) in Cancer Patients With a Central Venous Catheter (CVC)(BECAT)",
+    "conditions": [
+      "Cancer",
+      "Thrombosis"
+    ],
+    "mesh_terms": [
+      "Thrombosis"
+    ],
+    "keywords": [
+      "Cancer",
+      "Thrombosis",
+      "Catheter",
+      "Bemiparin",
+      "Prophylaxis"
+    ],
+    "interventions": [
+      "Bemiparin",
+      "Placebo"
+    ],
+    "brief_summary": "The purpose of this study is to evaluate the efficacy and safety of the subcutaneous administration for 45 days of Bemiparin (3,500 UI/day) in cancer patients with a CVC, to prevent CVC-related deep venous thrombosis (CVC-DVT)",
+    "eligibility_text": "Inclusion Criteria: - Patients over 18 years old of either sex who have given their informed consent to participate in the study. - Patients with a neoplastic process, with a CVC for the administration of anti-tumoral treatment or any other treatment related to the neoplastic process. - Patients with a platelet count above 30,000/mm3. - Patients with no hemorrhagic symptomatology at the time of their inclusion Exclusion Criteria: - Patients with a history of clinically evident hemorrhagic episodes and/or with increased bleeding due to any other homeostatic alteration that contraindicates anticoagulant treatment and/or in the past two months have presented at least one of the following: active hemorrhaging or organic lesions susceptible to bleeding (e.g. active peptic ulcer, hemorrhagic cerebrovascular accident, aneurysms). - Major surgery in the past two months. - Known hypersensitivity to LMWH, heparin or substances of porcine origin. - Patients with congenital or acquired bleeding diathesis. - Damage to or surgical interventions of the central nervous system, eyes and ears within the past 6 months. - Acute bacterial endocarditis or slow endocarditis. - Patients with a history of heparin-associated thrombocytopenia. - Patients with severe renal failure (serum creatinine over 2 mg/dl) or hepatic insufficiency (with values of AST and/or ALT > 5 times the normal value established by the reference range of the local hospital laboratory). - Severe arterial hypertension (systolic blood pressure over 200 mmHg and/or diastolic blood pressure over 120 mmHg). - Patients with suspected inability/or inability to comply with treatment and/or complete the study. - Patients who are participating in another clinical trial or have done so in the past 30 days. - Patients with a life expectancy less than 3 months. - Women who are pregnant or breast-feeding, or with the possibility of becoming pregnant during the study. - Patients on treatment with anticoagulants or who have been on treatment during the week previous to insert the CVC (including prophylaxis with heparin for hepatic veno-occlusive disease). - Patients diagnosed with acute leukemia or awaiting a transplant from hematopoietic progenitors during the 90 days of the study.",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Prevention",
+    "copied_xml_relpath": "xml/NCT00311896.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0031xxxx/NCT00311896.xml"
+  },
+  "NCT00408824": {
+    "name": "Investigation of Genetic Risk of Metabolic Syndrome in Company Employee (NGK Study)",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "manual_review",
+    "rationale": "ClinicalTrials.gov overall_status=Unknown status; aligned to MedAI status=manual_review for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00408824"
+    ],
+    "actions": [
+      "Review the full XML and the current ClinicalTrials.gov record manually before use.",
+      "Do not promote this trial to a direct recommendation until the lifecycle status is confirmed."
+    ],
+    "nct_id": "NCT00408824",
+    "department_tag": "内科",
+    "department_role": "primary",
+    "department_tags": [
+      "内科"
+    ],
+    "primary_department": "内科",
+    "secondary_departments": [],
+    "overall_status": "Unknown status",
+    "status_reason": "The trial lifecycle is unclear, so MedAI should require manual review before using it in protocol recommendations.",
+    "enrollment_open": false,
+    "brief_title": "Investigation of Genetic Risk of Metabolic Syndrome in Company Employee (NGK Study)",
+    "official_title": "Assessment of Genetic Risk of Metabolic Syndrome in Company Employee and Making New Health Guidance Program (NGK Study)",
+    "conditions": [
+      "Healthy",
+      "Metabolic Syndrome X",
+      "Hyperlipidemia",
+      "Hypertension",
+      "Diabetes Mellitus"
+    ],
+    "mesh_terms": [
+      "Metabolic Syndrome",
+      "Hyperlipidemias",
+      "Syndrome"
+    ],
+    "keywords": [
+      "insulin resistance",
+      "adipocytokine",
+      "Metabolic syndrome",
+      "Diabetes"
+    ],
+    "interventions": [],
+    "brief_summary": "The metabolic syndrome is a highly prevalent disorder, which causes atherosclerotic cardiovascular disease and is closely associated with insulin resistance. The alteration of the secretion of adipocytokines from accumulated visceral adipose tissue in the obese induces insulin resistance. The purpose of this study is to identify gene polymorphisms that confer susceptibility to the metabolic syndrome and to make up a new health guidance program based on genetic risk assessment. About 25% of male employees over 45 years old in a certain company are diagnosed with the metabolic syndrome in medical examination. We, the researchers at Nagoya University, will analyze gene polymorphism and various biomarkers of over 3500 company employees.",
+    "eligibility_text": "Inclusion Criteria: - Healthy subjects who work for a certain company",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00408824.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0040xxxx/NCT00408824.xml"
+  },
+  "NCT00593489": {
+    "name": "Advancing Insulin Prescribing in General Practice",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00593489"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00593489",
+    "department_tag": "内科",
+    "department_role": "primary",
+    "department_tags": [
+      "内科"
+    ],
+    "primary_department": "内科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Advancing Insulin Prescribing in General Practice",
+    "official_title": "Advancing INSIGHT Methods in General Practice",
+    "conditions": [
+      "Diabetes Mellitus"
+    ],
+    "mesh_terms": [
+      "Diabetes Mellitus"
+    ],
+    "keywords": [
+      "Insulin",
+      "Diabetes Mellitus",
+      "Practice Behaviour",
+      "Preceptor",
+      "Pharmacy"
+    ],
+    "interventions": [
+      "Basal Insulin Initiation Strategy"
+    ],
+    "brief_summary": "Family Physicians, the subjects of this trial are reluctant to initiate insulin in patients with type 2 diabetes due to a lack of familiarity and comfort with this clinical strategy. This study will test the effectiveness of diabetes specialist consultation support, and community pharmacy insulin initiation support on the insulin prescribing behaviour of family physicians across Canada.",
+    "eligibility_text": "Inclusion Criteria: - Full time family physicians (FP) >25 hours per week in office - Ability to generate a listing of patients with type 2 diabetes (T2DM) from their practice or billing records. - Generation of a practice list of patients with T2DM - A minimum of 50 patients with type 2 diabetes in their practice. - Support the generation of a Diabetes Practice Profile prior to the deadline established - A minimum of 6 insulin-eligible patients - Attendance at the scheduled Workshop (if unable to attend the Workshop must be available to be educated and trained by diabetes nurse educator(DNE) using a Workshop DVD) Exclusion Criteria: - FP does not attend Workshop or complete educational training using Workshop DVD with DNE guidance - FPs who anticipate retiring within the post-intervention period, moving their practice to another city, or having locum coverage of their practice for more than 4 weeks during the post-intervention period - FPs currently participating in a diabetes behaviour-change intervention trial - FPs working in an academic environment - FPs unlikely to comply with protocol, (uncooperative attitude, unlikelihood of completing the study).",
+    "study_type": "Interventional",
+    "phase": "N/A",
+    "primary_purpose": "Other",
+    "copied_xml_relpath": "xml/NCT00593489.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0059xxxx/NCT00593489.xml"
+  },
+  "NCT00490178": {
+    "name": "Acceptability Study of a New Fixed Combination of Fenofibrate 80 mg BID and Metformin 1000 mg BID in Type 2 Diabetes and Dyslipidemia",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00490178"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00490178",
+    "department_tag": "内科",
+    "department_role": "primary",
+    "department_tags": [
+      "内科"
+    ],
+    "primary_department": "内科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Acceptability Study of a New Fixed Combination of Fenofibrate 80 mg BID and Metformin 1000 mg BID in Type 2 Diabetes and Dyslipidemia",
+    "official_title": "An Open Label, Multicenter Trial Assessing the Acceptability of a New Fixed Combination of Fenofibrate 80 mg BID and Metformin 1000 mg BID in Patients With Type 2 Diabetes and Dyslipidemia",
+    "conditions": [
+      "Diabetes Mellitus, Type 2",
+      "Dyslipidemia"
+    ],
+    "mesh_terms": [
+      "Diabetes Mellitus",
+      "Diabetes Mellitus, Type 2",
+      "Dyslipidemias"
+    ],
+    "keywords": [
+      "Type II diabetes",
+      "dyslipidemia",
+      "metformin",
+      "fenofibrate",
+      "synordia"
+    ],
+    "interventions": [
+      "Fenofibrate 80 mg and metformin 1000 mg (fixed combination)"
+    ],
+    "brief_summary": "The present study aims to assess the acceptability of a 4 week treatment of a new fixed-dose combination of fenofibrate and metformin, in patients with type 2 diabetes and dyslipidemia",
+    "eligibility_text": "Inclusion Criteria: 1. Male or female patients aged from 20 to 80 years (at inclusion visit). 2. Type 2 diabetes treated with a stable dose of metformin for a minimum of 3 months either alone or in combination with another oral hypoglycaemic agent. 3. Dyslipidemia treated with 160 mg fenofibrate (or bioequivalent formulations) for a minimum of 3 months either alone or in combination with a statin. 4. And having signed a written informed consent.- Exclusion Criteria: 1. Known Type 1 Diabetes, uncontrolled type 2 diabetes [HbA1c > 9.5 %, Fasting plasma glucose (FPG) > 240 mg/dL (> 13.4 mmol/L) on the last performed blood sample (within the last 3 months)]. 2. TG > 500 mg/dL (> 5.65 mmol/L) on the last performed blood sample (within the last 3 months). 3. Women who are not surgically sterilized (i.e. bilateral tubal ligation, bilateral or two unilateral oophorectomies, hysterectomy) or not using adequate contraceptive methods (i.e. oral contraceptives, approved hormonal implant, intrauterine device, diaphragm with spermicide, condom with spermicide) or not postmenopausal (> 1 year since their last menstrual period). 4. Pregnant or lactating women.",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00490178.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0049xxxx/NCT00490178.xml"
+  },
+  "NCT00332631": {
+    "name": "High-Dose N-Acetylcysteine in Cardiac Surgery",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00332631"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00332631",
+    "department_tag": "内科",
+    "department_role": "secondary",
+    "department_tags": [
+      "外科",
+      "内科"
+    ],
+    "primary_department": "外科",
+    "secondary_departments": [
+      "内科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "High-Dose N-Acetylcysteine in Cardiac Surgery",
+    "official_title": "High-Dose N-Acetylcysteine in Cardiac Surgery Patients at High-Risk of Postoperative Renal Dysfunction.",
+    "conditions": [
+      "Cardiac Surgery and Cardiopulmonary Bypass"
+    ],
+    "mesh_terms": [],
+    "keywords": [
+      "Cardiac surgery,",
+      "Cardiopulmonary bypass,",
+      "Oxidative stress,",
+      "Acute renal dysfunction,",
+      "N-acetylcysteine"
+    ],
+    "interventions": [
+      "N-acetylcysteine",
+      "Placebo"
+    ],
+    "brief_summary": "At least 14% of patients develop kidney failure after cardiac surgery. Although this kidney failure can usually be treated effectively, a longer stay in intensive care is often required. While many patients suffer no long term ill effects after developing post-operative kidney failure, some require long term kidney dialysis. The investigators also know that patients who develop post-operative kidney failure are much more likely to die before they leave hospital. Why some people develop kidney failure after cardiac surgery is not known. However, doctors suspect that the process of cardiopulmonary bypass (where the functions of the heart and lungs are taken over by a machine during the operation, to allow the surgeon to operate) overactivates some of the same mechanisms the body uses to defend itself against severe infection. Many of the cell changes by which severe infection causes kidney failure also occur after cardiopulmonary bypass. One of the main overactive defence mechanisms is the release of highly toxic compounds derived from oxygen - a process called 'oxidative stress'. Another well-known cause of oxidative stress is paracetamol (Panadol) overdose. In large doses the oxidative stress caused by paracetamol damages cells in the liver, where it is digested, and the kidney. N-acetylcysteine is a drug in common use for the treatment of paracetamol overdose. Patients who would otherwise die of liver failure are routinely saved by N-acetylcysteine, which acts as a strong anti-oxidant. The investigators believe that N-acetylcysteine might similarly reduce the oxidative stress which occurs during cardiac surgery, and so prevent or decrease the kidney failure which occurs in many patients. The investigators hope to give N-acetylcysteine (in similar doses to those used safely for paracetamol poisoning) to patients during, and for a day after cardiac surgery, and compare the effects with patients who have not had N-acetylcysteine. The drug, or a 5% glucose placebo, will be given through the drip which is present in all cardiac surgery patients. Whether a particular patient receives the drug or placebo will be decided at random, and neither the patient nor the investigators will know which has been given. The investigators will measure kidney function before and after the operation using the standard tests which are performed for the purposes of clinical care of every patient. Also, the investigators will do an extra test involving the collection of urine (from the urinary catheter every patient has after cardiac surgery), which provides an even better measure of kidney function. This is a potential benefit to the patient, as while this test is not routinely performed, the results will be available to the doctors in the intensive care unit. The investigators will also take four 20ml samples of blood, spaced before, during, and after the operation, from the arterial catheter routinely inserted in every patient. This is an insignificant amount of blood compared to that taken for other tests, and would have no adverse effects. This blood would be used to measure oxidative stress, and also some of the proteins inside the blood cells which are responsible for creating the toxic oxygen compounds. In this way the investigators will discover not only the effect of N-acetylcysteine, but the mechanism of that effect. N-acetylcysteine is routinely used to treat paracetamol overdose with few side effects. An itchy skin rash is the only common side effect. Sometimes patients develop nausea and vomiting, but the treatment for this is usually very effective, and the drug will be stopped if it occurs. Rarely, as with all drugs, allergic reactions have been reported, but there are no other reported adverse effects. There will be no extra risk to a patient who participates in the study, and no discomfort other than that normally associated with cardiac surgery. The itchy rash which occasionally develops with N-acetylcysteine would occur under anaesthetic, and would almost certainly be gone by the time the patient wakes up. Informed consent will be obtained from the patient prior to the operation by one of the investigators or the ICU research nurse.",
+    "eligibility_text": "Inclusion Criteria: - Age above 70 years - Preexisting renal impairment (preoperative serum creatinine level >120µmol/L - New York Heart Association class III/IV or Moderate to poor left ventricular dysfunction - Valve surgery or complex cardiac surgery - Redo cardiac surgery - Insulin-dependent diabetes mellitus Exclusion Criteria: - Age <18 years - Known allergy or hypersensitivity to N-acetylcysteine - Emergency cardiac surgery - Planned off-pump cardiac surgery - Enrolled in conflicting research study - Known blood-borne infectious disease - Chronic inflammatory disease on immunosuppression - Chronic moderate to high dose corticosteroid therapy (>10mg/d prednisone or equivalent) - End stage renal disease (serum creatinine >300µmol/L) - Patients receiving pre-op IV nitrates",
+    "study_type": "Interventional",
+    "phase": "Phase 2",
+    "primary_purpose": "Prevention",
+    "copied_xml_relpath": "xml/NCT00332631.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0033xxxx/NCT00332631.xml"
+  },
+  "NCT00704795": {
+    "name": "Glucagon Responses During Oral- and iv Glucose in Patients With Type 1 Diabetes",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "manual_review",
+    "rationale": "ClinicalTrials.gov overall_status=Unknown status; aligned to MedAI status=manual_review for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00704795"
+    ],
+    "actions": [
+      "Review the full XML and the current ClinicalTrials.gov record manually before use.",
+      "Do not promote this trial to a direct recommendation until the lifecycle status is confirmed."
+    ],
+    "nct_id": "NCT00704795",
+    "department_tag": "内科",
+    "department_role": "primary",
+    "department_tags": [
+      "内科"
+    ],
+    "primary_department": "内科",
+    "secondary_departments": [],
+    "overall_status": "Unknown status",
+    "status_reason": "The trial lifecycle is unclear, so MedAI should require manual review before using it in protocol recommendations.",
+    "enrollment_open": false,
+    "brief_title": "Glucagon Responses During Oral- and iv Glucose in Patients With Type 1 Diabetes",
+    "official_title": "Glucagon Responses Following Oral Glucose and Isoglycemic iv Glucose in Patients With Type 1 Diabetes - a Role for the Gastrointestinal Tract in Diabetic Hyperglucagonemia?",
+    "conditions": [
+      "Hyperglucagonemia",
+      "Hyperglycemia",
+      "Diabetes Mellitus"
+    ],
+    "mesh_terms": [
+      "Diabetes Mellitus",
+      "Hyperglycemia"
+    ],
+    "keywords": [],
+    "interventions": [
+      "Oral glucose tolerance test",
+      "Isoglycemic iv glucose infusion"
+    ],
+    "brief_summary": "In order to evaluate the potential role of the gastrointestinal (GI) tract in the postprandial hyperglucagonemia, which characterizes type 1 diabetes mellitus (T1DM) (as well as type 2 diabetes mellitus (T2DM)), we wish to investigate the secretion of glucagon in patients with T1DM without residual beta-cell function during 50-g oral glucose tolerance test (OGTT) and during isoglycemic iv glucose infusion. By evaluating C-peptide negative patients with T1DM we aim to describe the glucagon response to glucose (+/-stimulation of the GI tract) independently of the potentially very important regulation of glucagon secretion by endogenous insulin secretion. A more detailed understanding of the inappropriate glucagon secretion in T1DM is highly needed in order to establish new intervention strategies in the future treatment of the growing numbers of T1DM patients.",
+    "eligibility_text": "Inclusion Criteria: - Caucasian over 18 years with T1DM (diagnosed according to WHO's criteria) treated with long-acting insulin - No residual beta-cell function (arginine test without increment in plasma C-peptide - see below) - BMI <30 kg/m2 - Normal haemoglobin - Informed consent Exclusion Criteria: - Residual beta-cell function (increment in plasma C-peptide during arginine test - see below) - Known liver disease or affected liver enzymes (ALAT/ASAT > 2 x upper normal limit) - Diabetic nephropathy (se-creatinin > 130 µM and/or albuminuria) - Proliferative diabetic retinopathy (anamnestic) - Treatment with medication that cannot be discontinued for 14 hours",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00704795.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0070xxxx/NCT00704795.xml"
+  },
+  "NCT00628615": {
+    "name": "Non-Micturation Bladder Activity in Relation to Self-Consciousness During Filling Phase and Sensation Measurement During the Filling Phase",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "manual_review",
+    "rationale": "ClinicalTrials.gov overall_status=Unknown status; aligned to MedAI status=manual_review for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00628615"
+    ],
+    "actions": [
+      "Review the full XML and the current ClinicalTrials.gov record manually before use.",
+      "Do not promote this trial to a direct recommendation until the lifecycle status is confirmed."
+    ],
+    "nct_id": "NCT00628615",
+    "department_tag": "内科",
+    "department_role": "primary",
+    "department_tags": [
+      "内科"
+    ],
+    "primary_department": "内科",
+    "secondary_departments": [],
+    "overall_status": "Unknown status",
+    "status_reason": "The trial lifecycle is unclear, so MedAI should require manual review before using it in protocol recommendations.",
+    "enrollment_open": false,
+    "brief_title": "Non-Micturation Bladder Activity in Relation to Self-Consciousness During Filling Phase and Sensation Measurement During the Filling Phase",
+    "official_title": "Non-Micturation Bladder Activity in Relation to Self-Consciousness During Filling Phase and Sensation Measurement During the Filling Phase",
+    "conditions": [
+      "Lower Urinary Tract Symptoms",
+      "Overactive Bladder Syndrome"
+    ],
+    "mesh_terms": [
+      "Urinary Bladder, Overactive",
+      "Lower Urinary Tract Symptoms"
+    ],
+    "keywords": [
+      "Urodynamics",
+      "Overactive bladder syndrome",
+      "Lower urinary tract symptoms LUTS"
+    ],
+    "interventions": [],
+    "brief_summary": "Rationale: The sensation of the need for urination (urge) is a complex and only partially understood mechanism. It is our hypothesis that this mechanism is disrupted in patients suffering from overactive bladder syndrome. The Overactive Bladder syndrome (OAB) has been defined as a spectrum of symptoms in which incontinence may or may not overlap with urgency, frequency and nocturia. This syndrome is estimated to affect approximately 17% of the adult population in Europe and the United States. The symptoms of overactive bladder have many potential causes and contributing factors. One of these factors is an outlet obstruction of the bladder due to benign prostatic hyperplasia (BPH). Nowadays antimuscarinic drugs are used for treatment of the overactive bladder. Antimuscarinic agents have been proven to work slightly to moderately better than placebo's and are associated with side effects such as a dry mouth, blurred vision and constipation. Many patients with lower urinary tract symptoms (LUTS) develop OAB. In this group of patients with LUTS and OAB, there is not always a clear obstruction found. So, at least in some patients, with LUTS, there must be another reason for OAB than obstruction. The autonomous bladder activity has been introduced by, among others the Maastricht Urology research group. In animal models, the bladder is shown to have rhythmic low amplitude contractions (micro motions). It is hypothesized that this activity has a sensory function in the micturation regulation system which is mainly located in the bladder wall. These so called micromotions have never been demonstrated in the human bladder. The sensing function of the bladder and the micturation reflex remain mainly unclear. We hypothesise that there is a disregulation of the autonomous bladder activity (micro motions) in patients with OAB. We want to explore and study the relationship between OAB, obstruction and the micro motions in order to gain a better understanding of the bladder (patho)physiology. reason for This on its turn, can help us in the quest for better treatment strategies for patients suffering from OAB. Objective: The study is divided in two distinct groups a male and female group: The male group consist of patients with lower urinary tract symptoms (LUTS). The female group consist of patients with the overactive bladder syndrome OAB. The primary objective of this pilot experiment is to describe via an observational study the relation between non-micturation bladder activity and sensation during the filling phase of the bladders in women. We want to explore if there is a relation between non-micturation bladder activity and the sensation of urgency during the filling phase. Furthermore in men, we want to study the relationship between non-micturation bladder activity and the amount of obstruction. We would also like to visualize the micro motions of the bladder in both men and women during filling phase and study the influence of (visual and cognitive) stimuli on bladder activity. We want to explore if there is a relation between non-micturation bladder activity and the sensation of urgency during the filling phase in male patients with Lower urinary tract symptoms. In order to gain a better understanding in bladder (patho)physiology. Study design: A pilot observational study to describe the non-micturation bladder activity and sensation measurement during filling phase. Study population: The study population consists of two groups. First a group of patients (female) who will undergo an ambulatory urodynamic investigation to investigate their bladder complaints. All patients will be older than 18 years. The second group consists of male patients who will undergo a conventional urodynamic investigation in the normal work up for their lower urinary tract symptoms. All patients will be older than 18 years.",
+    "eligibility_text": "Inclusion Criteria: - Male patients with lower urinary tract symptoms - Female patients with overactive bladder syndrome Exclusion Criteria: - None",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00628615.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0062xxxx/NCT00628615.xml"
+  },
+  "NCT00001142": {
+    "name": "Metabolism and Body Shape of Healthy Children and Children With Chronic Infections",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00001142"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00001142",
+    "department_tag": "内科",
+    "department_role": "secondary",
+    "department_tags": [
+      "传染科",
+      "儿科",
+      "内科"
+    ],
+    "primary_department": "传染科",
+    "secondary_departments": [
+      "儿科",
+      "内科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Metabolism and Body Shape of Healthy Children and Children With Chronic Infections",
+    "official_title": "Metabolism and Body Composition of Healthy Children and Children With Chronic Infections",
+    "conditions": [
+      "HIV Infections",
+      "Healthy",
+      "Hyperlipidemia",
+      "Lipodystrophy"
+    ],
+    "mesh_terms": [
+      "Infection",
+      "Communicable Diseases",
+      "Lipodystrophy",
+      "Hyperlipidemias",
+      "Hyperlipoproteinemias"
+    ],
+    "keywords": [
+      "Body Fat",
+      "DXA",
+      "HAART",
+      "Hyperlipidemia",
+      "Insulin Resistance",
+      "Lipodystrophy",
+      "MRI",
+      "Protease Inhibitor",
+      "Side-Effects",
+      "Visceral Fat",
+      "Chronic Infection",
+      "HIV",
+      "Healthy Volunteer"
+    ],
+    "interventions": [],
+    "brief_summary": "Some HIV-infected adults develop lipodystrophy that includes significant changes in body shape, with fat losses in the face, arms and legs, and fat gain in the trunk. This lipodystrophy is often accompanied by other disorders of metabolism, such as increased levels of fat and insulin in the blood. The majority of these cases have been seen when patients are taking medications called protease inhibitors. These are anti-retroviral medications designed to treat patients with HIV. It is unclear if lipodystrophy is a result of having HIV or the medication used to treat HIV. It has been suggested, but not proven, that lipodystrophy is a direct side effect of protease inhibitors. In addition, it is unknown if HIV-infected children develop significant lipodystrophy after taking protease inhibitors. This study will investigate the prevalence of metabolic disorders and changes in body fat distribution in children taking protease inhibitor anti-retroviral medications. The results will be compared to three other groups; (1) children suffering from other non-HIV chronic infections, (2) HIV-infected children not taking protease inhibitors, and (3) healthy children. The study will look at HIV-infected children who have already started taking protease inhibitors. It will evaluate these children for disorders in metabolism as well as body fat changes. In addition, the study will follow HIV-infected children who will begin taking protease inhibitors. The study will follow these children for 18 months to detect the development of disorders in metabolism and / or body fat changes.",
+    "eligibility_text": "FOR PROTEASE INHIBITOR-NAIVE HIV-INFECTED CHILDREN AND HIV-INFECTED CHILDREN ON PROTEASE INHIBITOR-CONTAINING ANTIRETROVIRAL REGIMENS: Evidence of HIV infection based on Center for Disease Control and Prevention criteria. Enrollment on protocol 98-C-0041 or other HIV treatment protocol for children. No other chronic disease unrelated to infection that may cause changes in body composition or in lipid or glucose homeostasis. No previous use of a protease inhibitor-containing antiretroviral regimen (PROTEASE INHIBITOR-NAIVE HIV-INFECTED CHILDREN ONLY). Data available concerning the start date of protease inhibitor treatment (HIV-INFECTED CHILDREN ON PROTEASE INHIBITOR-CONTAINING ANTIRETROVIRAL REGIMENS ONLY). HEALTHY PEDIATRIC VOLUNTEERS: Good general health. No significant hematologic, renal, hepatic, endocrinologic, or pulmonary disorders. No evidence of HIV infection by standard HIV antibody testing. Body mass index for age below 85th percentile. Not currently using prescription medications on a continuing basis; the use of over-the-counter medications will be reviewed on a case-by-case basis. Stable clinical condition during evaluation. CHILDREN WITH CONDITIONS CAUSING CHRONIC INFECTIONS OTHER THAN HIV: Evidence of chronic, non-HIV-related infection such as chronic granulomatous disease, hyperimmunoglobin E syndrome, etc. Evidence of non-growth hormone-deficient growth failure, defined as a 12-month height velocity at or below the fifth percentile for age using standard reference norms and by clinically-indicated testing. No evidence of HIV infection by standard HIV antibody testing. No current (last 2 months) use of sex steroid supplementation. Enrollment in an ongoing NIH protocol for treatment of their disorders. Age between 4 and 18 years. No other chronic disease unrelated to infection that may cause either changes in body composition or lipid or glucose homeostasis such as Type I diabetes mellitus, lipodystrophic diabetes, Cushing's syndrome etc. No pregnancy. No inability to undergo MRI because of metal objects within their bodies that are contraindications for MRI. These include cardiac pacemakers, neural pacemakers, aneurysmal clips, schrapnel, ocular foreign bodies, cochlear implants, non-detachable electronic or electromechanical devices. No allergic reaction to heparin.",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00001142.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0000xxxx/NCT00001142.xml"
+  },
+  "NCT00044720": {
+    "name": "Study Evaluating Sirolimus in End Stage Renal Disease in High Risk Kidney Transplant Recipients",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00044720"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00044720",
+    "department_tag": "内科",
+    "department_role": "secondary",
+    "department_tags": [
+      "外科",
+      "内科"
+    ],
+    "primary_department": "外科",
+    "secondary_departments": [
+      "内科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Study Evaluating Sirolimus in End Stage Renal Disease in High Risk Kidney Transplant Recipients",
+    "official_title": "An Open-label, Concentration Controlled, Randomized, 12 Month Study of Prograf + Rapamune + Cor",
+    "conditions": [
+      "Chronic Kidney Failure",
+      "Graft vs Host Disease",
+      "Kidney Transplantation"
+    ],
+    "mesh_terms": [
+      "Renal Insufficiency",
+      "Kidney Failure, Chronic",
+      "Graft vs Host Disease"
+    ],
+    "keywords": [
+      "Kidney Transplant"
+    ],
+    "interventions": [
+      "Rapamune"
+    ],
+    "brief_summary": "The incidence of efficacy failure at 12 months between two regimens.",
+    "eligibility_text": "Inclusion Criteria - Age: 13 years or older, 40 kgs or more - End-stage renal disease - African-American/Black transplant recipient and/or repeat renal transplant recipient who lost a previous allograft Exclusion Criteria - Evidence of active infection - Evidence abnormal chest x-ray - Patients with HIV.",
+    "study_type": "Interventional",
+    "phase": "Phase 4",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00044720.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0004xxxx/NCT00044720.xml"
+  },
+  "NCT00564382": {
+    "name": "CMR in the Assessment of Patient With ACS in the Emergency Room",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00564382"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00564382",
+    "department_tag": "内科",
+    "department_role": "secondary",
+    "department_tags": [
+      "医学影像科",
+      "内科"
+    ],
+    "primary_department": "医学影像科",
+    "secondary_departments": [
+      "内科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "CMR in the Assessment of Patient With ACS in the Emergency Room",
+    "official_title": "Cardiac MRI for the Diagnosis of Unstable Angina/ NSTEMI in the Emergency Room",
+    "conditions": [
+      "Infarction",
+      "Ischemia",
+      "Magnetic Resonance Imaging"
+    ],
+    "mesh_terms": [
+      "Infarction",
+      "Emergencies",
+      "Ischemia"
+    ],
+    "keywords": [
+      "Acute coronary syndrome",
+      "Cardiac Magnetic Resonance Imaging",
+      "Contrast agents",
+      "Gadolinium"
+    ],
+    "interventions": [
+      "Cardiac magnetic Resonance study"
+    ],
+    "brief_summary": "In this study, we investigate the role of Cardiac Magnetic Resonance Imaging in patients with suspected, but not yet proven, \"acute cardiac syndrome ACS\". Patients are included if they presented to the local Emergency Department with chest pain, but the first tests in the Emergency Department are negative or not clearly indicative of cardiac ischemia. For example, the first lab value Troponin T is negative or borderline elevated; or the first ECG is not clearly indicative of ischemia. The standard procedure for these patients is to wait 4-6 hours and then repeat the test; if they continue to be negative, the patients are discharged home, if the have become positive, an invasive coronary artery angiography has to be performed. We think, that a CMR study can shorten the time needed to make the decision of either \"discharge\" or \"admit to CCU and perform a coronary artery angiography\". CMR has been shown to be the gold standard for heart function (thus, can see even subtle wall motion abnormalities), for tissue characterization (so-called T2-weighted images can identify tissue edema (swelling); perfusion images can identify areas with reduced blood supply; late enhancement images can safely identify fibrotic or irreversibly damaged tissue) and can even be used to stress the patients to exclude a critical or non-critical narrowing of coronary arteries. The primary endpoint of this study will be the impact of CMR on the time-to-decision in these patients. It should be possible to a) identify all patients WITH an acute infarct by CMR and send them to a cath lab sooner compared to waiting for a second test; b) identify all patients WITHOUT an acute infarct and c) perform a stress test in those patients to exclude severe coronary artery disease.",
+    "eligibility_text": "Inclusion Criteria: 1. 18+ years of age, informed consent obtained 2. Chest pain, suggestive of coronary artery disease, plus at least one more point from the TIMI risk score (TIMI score ≥2) 3. Troponin is negative on 1st draw; based on the Emergency Room Physician's discretion, a 2nd Troponin draw is indicated and pending Exclusion Criteria: 1. ST elevation on ECG, new Q-waves or dynamic ST-segment changes, 2nd or 3rd degree AV-block 2. Unstable patients 3. PCI or myocardial infarction within 3 months 4. Ferromagnetic objects precluding MRI imaging (e.g., pacemaker, defibrillator, cerebral aneurysm clip, metal in eye, insulin pumps, neural stimulators, cochlea implants) 5. Pregnancy 6. Extreme claustrophobia 7. Asthma 8. Inability to lie flat",
+    "study_type": "Interventional",
+    "phase": "N/A",
+    "primary_purpose": "Diagnostic",
+    "copied_xml_relpath": "xml/NCT00564382.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0056xxxx/NCT00564382.xml"
+  },
+  "NCT00731874": {
+    "name": "Thymoglobulin Induction Therapy With Minimal Immunosuppression and Evaluation of Allograft Status",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "abandoned",
+    "rationale": "ClinicalTrials.gov overall_status=Terminated; aligned to MedAI status=abandoned for department tag 内科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00731874"
+    ],
+    "actions": [
+      "Do not surface this trial as a direct option for the current patient.",
+      "Keep it only as historical context if the protocol remains clinically informative."
+    ],
+    "nct_id": "NCT00731874",
+    "department_tag": "内科",
+    "department_role": "primary",
+    "department_tags": [
+      "内科"
+    ],
+    "primary_department": "内科",
+    "secondary_departments": [],
+    "overall_status": "Terminated",
+    "status_reason": "The trial lifecycle indicates that it is halted or unavailable, so MedAI should not treat it as a current treatment-trial option.",
+    "enrollment_open": false,
+    "brief_title": "Thymoglobulin Induction Therapy With Minimal Immunosuppression and Evaluation of Allograft Status",
+    "official_title": "Thymoglobulin Induction Therapy With Minimal Immunosuppression and Evaluation of Allograft Status by Biopsy and mRNA Profiles (TIMELY Study)",
+    "conditions": [
+      "Immunosuppression"
+    ],
+    "mesh_terms": [],
+    "keywords": [
+      "Kidney transplantation",
+      "Immunosuppression",
+      "Minimization",
+      "Tacrolimus",
+      "Prograf",
+      "Thymoglobulin"
+    ],
+    "interventions": [
+      "Tacrolimus"
+    ],
+    "brief_summary": "Tacrolimus (Prograf) is a medication that is commonly used in patients who receive a kidney transplant. It is considered to be one of the most important medications that prevent rejection of the transplant kidney by suppressing the immune system. Although tacrolimus is good at preventing rejection, it does have some unwanted side effects. These side effects include high blood pressure, increase in blood sugar, headache, and tremor. In addition, tacrolimus causes some damage to the transplant kidney over time, by causing healthy tissue to turn into scar tissue that does not function as well as healthy tissue. Therefore, kidney function may be reduced over time. In the first three months after kidney transplant, Prograf levels are kept between 8 to 10 ng/mL. This study will compare two groups of patients that will both have their tacrolimus dose reduced slowly over three months to prevent rejection while decreasing the risk of causing toxic effects to the kidney. One group will have their Prograf levels kept between 6 and 8 ng/mL, while the second group will have their levels kept between 3 and 5 ng/mL. We will then compare the two groups to see if there are any differences in their kidney function over time.",
+    "eligibility_text": "Inclusion Criteria: - Age > 18 years - Renal allograft recipients who received a steroid-sparing immunosuppression protocol with rabbit anti-thymocyte globulin (Thymoglobulin) induction - Patient must have previously enrolled in protocol entitled \"The use of urinary PCR test to help detect rejection in kidney transplant patients\" - Recipients must agree to undergo all standard post-transplant protocol biopsies - Recipients must be at least 3 months post-transplant and the three most recent urinary profiles must demonstrate immunologic quiescence as determined by measurement of Granzyme B and Perforin copy numbers - Patient must provide informed consent to participate in the research study Exclusion Criteria: - Patient is a high-risk recipient (defined as peak or current PRA >50% or a re-transplant recipient who lost prior graft within 1 year due to immunologic reasons) - Patients who require maintenance steroids for another medical condition (such as asthma) - Patients who are taking less than 1 gram/day of mycophenolate mofetil - Multiple organ transplant recipients (such as kidney-pancreas) - Patients with one or more acute rejection episodes within the first 3 months after transplant - Three-month protocol biopsy showing clinical acute rejection (BANFF grade 1a or higher) - Patient with documented or suspected non-compliance with transplant medications in the first 3 months after transplant",
+    "study_type": "Interventional",
+    "phase": "Phase 4",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00731874.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0073xxxx/NCT00731874.xml"
+  }
+}

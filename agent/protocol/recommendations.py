@@ -117,12 +117,168 @@ def _trial_candidate_text(candidate: dict[str, Any]) -> str:
     return " ".join(part for part in text_parts if str(part).strip())
 
 
+def _candidate_field_text(candidate: dict[str, Any], field_name: str) -> str:
+    return " ; ".join(_normalize_trial_text_list(candidate.get(field_name))).casefold()
+
+
+def _anchor_term_variants(term: str) -> list[str]:
+    normalized = " ".join(str(term or "").casefold().split()).strip()
+    if not normalized:
+        return []
+
+    variants = [normalized]
+    replacements = {
+        "critical aortic stenosis": "aortic stenosis",
+        "severe aortic stenosis": "aortic stenosis",
+        "aortic valve stenosis": "aortic stenosis",
+        "aortic valve replacement": "valve replacement",
+        "surgical aortic valve replacement": "aortic valve replacement",
+        "transcatheter aortic valve implantation": "tavi",
+    }
+    for source, replacement in replacements.items():
+        if source in normalized:
+            variants.append(normalized.replace(source, replacement))
+            variants.append(replacement)
+    if normalized == "bicuspid aortic valve":
+        variants.append("bicuspid")
+
+    deduped: list[str] = []
+    for item in variants:
+        text = " ".join(str(item or "").split()).strip()
+        if text and text not in deduped:
+            deduped.append(text)
+    return deduped
+
+
 def _candidate_matches_term(candidate: dict[str, Any], term: str) -> bool:
-    normalized_term = str(term or "").strip().casefold()
-    if not normalized_term:
-        return False
     candidate_text = _trial_candidate_text(candidate).casefold()
-    return normalized_term in candidate_text
+    return any(variant in candidate_text for variant in _anchor_term_variants(term))
+
+
+def _candidate_matches_any_term(candidate: dict[str, Any], terms: list[str]) -> bool:
+    return any(_candidate_matches_term(candidate, term) for term in list(terms or []))
+
+
+def _candidate_matches_anchor_field(candidate: dict[str, Any], field_name: str, terms: list[str]) -> bool:
+    field_text = _candidate_field_text(candidate, field_name)
+    if not field_text:
+        return False
+    return any(
+        variant in field_text
+        for term in list(terms or [])
+        for variant in _anchor_term_variants(str(term or ""))
+    )
+
+
+def _candidate_has_explicit_conflict(candidate: dict[str, Any], assessment: dict[str, Any] | None) -> bool:
+    if str(candidate.get("status") or "").strip() == "abandoned":
+        return True
+    if list(candidate.get("eligibility_conflicts") or []):
+        return True
+    aggregate_status = str((assessment or {}).get("aggregate_status") or "").strip()
+    if aggregate_status in {"ineligible", "not_current_option"}:
+        return True
+    return False
+
+
+def _trial_match_reason(
+    candidate: dict[str, Any],
+    *,
+    condition_anchor_match: bool,
+    intervention_anchor_match: bool,
+    context_match: bool,
+    assessment: dict[str, Any] | None,
+) -> str:
+    title = str(candidate.get("title") or candidate.get("display_title") or candidate.get("nct_id") or "").strip()
+    reasons: list[str] = []
+    if condition_anchor_match:
+        reasons.append("matches the case disease focus")
+    if intervention_anchor_match:
+        reasons.append("matches the case treatment or procedure focus")
+    if context_match and not (condition_anchor_match and intervention_anchor_match):
+        reasons.append("matches related trial context from the structured case")
+
+    status = str(candidate.get("overall_status") or "").strip()
+    if status:
+        reasons.append(f"trial status is {status}")
+
+    aggregate_status = str((assessment or {}).get("aggregate_status") or "").strip()
+    if aggregate_status:
+        reasons.append(f"eligibility aggregate is {aggregate_status}")
+
+    if not reasons:
+        reasons.append("survived retrieval and eligibility screening")
+
+    return f"{title}: " + "; ".join(reasons) + "."
+
+
+def build_matched_trials(
+    trial_bundle: dict[str, Any],
+    *,
+    eligibility_assessment_bundle: dict[str, Any] | None = None,
+    limit: int = 10,
+) -> list[dict[str, Any]]:
+    """Return final trial matches after coarse retrieval and fine screening.
+
+    This is intentionally conservative: it keeps a trial only when it matches
+    the structured case's primary disease or treatment anchors and has no
+    explicit age/status/eligibility conflict surfaced by earlier stages.
+    """
+
+    query_profile = dict(trial_bundle.get("query_profile") or {})
+    condition_terms = _normalize_trial_text_list(query_profile.get("trial_condition_terms"))
+    intervention_terms = _normalize_trial_text_list(query_profile.get("trial_intervention_terms"))
+    context_terms = _normalize_trial_text_list(
+        list(query_profile.get("trial_intent_terms") or [])
+        + list(query_profile.get("focus_terms") or [])
+    )
+    assessments = _eligibility_assessment_by_trial(eligibility_assessment_bundle)
+
+    matched: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for candidate in list(trial_bundle.get("candidate_ranking") or []):
+        if not isinstance(candidate, dict):
+            continue
+        nct_id = str(candidate.get("nct_id") or "").strip()
+        if not nct_id or nct_id in seen:
+            continue
+        seen.add(nct_id)
+
+        assessment = assessments.get(nct_id)
+        if _candidate_has_explicit_conflict(candidate, assessment):
+            continue
+
+        condition_anchor_match = (
+            _candidate_matches_anchor_field(candidate, "conditions", condition_terms)
+            or _candidate_matches_any_term(candidate, condition_terms)
+        )
+        intervention_anchor_match = (
+            _candidate_matches_anchor_field(candidate, "interventions", intervention_terms)
+            or _candidate_matches_any_term(candidate, intervention_terms)
+        )
+        context_match = _candidate_matches_any_term(candidate, context_terms)
+
+        if not (condition_anchor_match or intervention_anchor_match):
+            continue
+
+        matched.append(
+            {
+                "nct_id": nct_id,
+                "title": str(candidate.get("title") or candidate.get("display_title") or "").strip(),
+                "overall_status": str(candidate.get("overall_status") or "").strip(),
+                "enrollment_open": bool(candidate.get("enrollment_open")),
+                "reason": _trial_match_reason(
+                    candidate,
+                    condition_anchor_match=condition_anchor_match,
+                    intervention_anchor_match=intervention_anchor_match,
+                    context_match=context_match,
+                    assessment=assessment,
+                ),
+            }
+        )
+        if len(matched) >= max(int(limit), 1):
+            break
+    return matched
 
 
 def _select_protocol_trial_candidate(
@@ -376,11 +532,27 @@ def _augment_treatment_recommendations_with_trials(
     eligibility_assessment_bundle: dict[str, Any] | None = None,
     has_completed_results: bool,
 ) -> list[TreatmentRecommendation]:
-    top_trial_ids = _top_non_abandoned_trial_ids(
-        trial_bundle,
-        eligibility_assessment_bundle=eligibility_assessment_bundle,
-        limit=3,
+    query_profile = dict(trial_bundle.get("query_profile") or {})
+    has_trial_anchors = bool(
+        _normalize_trial_text_list(query_profile.get("trial_condition_terms"))
+        or _normalize_trial_text_list(query_profile.get("trial_intervention_terms"))
     )
+    matched_trial_ids = [
+        str(item.get("nct_id") or "").strip()
+        for item in build_matched_trials(
+            trial_bundle,
+            eligibility_assessment_bundle=eligibility_assessment_bundle,
+            limit=3,
+        )
+        if str(item.get("nct_id") or "").strip()
+    ]
+    top_trial_ids = matched_trial_ids
+    if not has_trial_anchors:
+        top_trial_ids = _top_non_abandoned_trial_ids(
+            trial_bundle,
+            eligibility_assessment_bundle=eligibility_assessment_bundle,
+            limit=3,
+        )
     if has_completed_results and top_trial_ids:
         for recommendation in recommendations:
             recommendation.linked_trials = list(top_trial_ids)

@@ -1,0 +1,42 @@
+{
+  "raw_text": "病史摘要：患者，男，78岁。3年前发现阵发性房颤，既往有高血压病史10余年。2周前出现短暂性脑缺血发作，表现为言语含糊及右上肢无力，约20分钟后缓解。此次来诊主要希望进一步评估卒中预防方案，并了解是否有合适的临床试验可以参加。\n\n现病史：患者近期无胸痛，无持续心悸，无晕厥。近2周无新的神经功能缺损。平素活动耐量一般，可独立完成日常生活。近期未使用华法林，目前仅间断服用阿司匹林，自述依从性一般。\n\n既往史：高血压。阵发性房颤。近期短暂性脑缺血发作。否认糖尿病。否认充血性心力衰竭。无明确消化道出血史，无颅内出血史。\n\n用药史：缬沙坦、氨氯地平、阿司匹林间断口服。未规律使用华法林或其他口服抗凝药。\n\n辅助检查：心电图提示房颤。头颅MRI未见大面积新发梗死灶。肾功能基本正常。血小板计数正常。\n\n功能状态：ECOG评分1分，可配合随访。",
+  "case_summary": "78-year-old male with paroxysmal atrial fibrillation, hypertension, recent transient ischemic attack, no diabetes, no congestive heart failure, not currently on warfarin or other regular oral anticoagulation. Seeking atrial fibrillation stroke prevention clinical trials.",
+  "problem_list": [
+    "atrial fibrillation",
+    "hypertension",
+    "transient ischemic attack",
+    "stroke prevention"
+  ],
+  "known_facts": [
+    "78 year old",
+    "male",
+    "paroxysmal atrial fibrillation",
+    "prior transient ischemic attack",
+    "no diabetes",
+    "no congestive heart failure",
+    "not currently prescribed warfarin",
+    "not on regular oral anticoagulation",
+    "ECOG 1",
+    "normal renal function",
+    "normal platelet count",
+    "no gastrointestinal bleeding history",
+    "no intracranial hemorrhage history"
+  ],
+  "structured_inputs": {
+    "age": 78,
+    "sex": "male",
+    "atrial_fibrillation": true,
+    "hypertension": true,
+    "prior_tia": true,
+    "diabetes": false,
+    "congestive_heart_failure": false,
+    "warfarin": false,
+    "oral_anticoagulation": false,
+    "ecog": 1,
+    "renal_function": "normal",
+    "platelet_count": "normal"
+  },
+  "department_tags": [
+    "心血管内科"
+  ]
+}

@@ -1,0 +1,51 @@
+sample_index	nct_id	primary_department	secondary_departments	department_tags	overall_status	medai_strategy	medai_status	copied_xml_relpath	source_xml_path
+1	NCT00365586	内科		内科	Completed	trial_match	trial_matched	xml/NCT00365586.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0036xxxx/NCT00365586.xml
+2	NCT00276250	内科		内科	Completed	trial_match	trial_matched	xml/NCT00276250.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0027xxxx/NCT00276250.xml
+3	NCT00403325	五官科		五官科	Completed	trial_match	trial_matched	xml/NCT00403325.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0040xxxx/NCT00403325.xml
+4	NCT00740454	妇产科	医学影像科	妇产科,医学影像科	Completed	trial_match	trial_matched	xml/NCT00740454.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0074xxxx/NCT00740454.xml
+5	NCT00135629	五官科		五官科	Unknown status	trial_match	manual_review	xml/NCT00135629.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0013xxxx/NCT00135629.xml
+6	NCT00462085	儿科	外科	儿科,外科	Completed	trial_match	trial_matched	xml/NCT00462085.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0046xxxx/NCT00462085.xml
+7	NCT00871052	皮肤性病科		皮肤性病科	Completed	trial_match	trial_matched	xml/NCT00871052.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0087xxxx/NCT00871052.xml
+8	NCT00984230	儿科		儿科	Completed	trial_match	trial_matched	xml/NCT00984230.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0098xxxx/NCT00984230.xml
+9	NCT00048204	精神心理科		精神心理科	Completed	trial_match	trial_matched	xml/NCT00048204.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0004xxxx/NCT00048204.xml
+10	NCT00224250	妇产科		妇产科	Completed	trial_match	trial_matched	xml/NCT00224250.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0022xxxx/NCT00224250.xml
+11	NCT00889707	内科		内科	Completed	trial_match	trial_matched	xml/NCT00889707.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0088xxxx/NCT00889707.xml
+12	NCT00529087	内科		内科	Completed	trial_match	trial_matched	xml/NCT00529087.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0052xxxx/NCT00529087.xml
+13	NCT00209586	麻醉医学科	内科	麻醉医学科,内科	Terminated	trial_match	abandoned	xml/NCT00209586.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0020xxxx/NCT00209586.xml
+14	NCT00201448	传染科	妇产科	传染科,妇产科	Terminated	trial_match	abandoned	xml/NCT00201448.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0020xxxx/NCT00201448.xml
+15	NCT00022971	肿瘤科		肿瘤科	Terminated	trial_match	abandoned	xml/NCT00022971.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0002xxxx/NCT00022971.xml
+16	NCT00951197	精神心理科	医学影像科	精神心理科,医学影像科	Completed	trial_match	trial_matched	xml/NCT00951197.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0095xxxx/NCT00951197.xml
+17	NCT00361582	麻醉医学科	外科	麻醉医学科,外科	Completed	trial_match	trial_matched	xml/NCT00361582.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0036xxxx/NCT00361582.xml
+18	NCT00311896	肿瘤科	内科	肿瘤科,内科	Terminated	trial_match	abandoned	xml/NCT00311896.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0031xxxx/NCT00311896.xml
+19	NCT00461838	妇产科	外科	妇产科,外科	Completed	trial_match	trial_matched	xml/NCT00461838.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0046xxxx/NCT00461838.xml
+20	NCT00408824	内科		内科	Unknown status	trial_match	manual_review	xml/NCT00408824.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0040xxxx/NCT00408824.xml
+21	NCT00706823	麻醉医学科	外科	麻醉医学科,外科	Completed	trial_match	trial_matched	xml/NCT00706823.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0070xxxx/NCT00706823.xml
+22	NCT00068809	传染科	儿科	传染科,儿科	Completed	trial_match	trial_matched	xml/NCT00068809.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0006xxxx/NCT00068809.xml
+23	NCT00699946	外科	精神心理科	外科,精神心理科	Completed	trial_match	trial_matched	xml/NCT00699946.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0069xxxx/NCT00699946.xml
+24	NCT00543049	肿瘤科	妇产科	肿瘤科,妇产科	Completed	trial_match	trial_matched	xml/NCT00543049.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0054xxxx/NCT00543049.xml
+25	NCT00540995	肿瘤科		肿瘤科	Active, not recruiting	trial_match	trial_matched	xml/NCT00540995.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0054xxxx/NCT00540995.xml
+26	NCT00593489	内科		内科	Completed	trial_match	trial_matched	xml/NCT00593489.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0059xxxx/NCT00593489.xml
+27	NCT00966160	传染科		传染科	Completed	trial_match	trial_matched	xml/NCT00966160.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0096xxxx/NCT00966160.xml
+28	NCT00787267	肿瘤科		肿瘤科	Terminated	trial_match	abandoned	xml/NCT00787267.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0078xxxx/NCT00787267.xml
+29	NCT00490178	内科		内科	Completed	trial_match	trial_matched	xml/NCT00490178.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0049xxxx/NCT00490178.xml
+30	NCT00146185	儿科	麻醉医学科	儿科,麻醉医学科	Completed	trial_match	trial_matched	xml/NCT00146185.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0014xxxx/NCT00146185.xml
+31	NCT00951678	医学影像科		医学影像科	Unknown status	trial_match	manual_review	xml/NCT00951678.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0095xxxx/NCT00951678.xml
+32	NCT00567333	外科		外科	Completed	trial_match	trial_matched	xml/NCT00567333.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0056xxxx/NCT00567333.xml
+33	NCT00894842	精神心理科		精神心理科	Completed	trial_match	trial_matched	xml/NCT00894842.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0089xxxx/NCT00894842.xml
+34	NCT00332631	外科	内科	外科,内科	Completed	trial_match	trial_matched	xml/NCT00332631.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0033xxxx/NCT00332631.xml
+35	NCT00534599	精神心理科		精神心理科	Completed	trial_match	trial_matched	xml/NCT00534599.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0053xxxx/NCT00534599.xml
+36	NCT00640393	皮肤性病科		皮肤性病科	Completed	trial_match	trial_matched	xml/NCT00640393.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0064xxxx/NCT00640393.xml
+37	NCT00704795	内科		内科	Unknown status	trial_match	manual_review	xml/NCT00704795.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0070xxxx/NCT00704795.xml
+38	NCT00717730	传染科	儿科	传染科,儿科	Completed	trial_match	trial_matched	xml/NCT00717730.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0071xxxx/NCT00717730.xml
+39	NCT00628615	内科		内科	Unknown status	trial_match	manual_review	xml/NCT00628615.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0062xxxx/NCT00628615.xml
+40	NCT00842348	肿瘤科		肿瘤科	Completed	trial_match	trial_matched	xml/NCT00842348.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0084xxxx/NCT00842348.xml
+41	NCT00310479	医学影像科	肿瘤科	医学影像科,肿瘤科	Completed	trial_match	trial_matched	xml/NCT00310479.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0031xxxx/NCT00310479.xml
+42	NCT00001142	传染科	儿科,内科	传染科,儿科,内科	Completed	trial_match	trial_matched	xml/NCT00001142.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0000xxxx/NCT00001142.xml
+43	NCT00044720	外科	内科	外科,内科	Completed	trial_match	trial_matched	xml/NCT00044720.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0004xxxx/NCT00044720.xml
+44	NCT00564382	医学影像科	内科	医学影像科,内科	Completed	trial_match	trial_matched	xml/NCT00564382.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0056xxxx/NCT00564382.xml
+45	NCT00731874	内科		内科	Terminated	trial_match	abandoned	xml/NCT00731874.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0073xxxx/NCT00731874.xml
+46	NCT00024362	肿瘤科		肿瘤科	Unknown status	trial_match	manual_review	xml/NCT00024362.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0002xxxx/NCT00024362.xml
+47	NCT00006254	肿瘤科		肿瘤科	Completed	trial_match	trial_matched	xml/NCT00006254.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0000xxxx/NCT00006254.xml
+48	NCT00906191	精神心理科		精神心理科	Completed	trial_match	trial_matched	xml/NCT00906191.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0090xxxx/NCT00906191.xml
+49	NCT00116675	皮肤性病科	儿科	皮肤性病科,儿科	Completed	trial_match	trial_matched	xml/NCT00116675.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0011xxxx/NCT00116675.xml
+50	NCT00803803	五官科		五官科	Completed	trial_match	trial_matched	xml/NCT00803803.xml	/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0080xxxx/NCT00803803.xml

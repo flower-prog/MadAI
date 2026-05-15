@@ -1,0 +1,506 @@
+{
+  "NCT00022971": {
+    "name": "Combination Antibody Therapy for Relapsed Lymphoma and Chronic Lymphocytic Leukemia",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "abandoned",
+    "rationale": "ClinicalTrials.gov overall_status=Terminated; aligned to MedAI status=abandoned for department tag 肿瘤科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00022971"
+    ],
+    "actions": [
+      "Do not surface this trial as a direct option for the current patient.",
+      "Keep it only as historical context if the protocol remains clinically informative."
+    ],
+    "nct_id": "NCT00022971",
+    "department_tag": "肿瘤科",
+    "department_role": "primary",
+    "department_tags": [
+      "肿瘤科"
+    ],
+    "primary_department": "肿瘤科",
+    "secondary_departments": [],
+    "overall_status": "Terminated",
+    "status_reason": "The trial lifecycle indicates that it is halted or unavailable, so MedAI should not treat it as a current treatment-trial option.",
+    "enrollment_open": false,
+    "brief_title": "Combination Antibody Therapy for Relapsed Lymphoma and Chronic Lymphocytic Leukemia",
+    "official_title": "Combination Antibody Therapy With Apolizumab (1D10) and Rituximab (CD20) in Relapsed Lymphoma and CLL",
+    "conditions": [
+      "Diffuse Large B-Cell Lymphoma",
+      "Follicular Lymphoma",
+      "Chronic Lymphocytic Leukemia",
+      "Mantle Cell Lymphoma",
+      "Small Lymphocytic Lymphoma"
+    ],
+    "mesh_terms": [
+      "Lymphoma",
+      "Leukemia",
+      "Leukemia, Lymphoid",
+      "Leukemia, Lymphocytic, Chronic, B-Cell",
+      "Lymphoma, Mantle-Cell",
+      "Lymphoma, Large B-Cell, Diffuse"
+    ],
+    "keywords": [
+      "Monoclonal Antibody",
+      "Lymphoma",
+      "Rituximab",
+      "Hu1D10",
+      "Non-Hodgkin's Lymphoma",
+      "NHL",
+      "Chronic Lymphocytic Leukemia",
+      "CLL",
+      "Leukemia"
+    ],
+    "interventions": [
+      "Apolizumab",
+      "Rituximab"
+    ],
+    "brief_summary": "This study will evaluate the safety and effectiveness of a combination of two antibodies, apolizumab and rituximab (Rituxan ), in treating B-cell lymphomas and chronic lymphocytic leukemia. Rituximab attaches to a molecule called CD20 on B-cell lymphomas and can cause significant shrinkage of these tumors in up to half of patients. However, it does not cure the lymphoma, which usually returns. Also, it is not as effective against leukemia. Apolizumab attaches to a protein called 1D10 on B-cell cancers and has also been able to shrink tumors in some patients. There is little experience apolizumab in patients with leukemia. This study will test whether the two antibodies together are more effective against these tumors than either one alone. Patients 18 years and older with B-cell lymphoma or chronic lymphocytic leukemia may be eligible for this study. Patients' leukemia or lymphoma cells must have both the CD20 and 1D10 antigen receptors and must have had at least one systemic treatment for their disease. Candidates are screened with a medical history and physical examination, blood and urine tests, electrocardiogram, x-rays and other imaging studies, and possibly a bone marrow aspirate (withdrawal of a small marrow sample through a needle inserted into the hip bone) and lumbar puncture (withdrawal of a small sample of cerebrospinal fluid-fluid that bathes the brain and spinal cord-through a needle placed between the bones in the lower back). Participants receive infusions of rituximab and apolizumab once a week for 4 weeks. The first patients in the study receive lower doses of apolizumab with standard doses of rituximab. If the apolizumab is well tolerated, subsequent patients are given higher doses. Patients are also given dexamethasone or another similar steroid, diphenhydramine (Benadryl ), and acetominophen (Tylenol ) to reduce reactions to the antibodies. After 4 weeks of treatment, patients are followed frequently to examine the response to treatment and evaluate drug side effects. Patients whose tumors do not grow during the 4 weeks of therapy may be offered another course of treatment at a later time. Participants are followed periodically after treatment ends until their disease worsens or the study ends. ...",
+    "eligibility_text": "- INCLUSION CRITERIA: Diagnosis of B-cell lymphoma, Waldenstrom's CLL with surface expression of both CD20 and 1D10 antigen by immunohistochemistry (IHC) or fluorescence of activated cell sorting (FACS) with anti-CD20 and 1D10 antibody. Positive 1D10 expression in a FACS assay is defined as more than 2 times the mean fluorescence intensity (MFI) of the control antibody by FACS or greater than 20% of cells 1D10+ by IHC. Confirmation of diagnosis in Laboratory of Pathology, NCI or OSU. Prior therapy with at least one systemic treatment, and not a candidate for potentially curative (i.e., transplant) treatment at the time of study entry. Prior treatment with rituximab greater than or equal to 1 month ago is permitted. Age greater than 18 years. ECOG performance status less than or equal to 2. Major organ function: ANC greater than or equal to 500/microliter, Platelet greater than or equal 25,000/microliter, Creatinine less than or equal to 1.5 mg/dl or creatinine clearance greater than 60 cc/min; SGPT less than 5 x upper limit of normal; bilirubin less than 2 mg/dl (total) except less than 5 mg/dl in patients with Gilbert's syndrome as defined by greater than 80% unconjugated; unless impairment due to organ involvement by lymphoma. Provides informed consent. EXCLUSION CRITERIA: Pregnancy or nursing. Both male and female patients must be willing to use adequate contraception. Prior apolizumab treatment. SActive cardiac disease, cerebrovascular disease or peripheral arterial vascular disease. Active CNS lymphoma. Systemic cytotoxic chemotherapy within 3 weeks of enrollment or systemic steroids (except stable doses less than 10 mg/day) within 1 week of enrollment.",
+    "study_type": "Interventional",
+    "phase": "Phase 1",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00022971.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0002xxxx/NCT00022971.xml"
+  },
+  "NCT00311896": {
+    "name": "Efficacy & Safety of Prophylaxis With Bemiparin in Cancer Patients With a Central Venous Catheter (BECAT)",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "abandoned",
+    "rationale": "ClinicalTrials.gov overall_status=Terminated; aligned to MedAI status=abandoned for department tag 肿瘤科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00311896"
+    ],
+    "actions": [
+      "Do not surface this trial as a direct option for the current patient.",
+      "Keep it only as historical context if the protocol remains clinically informative."
+    ],
+    "nct_id": "NCT00311896",
+    "department_tag": "肿瘤科",
+    "department_role": "primary",
+    "department_tags": [
+      "肿瘤科",
+      "内科"
+    ],
+    "primary_department": "肿瘤科",
+    "secondary_departments": [
+      "内科"
+    ],
+    "overall_status": "Terminated",
+    "status_reason": "The trial lifecycle indicates that it is halted or unavailable, so MedAI should not treat it as a current treatment-trial option.",
+    "enrollment_open": false,
+    "brief_title": "Efficacy & Safety of Prophylaxis With Bemiparin in Cancer Patients With a Central Venous Catheter (BECAT)",
+    "official_title": "Multicentric, Randomized, Placebo Controlled and Double-blind Study to Evaluate the Efficacy and Safety of Antithrombotic Prophylaxis With Bemiparin (3,500 UI/Day) in Cancer Patients With a Central Venous Catheter (CVC)(BECAT)",
+    "conditions": [
+      "Cancer",
+      "Thrombosis"
+    ],
+    "mesh_terms": [
+      "Thrombosis"
+    ],
+    "keywords": [
+      "Cancer",
+      "Thrombosis",
+      "Catheter",
+      "Bemiparin",
+      "Prophylaxis"
+    ],
+    "interventions": [
+      "Bemiparin",
+      "Placebo"
+    ],
+    "brief_summary": "The purpose of this study is to evaluate the efficacy and safety of the subcutaneous administration for 45 days of Bemiparin (3,500 UI/day) in cancer patients with a CVC, to prevent CVC-related deep venous thrombosis (CVC-DVT)",
+    "eligibility_text": "Inclusion Criteria: - Patients over 18 years old of either sex who have given their informed consent to participate in the study. - Patients with a neoplastic process, with a CVC for the administration of anti-tumoral treatment or any other treatment related to the neoplastic process. - Patients with a platelet count above 30,000/mm3. - Patients with no hemorrhagic symptomatology at the time of their inclusion Exclusion Criteria: - Patients with a history of clinically evident hemorrhagic episodes and/or with increased bleeding due to any other homeostatic alteration that contraindicates anticoagulant treatment and/or in the past two months have presented at least one of the following: active hemorrhaging or organic lesions susceptible to bleeding (e.g. active peptic ulcer, hemorrhagic cerebrovascular accident, aneurysms). - Major surgery in the past two months. - Known hypersensitivity to LMWH, heparin or substances of porcine origin. - Patients with congenital or acquired bleeding diathesis. - Damage to or surgical interventions of the central nervous system, eyes and ears within the past 6 months. - Acute bacterial endocarditis or slow endocarditis. - Patients with a history of heparin-associated thrombocytopenia. - Patients with severe renal failure (serum creatinine over 2 mg/dl) or hepatic insufficiency (with values of AST and/or ALT > 5 times the normal value established by the reference range of the local hospital laboratory). - Severe arterial hypertension (systolic blood pressure over 200 mmHg and/or diastolic blood pressure over 120 mmHg). - Patients with suspected inability/or inability to comply with treatment and/or complete the study. - Patients who are participating in another clinical trial or have done so in the past 30 days. - Patients with a life expectancy less than 3 months. - Women who are pregnant or breast-feeding, or with the possibility of becoming pregnant during the study. - Patients on treatment with anticoagulants or who have been on treatment during the week previous to insert the CVC (including prophylaxis with heparin for hepatic veno-occlusive disease). - Patients diagnosed with acute leukemia or awaiting a transplant from hematopoietic progenitors during the 90 days of the study.",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Prevention",
+    "copied_xml_relpath": "xml/NCT00311896.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0031xxxx/NCT00311896.xml"
+  },
+  "NCT00543049": {
+    "name": "Randomized Multicenter Trial With SU11248 Evaluating Dosage,Tolerability,Toxicity and Effectiveness of a Multitargeted Receptor Tyrosine Kinase Inhibitor",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 肿瘤科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00543049"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00543049",
+    "department_tag": "肿瘤科",
+    "department_role": "primary",
+    "department_tags": [
+      "肿瘤科",
+      "妇产科"
+    ],
+    "primary_department": "肿瘤科",
+    "secondary_departments": [
+      "妇产科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Randomized Multicenter Trial With SU11248 Evaluating Dosage,Tolerability,Toxicity and Effectiveness of a Multitargeted Receptor Tyrosine Kinase Inhibitor",
+    "official_title": "Phase II Trial in Platinum-refractory Ovarian Cancer: A Randomized Multicenter Trial With SU11248 to Evaluate Dosage, Tolerability, Toxicity and Effectiveness of a Multitargeted Receptor Tyrosine Kinase Inhibitor Monotherapy",
+    "conditions": [
+      "Platinum Refractory Epithelial Ovarian Cancer",
+      "Primary Cancer of the Peritoneum",
+      "Cancer of the Fallopian Tube"
+    ],
+    "mesh_terms": [
+      "Ovarian Neoplasms",
+      "Carcinoma, Ovarian Epithelial",
+      "Fallopian Tube Neoplasms"
+    ],
+    "keywords": [
+      "platinum refractory",
+      "epithelial ovarian cancer",
+      "primary cancer of the peritoneum",
+      "cancer of the fallopian tube"
+    ],
+    "interventions": [
+      "Sunitinib",
+      "SUNITINIB"
+    ],
+    "brief_summary": "Ovarian cancer is most often recognized in advanced clinical state, the initial therapeutic strategies consist of a platinum containing chemotherapy subsequent to primary surgery. Although initially responsive to platinum-paclitaxel containing chemotherapy, a significant number of patients will show tumor progression during first line chemotherapy or relapse within six months after completion of first line chemotherapy, therefore being characterized as chemotherapy resistant. Any second line chemotherapy will result in approximately 10% of overall response, underlining the poor prognosis for these patients with an estimated median overall survival of 20 weeks. In addition to conventional chemotherapeutics, so called small molecules are of high interest to establish new strategies in chemotherapy-refractory ovarian cancer (and in the long run first line chemotherapy). SU11248 is a polytargeting tyrosine kinase inhibitor. SU11248 has demonstrated clinical efficacy in kidney cancer and GIST, further clinical trials have been initiated in other tumor entities. Growth pattern and biological targets present in ovarian cancer indicate that SU11248 might be a promising compound for the treatment of ovarian cancer. Especially, VEGFR, PDGFR and c-kit are specific targets for SU11248, which are expressed in ovarian cancer. The different targets of SU11248 provide a potential advantage of this compound compared to single-target molecules in chemotherapy-refractory ovarian cancer.",
+    "eligibility_text": "Inclusion Criteria: - Women, 18 years and older, written (signed and dated) informed consent - Histological confirmed epithelial ovarian cancer, primary cancer of the peritoneum or fallopian tube - Up to three prior chemotherapies, at least one platinum based chemotherapy - Platinum refractory or resistant ovarian cancer (defined as stable (SD) or progressive disease (PD) during platinum containing chemotherapy, or treatment free interval < 6 months after stop of platinum based chemotherapy) - Measurable or non-measurable disease - Elevated CA°125 level (> 2 x ULN in case of normal CA°125 after prior chemotherapy; or ≥ 2 x nadir CA°125 value after prior chemotherapy, when CA° 125 levels remained elevated above normal) in case of non-measurable disease - ECOG performance status 0-2 - Negative pregnancy test within 5 days before randomization and adequate contraception in women with childbearing potential Adequate organ function as defined by the following criteria: - Serum aspartate aminotransferase (AST; serum glutamate-oxalate transferase [SGOT]) and serum alanine aminotransferase (ALT; serum glutamate-pyruvate transferase [SGPT]) <=2.5 x upper limit of normal (ULN). If liver function abnormalities are due to underlying malignancy, then AST and ALT may be <=5x ULN - Total serum bilirubin <=1.5 x ULN - Prothrombin time (PT) and partial thromboplastin time (PTT) <=1.5 x ULN - Serum albumin >= 3.0 g/dL - Absolute neutrophil count (ANC) >=1500/µl - Platelets >=100,000/µl - Hemoglobin >=9.0 g/dL - Serum creatinine <=1.5 x ULN - TSH within normal range Willingness and ability to comply with scheduled visits, treatment plans, laboratory tests, and other study procedures Resolution of all toxic effects of any prior chemotherapy, surgical procedures, radiotherapy, or other cancer related therapies to NCI CTCAE (Version 3.0) grade >=1 and to the baseline laboratory values as defined in inclusion criterion (see before) Exclusion Criteria: - Borderline tumor of the ovaries - Acute or chronic infection - Any required concurrent cancer chemotherapy or antineoplastic endocrine therapy or radiotherapy - Exposure to investigational trial medication, cancer chemo- or radiotherapy within the last 28 days prior to start of study treatment - Known or suspected hypersensitivity to investigational compound - Second malignancy interfering with prognosis of the patient - Cachectic patients with a body weight <45 kg - Patients requiring parenteral nutrition - Patients with ileus within the last 28 days - Any of the following within the 12 months prior to study drug administration: myocardial infarction, severe/unstable angina, coronary/peripheral artery bypass graft, symptomatic congestive heart failure, cerebrovascular accident or transient ischemic attack, pulmonary embolism, deep vein thrombosis, or other thromboembolic event - Current treatment with therapeutic doses of anticoagulant - Current treatment with CYP3A4 inhibitors or -inducers - Hypertension that cannot be controlled by medications (>150/100 mmHg despite optimal medical therapy) - Ongoing cardiac dysrhythmias of NCI CTCAE grade >=2, atrial fibrillation of any grade, or prolongation of the QTc interval to >470 msec for females - Left ventricular ejection fraction (LVEF) <=50% as measured by echocardiogram - NCI CTCAE Grade 3 hemorrhage within 4 weeks of starting study treatment - Evidence of neurological signs/symptoms suggestive of brain metastases, spinal cord compression, or new evidence of brain or leptomeningeal disease - Known human immunodeficiency virus (HIV) positivity or acquired immunodeficiency syndrome (AIDS)-related illness - Patients with any other severe concurrent disease, which is an undue risk for the patient by participating in the present study - Any further condition which according to the investigator results in an undue risk of the patient by participating in the present study - Major surgery, radiation therapy, or systemic therapy within 3 weeks of first study treatment. At least 7 days should elapse from the time of minor surgical procedure including placement of an access device or fine needle aspiration before randomization into this study can occur. - Wounds that have not completely healed, active ulcer(s), or bone fracture(s). - Prior high-dose chemotherapy requiring hematopoietic stem cell rescue. - Prior radiation therapy to >25% of the bone marrow.",
+    "study_type": "Interventional",
+    "phase": "Phase 2",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00543049.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0054xxxx/NCT00543049.xml"
+  },
+  "NCT00540995": {
+    "name": "Busulfan, Etoposide, and Intensity-Modulated Radiation Therapy Followed By Donor Stem Cell Transplant in Treating Patients With Advanced Myeloid Cancer",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Active, not recruiting; aligned to MedAI status=trial_matched for department tag 肿瘤科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00540995"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00540995",
+    "department_tag": "肿瘤科",
+    "department_role": "primary",
+    "department_tags": [
+      "肿瘤科"
+    ],
+    "primary_department": "肿瘤科",
+    "secondary_departments": [],
+    "overall_status": "Active, not recruiting",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Busulfan, Etoposide, and Intensity-Modulated Radiation Therapy Followed By Donor Stem Cell Transplant in Treating Patients With Advanced Myeloid Cancer",
+    "official_title": "Phase I/II Study of Intravenous (IV) Busulfan and Etoposide (VP-16) Combined With Escalated Doses of Large Field Image-Guided Intensity Modulated Radiation Therapy (IMRT) Using Helical Tomotherapy as a Preparative Regimen for Allogeneic Hematopoietic Stem Cell Transplantation (HSCT) for Patients With Advanced Myeloid Malignancies",
+    "conditions": [
+      "Adult Acute Myeloid Leukemia in Remission",
+      "Adult Acute Myeloid Leukemia With 11q23 (MLL) Abnormalities",
+      "Adult Acute Myeloid Leukemia With Del(5q)",
+      "Adult Acute Myeloid Leukemia With Inv(16)(p13;q22)",
+      "Adult Acute Myeloid Leukemia With t(15;17)(q22;q12)",
+      "Adult Acute Myeloid Leukemia With t(16;16)(p13;q22)",
+      "Adult Acute Myeloid Leukemia With t(8;21)(q22;q22)",
+      "Blastic Phase Chronic Myelogenous Leukemia",
+      "Childhood Acute Myeloid Leukemia in Remission",
+      "Childhood Chronic Myelogenous Leukemia",
+      "Childhood Myelodysplastic Syndromes",
+      "Previously Treated Myelodysplastic Syndromes",
+      "Recurrent Adult Acute Myeloid Leukemia",
+      "Recurrent Childhood Acute Myeloid Leukemia",
+      "Refractory Anemia With Excess Blasts"
+    ],
+    "mesh_terms": [
+      "Leukemia",
+      "Leukemia, Myeloid",
+      "Leukemia, Myeloid, Acute",
+      "Preleukemia",
+      "Leukemia, Myelogenous, Chronic, BCR-ABL Positive",
+      "Blast Crisis",
+      "Myelodysplastic Syndromes",
+      "Anemia, Refractory",
+      "Anemia, Refractory, with Excess of Blasts",
+      "Syndrome"
+    ],
+    "keywords": [],
+    "interventions": [
+      "busulfan",
+      "etoposide",
+      "intensity-modulated radiation therapy",
+      "allogeneic hematopoietic stem cell transplantation",
+      "allogeneic bone marrow transplantation",
+      "peripheral blood stem cell transplantation",
+      "tomotherapy"
+    ],
+    "brief_summary": "RATIONALE: Giving chemotherapy drugs, such as busulfan and etoposide, and intensity-modulated radiation therapy before a donor stem cell transplant helps stop the growth of cancer cells. It also helps stop the patient's immune system from rejecting the donor's stem cells. When the healthy stem cells from a donor are infused into the patient they may help the patient's bone marrow make stem cells, red blood cells, white blood cells, and platelets. Sometimes the transplanted cells from a donor can make an immune response against the body's normal cells. Giving intensity-modulated radiation therapy together with busulfan and etoposide before a transplant may stop this from happening. PURPOSE: This phase I/II trial is studying the side effects and best dose of intensity-modulated radiation therapy when given together with busulfan and etoposide followed by a donor stem cell transplant and to see how well it works in treating patients with advanced myeloid cancer.",
+    "eligibility_text": "Inclusion - Patients with the following diagnoses are eligible for this study: Advanced myeloid malignancy with a disease status of more than second remission, induction failure, or relapse; Chronic myeloid leukemia in blast crisis; Myelodysplasia, specifically refractory anemia with excess blasts (RAEB) - All candidates for this study must have a HLA (-A, -B, -C, -DR) identical sibling who is willing to donate bone marrow or primed blood stem cells or a 10/10 allele-matched unrelated donor or minor mismatches as per BMT SOP that allows Tacrolimus and Sirolimus to be given for GVH prophylaxis; all ABO blood group combinations of the donor/recipient are acceptable since even major ABO compatibilities can be dealt with by various techniques (red cell exchange or plasma exchange) - Prior therapy with VP-16, busulfan, hydrea and gleevec are allowed - A cardiac evaluation with electrocardiogram and MUGA or echocardiogram is required for all patients; patients must have an ejection fracture of greater than or equal to 50% - Patients must have a serum creatinine of less than or equal to 1.2 or creatinine clearance > 80 ml/min - A bilirubin of less than or equal to 1.5; patients should also have an SGOT and SGPT less than 5 times the upper limit of normal - Pulmonary function tests including DLCO will be performed; FEV1 and DLCO should be greater than 50% of predicted normal value - Time from the end of last induction or reinduction attempt should be greater than or equal to 21 days - A signed (IRB approved) informed consent document is required; the patient, donor family member, and transplant team (physician, nurse, and social worker) meet together at least once prior to starting the transplant procedure to review all pertinent risk/benefit information as part of the consenting process; alternative treatment modalities are also discussed at this meeting Exclusion - Prior radiation therapy/exposure that prevents patient from receiving IMRT (Determination will be made by the Radiation Oncologist) - Patients who have previously undergone a blood/marrow transplant and now have relapsed disease - Patients with a psychological or medical condition that the treating physician deems unacceptable to proceed to allogeneic bone marrow transplant - Pregnancy - EKG showing ischemic changes or abnormal rhythm and echocardiogram showing ejection fraction < 50 % or abnormal wall motion",
+    "study_type": "Interventional",
+    "phase": "Phase 1/Phase 2",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00540995.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0054xxxx/NCT00540995.xml"
+  },
+  "NCT00787267": {
+    "name": "Phase II Study of Dasatinib in Previously Treated Patients With Advanced NSCLC",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "abandoned",
+    "rationale": "ClinicalTrials.gov overall_status=Terminated; aligned to MedAI status=abandoned for department tag 肿瘤科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00787267"
+    ],
+    "actions": [
+      "Do not surface this trial as a direct option for the current patient.",
+      "Keep it only as historical context if the protocol remains clinically informative."
+    ],
+    "nct_id": "NCT00787267",
+    "department_tag": "肿瘤科",
+    "department_role": "primary",
+    "department_tags": [
+      "肿瘤科"
+    ],
+    "primary_department": "肿瘤科",
+    "secondary_departments": [],
+    "overall_status": "Terminated",
+    "status_reason": "The trial lifecycle indicates that it is halted or unavailable, so MedAI should not treat it as a current treatment-trial option.",
+    "enrollment_open": false,
+    "brief_title": "Phase II Study of Dasatinib in Previously Treated Patients With Advanced NSCLC",
+    "official_title": "Phase II Study of Dasatinib in Previously Treated Patients With Advanced Non-Small Cell Lung Cancer (NSCLC)",
+    "conditions": [
+      "Non Small Cell Lung Cancer"
+    ],
+    "mesh_terms": [
+      "Lung Neoplasms",
+      "Carcinoma, Non-Small-Cell Lung"
+    ],
+    "keywords": [
+      "NSCLC",
+      "Lung Cancer",
+      "Dasatinib",
+      "Genomics",
+      "Genomics analysis",
+      "Genomic signature"
+    ],
+    "interventions": [
+      "Dasatinib"
+    ],
+    "brief_summary": "On this study patients will receive dasatinib, a targeted therapy, for advanced NSCLC that has progressed after previous therapy. Safety and response to dasatinib will be assessed. Fresh frozen tumor tissue must be available for genomics analysis prior to initiating dasatinib therapy. A biopsy must be obtained after any prior chemotherapy. If fresh frozen tumor tissue is not available, a biopsy will be required to participate in this trial.",
+    "eligibility_text": "Inclusion Criteria: 1. Histological/cytological documented non-small cell lung cancer (NSCLC). Documentation of recurrence required if treated with surgical resection and/or external beam radiation therapy (XRT) with curative intent and now have recurrent disease. 2. Fresh tissue biopsy material for genomics analysis prior to initiating dasatinib. If prior XRT, tissue biopsy must be outside XRT field. Biopsy must be after any prior chemotherapy. 3. Prior treatment (tx) to include one of the following: - At least 1 prior systemic regimen (IV or oral agent) for Stage IV NSCLC or for recurrent disease. - Recurrence within 12 months after completion of systemic neoadjuvant/adjuvant chemotherapy for early stage NSCLC. - Combined modality platinum-based tx for Stage III NSCLC. 4. Prior XRT permitted if ≥1 week since completion, XRT must be <25% of bone marrow reserve. 5. At least one, non-radiated, measurable lesion (per RECIST). 6. Age ≥18 years. 7. Eastern Cooperative Oncology Group (ECOG) 0-2. 8. Adequate Organ Function: 1. Total bilirubin < Upper limit normal (ULN) 2. Hepatic enzymes (AST, ALT) ≤2.5x ULN 3. Serum creatinine <1.5x ULN 4. Hemoglobin ≥9 gm/dL 5. Neutrophil count (ANC/AGC) ≥1500 per μL 6. Platelets ≥100,000 per μL 7. Prothrombin time (PT)/a Partial thromboplastin time (PTT) ≤1.5x control 9. No other serious medical or psychiatric illness. 10. Ability to take oral medication (dasatinib must be swallowed whole). 11. Women of childbearing potential must have negative serum pregnancy test ≤72 hours and not >7 days prior to starting study drug. 12. Sexually active males and females of reproductive potential must agree to use adequate method of contraception during tx and for at least 4 weeks after study drug stopped. 13. Signed, written informed consent including Health Insurance Portability and Accountability Act (HIPAA) according to institutional guidelines. Exclusion Criteria: 1. Previous or concomitant malignancy in past 2 years other than curatively treated carcinoma in situ of cervix, or basal cell/squamous cell carcinoma of the skin. 2. Prior tx with dasatinib or other agents that inhibit Src. 3. Evidence of symptomatic pleural effusions (grade 2) unless undergo therapeutic thoracentesis as part of non-study care. Successful pleurodesis allowed. Patients who require supplemental oxygen or with oxygen saturation on room air <89% are not eligible. Pericardial effusions of any grade are not eligible. 4. Untreated documented symptomatic central nervous system (CNS) metastases. 5. Cardiac Symptoms: 1. Uncontrolled angina, congestive heart failure(CHF)or myocardial infarction within 6 months 2. Diagnosed congenital long QT syndrome 3. Any h/o clinically significant ventricular arrhythmias 4. Prolonged QT corrected (QTc) interval on pre-entry EKG (>450 msec) 5. Uncontrolled B/P as defined as >160/90 on B/P therapy 6. Hypokalemia or hypomagnesaemia if it cannot be corrected. 7. H/o diagnosed congenital acquired bleeding disorders. 8. Ongoing or recent (≤3 months) significant (≥grade 3) GI bleeding. 9. Con Meds: 1. Drugs having risk of causing Torsades de Pointes (must stop drug 7 days before dasatinib); 2. Current therapeutic dose unfractionated heparin, low-molecular weight heparin, or coumadin therapy; 3. St. John's Wort must be stopped while on dasatinib; 4. IV bisphosphonates stopped 2 weeks pre/6 weeks post dasatinib. 10. Prisoners/subjects compulsorily detained for tx of psychiatric and/or physical illness. 11. Pregnant or breastfeeding. 12. Active or uncontrolled infection requiring IV antibiotics. 13. Impairment of GI function/disease that may alter absorption of dasatinib (e.g., ulcerative diseases, uncontrolled nausea, vomiting, diarrhea, malabsorption syndrome, or small bowel resection). 14. Received investigational drugs ≤4 weeks prior to starting study drug and/or not recovered from side effects of such therapy. Any other anti-neoplastic and/or molecular therapy must be discontinued 7 days prior to starting dasatinib.",
+    "study_type": "Interventional",
+    "phase": "Phase 2",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00787267.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0078xxxx/NCT00787267.xml"
+  },
+  "NCT00842348": {
+    "name": "Study of Lanreotide Autogel 120 mg in Patients With Non-functioning Entero- Pancreatic Endocrine Tumour",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 肿瘤科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00842348"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00842348",
+    "department_tag": "肿瘤科",
+    "department_role": "primary",
+    "department_tags": [
+      "肿瘤科"
+    ],
+    "primary_department": "肿瘤科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Study of Lanreotide Autogel 120 mg in Patients With Non-functioning Entero- Pancreatic Endocrine Tumour",
+    "official_title": "Open Label Extension Study of Lanreotide Autogel 120 mg in Patients With Non-functioning Entero-pancreatic Endocrine Tumour",
+    "conditions": [
+      "Non Functioning Entero-pancreatic Endocrine Tumour"
+    ],
+    "mesh_terms": [
+      "Endocrine Gland Neoplasms",
+      "Adenoma, Islet Cell"
+    ],
+    "keywords": [
+      "Lanreotide",
+      "Somatuline",
+      "Neuroendocrine tumour",
+      "NET"
+    ],
+    "interventions": [
+      "lanreotide (Autogel formulation)"
+    ],
+    "brief_summary": "The primary purpose of this extension study was to assess the long term safety of patients with nonfunctioning enteropancreatic neuroendocrine tumour (NET), who were treated with open label lanreotide Autogel (120 mg every 28 days) and who participated in a previous study, 2-55-52030-726 (NCT00353496).",
+    "eligibility_text": "Inclusion Criteria: 1. Had provided written informed consent prior to any study-related procedures. 2. Had been enrolled and treated in Study 2-55-52030-726 and either: - Was stable at 96 weeks of treatment (whatever the treatment received during the 2 years of participation, i.e. no code break at Week 96); or, - Had received at least one injection in Study 2-55-52030-726 and had disease progression, confirmed by central assessment, during the course of the study and code break showed placebo. 3. Had a World Health Organisation (WHO) performance score lower than or equal to 2. Exclusion Criteria: 1. Had been enrolled and treated in the frame of the protocol and had disease progression during the study and the code break showed a treatment with lanreotide Autogel 120 mg. 2. Had received any new treatment for the entero-pancreatic NET since the end of participation in the study. 3. Were likely to require any additional concomitant treatment to lanreotide Autogel 120 mg for the entero-pancreatic NET. 4. Had been treated with radionuclide at any time prior to study entry. 5. Had a history of hypersensitivity to drugs with a similar chemical structure to lanreotide Autogel 120 mg. 6. Were likely to require treatment during the study with drugs that were not permitted by the study protocol. 7. Were at risk of pregnancy or lactation. Females of childbearing potential had to provide a negative pregnancy test at the start of study and had to be using oral, double barrier or injectable contraception. Non-childbearing potential was defined as postmenopause for at least 1 year, or surgical sterilisation or hysterectomy at least 3 months before the start of the study. 8. Had any mental condition rendering the patient unable to understand the nature, scope and possible consequences of the study, and/or evidence of an uncooperative attitude. 9. Had abnormal findings at Visit 1, any other medical condition(s) or laboratory findings that, in the opinion of the investigator, might have jeopardised the patient's safety or decreased the chance of obtaining satisfactory data needed to achieve the objective(s) of the study. 10. Previous enrolment in this study.",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00842348.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0084xxxx/NCT00842348.xml"
+  },
+  "NCT00310479": {
+    "name": "Clinico-pathologic Correlative Study of 3T Magnetic Resonance Spectroscopy in the Localization of Prostate Cancer",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 肿瘤科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00310479"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00310479",
+    "department_tag": "肿瘤科",
+    "department_role": "secondary",
+    "department_tags": [
+      "医学影像科",
+      "肿瘤科"
+    ],
+    "primary_department": "医学影像科",
+    "secondary_departments": [
+      "肿瘤科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Clinico-pathologic Correlative Study of 3T Magnetic Resonance Spectroscopy in the Localization of Prostate Cancer",
+    "official_title": "Clinico-pathologic Correlative Study of 3T Magnetic Resonance Spectroscopy in the Localization of Prostate Cancer",
+    "conditions": [
+      "Prostate Cancer"
+    ],
+    "mesh_terms": [
+      "Prostatic Neoplasms"
+    ],
+    "keywords": [
+      "Magnetic Resonance Imaging",
+      "prostate cancer imaging",
+      "3T MRS",
+      "functional imaging"
+    ],
+    "interventions": [
+      "Magnetic Resonance Spectroscopy (3Tesla)"
+    ],
+    "brief_summary": "We seek to develop an advanced imaging approach to identifying and localizing prostate cancer. We believe that high field MRI (magnetic resonance imaging) has the potential to do this and we will endeavor to prove this by having patients with prostate cancer pre-operatively undergo a technique called magnetic resonance spectroscopy. After surgery, the microscopic locations of cancer will be compared with the pre-operative images to assess how well the imaging technique succeeds.",
+    "eligibility_text": "Inclusion Criteria: - Histologically verified prostate cancer - Patient has opted for surgery - Low risk prostate cancer PSA <1 0, Gleason < 7, Stage < T2b - No contraindication to MR scanning - No prior history of malignancy - Fit for surgery Exclusion Criteria: - Nonbiopsied lesion - Intermediate or high risk prostate cancer - Unfit for surgery - Contraindication to MR scanning (i.e. pacemaker, aneurysm clips, claustrophobia)",
+    "study_type": "Interventional",
+    "phase": "N/A",
+    "primary_purpose": "Diagnostic",
+    "copied_xml_relpath": "xml/NCT00310479.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0031xxxx/NCT00310479.xml"
+  },
+  "NCT00024362": {
+    "name": "BBR 3464 in Treating Patients With Locally Advanced or Metastatic Pancreatic Cancer That Cannot be Treated With Surgery",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "manual_review",
+    "rationale": "ClinicalTrials.gov overall_status=Unknown status; aligned to MedAI status=manual_review for department tag 肿瘤科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00024362"
+    ],
+    "actions": [
+      "Review the full XML and the current ClinicalTrials.gov record manually before use.",
+      "Do not promote this trial to a direct recommendation until the lifecycle status is confirmed."
+    ],
+    "nct_id": "NCT00024362",
+    "department_tag": "肿瘤科",
+    "department_role": "primary",
+    "department_tags": [
+      "肿瘤科"
+    ],
+    "primary_department": "肿瘤科",
+    "secondary_departments": [],
+    "overall_status": "Unknown status",
+    "status_reason": "The trial lifecycle is unclear, so MedAI should require manual review before using it in protocol recommendations.",
+    "enrollment_open": false,
+    "brief_title": "BBR 3464 in Treating Patients With Locally Advanced or Metastatic Pancreatic Cancer That Cannot be Treated With Surgery",
+    "official_title": "A Phase II Trial of BBR 3464 as First Line Treatment in Patients With Inoperable, Locally Advanced or Metastatic Adenocarcinoma of the Pancreas",
+    "conditions": [
+      "Pancreatic Cancer"
+    ],
+    "mesh_terms": [
+      "Pancreatic Neoplasms"
+    ],
+    "keywords": [
+      "stage III pancreatic cancer",
+      "adenocarcinoma of the pancreas",
+      "stage IV pancreatic cancer"
+    ],
+    "interventions": [
+      "BBR 3464"
+    ],
+    "brief_summary": "RATIONALE: Drugs used in chemotherapy use different ways to stop tumor cells from dividing so they stop growing or die. PURPOSE: Phase II trial to study the effectiveness of BBR 3464 in treating patients who have locally advanced or metastatic pancreatic cancer that cannot be treated with surgery.",
+    "eligibility_text": "DISEASE CHARACTERISTICS: Histologically or cytologically confirmed adenocarcinoma of the pancreas Inoperable locally advanced or metastatic disease Previously untreated disease At least 1 measurable lesion Lesions in a previously irradiated field are not considered measurable Brain metastases allowed provided symptoms are stable and patient is receiving a stable dose of steroids within 1 month prior to study PATIENT CHARACTERISTICS: Age: 18 and over Performance status: WHO 0-1 Life expectancy: Not specified Hematopoietic: Neutrophil count at least 1,500/mm3 Platelet count at least 100,000/mm3 Hemoglobin at least 9 g/dL Hepatic: Bilirubin no greater than 2 times upper limit of normal (ULN) Alkaline phosphatase no greater than 2 times ULN ALT or AST no greater than 2 times ULN (5 times ULN if liver metastases present) Renal: Creatinine no greater than 1.5 mg/dL OR Creatinine clearance at least 40 mL/min Cardiovascular: No congestive heart failure No angina pectoris (even if medically controlled) No myocardial infarction within the past year No uncontrolled hypertension No arrhythmia Neurologic: No significant neurological disorder except that caused by metastatic disease or psychiatric disorders No clinically significant abnormal findings on audiogram or neurological examination Other: No other serious illness or medical condition No uncontrolled concurrent infection No prior disposition to diarrhea (e.g., Crohn's disease or ulcerative colitis) No poor nutritional status that would be compromised by severe diarrhea No other prior or concurrent malignancy except: Curatively treated nonmelanoma skin cancer or carcinoma in situ of the cervix OR Other cancer curatively treated by surgery alone that has not recurred for more than 5 years No other condition that would preclude study Not pregnant or nursing Negative pregnancy test Fertile patients must use effective contraception during and for at least 6 months after study PRIOR CONCURRENT THERAPY: Biologic therapy: No prior immunotherapy No concurrent antitumor immunotherapy Chemotherapy: No prior chemotherapy No other concurrent antitumor chemotherapy Endocrine therapy: See Disease Characteristics No prior endocrine therapy No concurrent antitumor hormonal therapy Radiotherapy: See Disease Characteristics Prior single fraction of radiotherapy for palliation allowed No concurrent radiotherapy except for local palliation to a nontarget lesion Surgery: See Disease Characteristics Prior surgeries allowed At least 4 weeks since prior major thoracic and/or abdominal surgery (2 weeks for biliary drainage procedures) and recovered Other: At least 30 days since prior investigational drugs No other concurrent investigational drugs",
+    "study_type": "Interventional",
+    "phase": "Phase 2",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00024362.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0002xxxx/NCT00024362.xml"
+  },
+  "NCT00006254": {
+    "name": "VNP20009 in Treating Patients With Advanced Solid Tumors",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 肿瘤科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00006254"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00006254",
+    "department_tag": "肿瘤科",
+    "department_role": "primary",
+    "department_tags": [
+      "肿瘤科"
+    ],
+    "primary_department": "肿瘤科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "VNP20009 in Treating Patients With Advanced Solid Tumors",
+    "official_title": "A Phase I Trial of a Live, Genetically Modified Salmonella Typhimurium (VNP20009) for the Treatment of Cancer by Intravenous Administration",
+    "conditions": [
+      "Unspecified Adult Solid Tumor, Protocol Specific"
+    ],
+    "mesh_terms": [],
+    "keywords": [
+      "unspecified adult solid tumor, protocol specific"
+    ],
+    "interventions": [
+      "salmonella VNP20009"
+    ],
+    "brief_summary": "RATIONALE: Biological therapies such as VNP20009 use different ways to stimulate the immune system and stop cancer cells from growing. PURPOSE: Phase I trial to study the effectiveness of VNP20009 in treating patients who have advanced solid tumors.",
+    "eligibility_text": "DISEASE CHARACTERISTICS: - Histologically confirmed advanced and/or metastatic solid tumors refractory to standard curative or palliative therapy and for which no other conventional therapy exists - Measurable or evaluable metastatic disease - No brain metastases unless previously treated and no evidence of recurrence - No lymphoma or other hematologic malignancy PATIENT CHARACTERISTICS: Age: - 18 and over Performance status: - ECOG 0-1 Life expectancy: - At least 3 months Hematopoietic: - Granulocyte count at least 2,000/mm^3 - Platelet count at least 100,000/mm^3 - Hematocrit at least 30% (transfusion allowed) - No known bleeding disorder Hepatic: - Bilirubin no greater than 1.5 times upper limit of normal (ULN) - ALT and AST no greater than 1.5 times ULN (3 times ULN if liver metastases present) - Alkaline phosphatase no greater than 1.5 times ULN (3 times ULN if liver metastases present) - PT and PTT no greater than 1.5 times ULN - Hepatitis B surface antigen negative - No chronic active hepatitis B - No end-stage liver disease Renal: - Creatinine no greater than 2.0 mg/dL - No urinary tract stones - No end-stage renal disease Cardiovascular: - No known valvular disease - No known clinically significant atherosclerotic disease, peripheral vascular disease, or arterial aneurysm - No unstable angina - No artificial heart valves Pulmonary: - No severe oxygen-dependent chronic obstructive pulmonary disease Other: - No artificial implant that cannot be removed (e.g., prosthetic hips or knees or other devices) - No permanent central venous catheters - No gallstones - No active infection - No documented Salmonella infection - No tumor fever or fever of unknown origin or cause - Daily maximum temperature no greater than 38.0 degrees Celsius - HIV negative - No documented immunodeficiency - No other life-threatening illness - No history of allergic reaction or hypersensitivity to quinolone or cephalosporin antibiotics - No commercial food handlers, day-care workers, or health-care workers - No patients unable to avoid close personal contact with severely immunosuppressed individuals (e.g., other patients on myelosuppressive cancer chemotherapy) - Not pregnant or nursing - Negative pregnancy test - Fertile patients must use effective contraception PRIOR CONCURRENT THERAPY: Biologic therapy: - At least 4 weeks since prior biologic therapy and recovered Chemotherapy: - At least 4 weeks since prior cytotoxic chemotherapy (6 weeks for mitomycin or nitrosoureas) and recovered Endocrine therapy: - At least 2 weeks since prior hormonal therapy and recovered - No concurrent steroids that could depress the immune system unless indicated for severe reactions Radiotherapy: - At least 4 weeks since prior radiotherapy and recovered Surgery: - At least 2 weeks since prior surgery and recovered - No prior splenectomy - No concurrent palliative surgery Other: - Recovered from any other prior anticancer therapies - No concurrent antibiotics - No concurrent immunosuppressives or any other medications that could suppress the immune system - No other concurrent treatment for malignancy - No requirement for immediate palliative treatment",
+    "study_type": "Interventional",
+    "phase": "Phase 1",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00006254.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0000xxxx/NCT00006254.xml"
+  }
+}

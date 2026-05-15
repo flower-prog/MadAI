@@ -19,10 +19,12 @@ if __package__ in {None, ""}:
     from agent.graph import build_graph_with_memory
     from agent.graph.snapshots import load_state_snapshot, prepare_state_for_resume
     from agent.graph.types import GraphState
+    from agent.tools import create_live_medical_knowledge_retriever
 else:
     from .graph import build_graph_with_memory
     from .graph.snapshots import load_state_snapshot, prepare_state_for_resume
     from .graph.types import GraphState
+    from .tools import create_live_medical_knowledge_retriever
 
 
 logger = logging.getLogger(__name__)
@@ -236,6 +238,39 @@ def _normalize_optional_directory_path(raw_value: str | None) -> str | None:
     return str(Path(text).expanduser().resolve())
 
 
+def _env_bool(names: tuple[str, ...], *, default: bool = False) -> bool:
+    for name in names:
+        raw_value = os.getenv(name)
+        if raw_value is None:
+            continue
+        normalized = str(raw_value).strip().lower()
+        if not normalized:
+            continue
+        if normalized in {"1", "true", "yes", "y", "on"}:
+            return True
+        if normalized in {"0", "false", "no", "n", "off"}:
+            return False
+    return default
+
+
+def _with_optional_live_medical_knowledge(
+    tool_registry: dict[str, Any] | None,
+    *,
+    enabled: bool | None = None,
+) -> dict[str, Any] | None:
+    should_enable = (
+        _env_bool(("MEDAI_ENABLE_LIVE_MEDICAL_KNOWLEDGE", "MEDAI_ENABLE_LIVE_KG"), default=False)
+        if enabled is None
+        else bool(enabled)
+    )
+    if not should_enable:
+        return tool_registry
+
+    registry = dict(tool_registry or {})
+    registry.setdefault("medical_knowledge_retriever", create_live_medical_knowledge_retriever())
+    return registry
+
+
 def _configure_logging(debug: bool) -> None:
     if debug:
         logging.basicConfig(
@@ -416,6 +451,11 @@ def _build_cli_parser() -> argparse.ArgumentParser:
         help="Retrieval recall top-k. Defaults to MEDAI_RETRIEVAL_TOP_K or MEDAI_TOP_K.",
     )
     parser.add_argument("--max-selected-tools", type=int, default=5, help="Max calculators to execute in patient_note mode.")
+    parser.add_argument(
+        "--live-medical-knowledge",
+        action="store_true",
+        help="Enable live online medical knowledge retrieval for the protocol stage.",
+    )
     parser.add_argument("--debug", action="store_true", help="Enable debug logging.")
     parser.add_argument(
         "--output",
@@ -476,12 +516,14 @@ def _main(argv: list[str] | None = None) -> int:
             resume_mode=args.resume_mode,
             snapshot_dir=args.snapshot_dir,
             debug=args.debug,
+            enable_live_medical_knowledge=args.live_medical_knowledge,
         )
     elif state_input is not None:
         result = run_workflow(
             state=state_input,
             snapshot_dir=args.snapshot_dir,
             debug=args.debug,
+            enable_live_medical_knowledge=args.live_medical_knowledge,
         )
     else:
         text = str(args.text or DEFAULT_DEMO_TEXT).strip()
@@ -500,6 +542,7 @@ def _main(argv: list[str] | None = None) -> int:
             forced_tool_pmid=args.forced_tool_pmid,
             snapshot_dir=args.snapshot_dir,
             debug=args.debug,
+            enable_live_medical_knowledge=args.live_medical_knowledge,
         )
 
     if args.save_json:
@@ -532,6 +575,7 @@ def run_agent_workflow(
     snapshot_dir: str | None = None,
     resume_snapshot: str | None = None,
     resume_mode: str = "restart",
+    enable_live_medical_knowledge: bool | None = None,
 ) -> dict[str, Any]:
     """Run the MedAI graph with either placeholder or clinical-tool mode."""
     normalized_snapshot_dir = _normalize_optional_directory_path(snapshot_dir)
@@ -564,7 +608,10 @@ def run_agent_workflow(
             resumed_state,
             config=workflow_config,
             debug=debug,
-            tool_registry=tool_registry,
+            tool_registry=_with_optional_live_medical_knowledge(
+                tool_registry,
+                enabled=enable_live_medical_knowledge,
+            ),
             snapshot_dir=normalized_snapshot_dir,
         )
 
@@ -577,7 +624,10 @@ def run_agent_workflow(
             state,
             config=config,
             debug=debug,
-            tool_registry=tool_registry,
+            tool_registry=_with_optional_live_medical_knowledge(
+                tool_registry,
+                enabled=enable_live_medical_knowledge,
+            ),
             snapshot_dir=normalized_snapshot_dir,
         )
 
@@ -590,7 +640,10 @@ def run_agent_workflow(
         messages=messages,
         patient_case=patient_case,
         clinical_tool_job=clinical_tool_job,
-        tool_registry=tool_registry,
+        tool_registry=_with_optional_live_medical_knowledge(
+            tool_registry,
+            enabled=enable_live_medical_knowledge,
+        ),
         deep_thinking_mode=deep_thinking_mode,
         search_before_planning=search_before_planning,
         pass_through_expert=pass_through_expert,
@@ -626,6 +679,7 @@ def run_workflow(
     config: dict[str, Any] | None = None,
     tool_registry: dict[str, Any] | None = None,
     snapshot_dir: str | None = None,
+    enable_live_medical_knowledge: bool | None = None,
 ) -> dict[str, Any]:
     """Unified MedAI workflow entrypoint.
 
@@ -644,6 +698,7 @@ def run_workflow(
             snapshot_dir=snapshot_dir,
             resume_snapshot=resume_snapshot,
             resume_mode=resume_mode,
+            enable_live_medical_knowledge=enable_live_medical_knowledge,
         )
 
     if state is not None:
@@ -653,7 +708,10 @@ def run_workflow(
             state,
             config=config,
             debug=debug,
-            tool_registry=tool_registry,
+            tool_registry=_with_optional_live_medical_knowledge(
+                tool_registry,
+                enabled=enable_live_medical_knowledge,
+            ),
             snapshot_dir=snapshot_dir,
         )
 
@@ -684,6 +742,7 @@ def run_workflow(
         tool_registry=tool_registry,
         messages=[{"role": "user", "content": normalized_case_text}],
         snapshot_dir=snapshot_dir,
+        enable_live_medical_knowledge=enable_live_medical_knowledge,
     )
 
 
@@ -704,6 +763,7 @@ def run_clinical_tool_workflow(
     debug: bool = False,
     tool_registry: dict[str, Any] | None = None,
     snapshot_dir: str | None = None,
+    enable_live_medical_knowledge: bool | None = None,
 ) -> dict[str, Any]:
     return run_workflow(
         case_text=text,
@@ -721,6 +781,7 @@ def run_clinical_tool_workflow(
         debug=debug,
         tool_registry=tool_registry,
         snapshot_dir=snapshot_dir,
+        enable_live_medical_knowledge=enable_live_medical_knowledge,
     )
 
 

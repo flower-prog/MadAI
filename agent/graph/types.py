@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import asdict, dataclass, fields, field, is_dataclass
 import os
 from typing import Any, Literal, cast
@@ -226,6 +227,7 @@ class GraphState:
     assessment_bundle: dict[str, Any] = field(default_factory=dict)  # clinical_assisstment 的结构化产物
     calculation_bundle: dict[str, Any] = field(default_factory=dict)  # calculator 阶段的汇总结果
     protocol_branch_bundle: dict[str, Any] = field(default_factory=dict)  # protocol_entry 记录的分支执行策略
+    trial_search_intent: dict[str, Any] = field(default_factory=dict)  # protocol 入口生成的 trial-facing 检索意图
     trial_retrieval_bundle: dict[str, Any] = field(default_factory=dict)  # protocol 阶段的 trial 检索包
     treatment_bundle: dict[str, Any] = field(default_factory=dict)  # protocol 阶段的治疗决策包
     reporter_result: dict[str, Any] = field(default_factory=dict)  # reporter 生成的完整报告结果
@@ -257,6 +259,34 @@ class GraphState:
     calculation_tasks: list[CalculationTask] = field(default_factory=list)  # 待执行或已规划的计算任务
     calculation_results: list[CalculationArtifact] = field(default_factory=list)  # 计算任务产出的结果制品
     treatment_recommendations: list[TreatmentRecommendation] = field(default_factory=list)  # 最终治疗/处置建议
+
+    def __deepcopy__(self, memo: dict[int, Any]) -> "GraphState":
+        """Deep-copy workflow state while preserving runtime tool objects by reference.
+
+        `tool_registry` intentionally stores clients, retrievers, and model handles that
+        are often not pickle/deepcopy safe. Branch states need isolated state fields, but
+        they can share the same immutable/runtime tool objects.
+        """
+        existing = memo.get(id(self))
+        if existing is not None:
+            return cast("GraphState", existing)
+
+        copied = GraphState(
+            request=deepcopy(self.request, memo),
+            patient_case=deepcopy(self.patient_case, memo),
+            clinical_tool_job=deepcopy(self.clinical_tool_job, memo),
+        )
+        memo[id(self)] = copied
+        for item in fields(self):
+            name = item.name
+            if name in {"request", "patient_case", "clinical_tool_job"}:
+                continue
+            value = getattr(self, name)
+            if name == "tool_registry":
+                setattr(copied, name, dict(value))
+            else:
+                setattr(copied, name, deepcopy(value, memo))
+        return copied
 
 
 def _resolve_retrieval_top_k(raw_value: Any) -> int:
@@ -967,6 +997,7 @@ def ensure_state(data: GraphState | dict[str, Any]) -> GraphState:
         assessment_bundle=dict(data.get("assessment_bundle") or {}),
         calculation_bundle=dict(data.get("calculation_bundle") or {}),
         protocol_branch_bundle=dict(data.get("protocol_branch_bundle") or {}),
+        trial_search_intent=dict(data.get("trial_search_intent") or {}),
         trial_retrieval_bundle=dict(data.get("trial_retrieval_bundle") or {}),
         treatment_bundle=dict(data.get("treatment_bundle") or {}),
         reporter_result=dict(data.get("reporter_result") or {}),

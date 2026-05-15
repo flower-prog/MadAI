@@ -1,0 +1,265 @@
+{
+  "NCT00740454": {
+    "name": "Single Complete Compression Ultrasonography to Rule Out Deep Vein Thrombosis During Pregnancy and Postpartum",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 妇产科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00740454"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00740454",
+    "department_tag": "妇产科",
+    "department_role": "primary",
+    "department_tags": [
+      "妇产科",
+      "医学影像科"
+    ],
+    "primary_department": "妇产科",
+    "secondary_departments": [
+      "医学影像科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Single Complete Compression Ultrasonography to Rule Out Deep Vein Thrombosis During Pregnancy and Postpartum",
+    "official_title": "Diagnostic Exclusion Value of a Negative Single Distal and Proximal Lower Limb Veins Compression Ultrasonography in Pregnant and Post-partum Women With a Clinically Suspected Deep Vein Thrombosis",
+    "conditions": [
+      "Deep Vein Thrombosis"
+    ],
+    "mesh_terms": [
+      "Thrombosis",
+      "Venous Thrombosis"
+    ],
+    "keywords": [
+      "pregnancy",
+      "postpartum",
+      "deep vein thrombosis",
+      "venous thromboembolism",
+      "diagnosis",
+      "compression ultrasonography"
+    ],
+    "interventions": [
+      "Lower limb veins compression ultrasonography"
+    ],
+    "brief_summary": "The objective of the EDVIGE study is to determine whether a negative single distal and proximal leg veins compression ultrasonography safely rules out the diagnosis of deep vein thrombosis in pregnant and post-partum women with clinical suspicion of DVT.",
+    "eligibility_text": "Inclusion Criteria: - Women with an ongoing pregnancy or within three-months post-partum and a clinically suspected deep vein thrombosis Exclusion Criteria: - suspicion of pulmonary embolism - age less than 18 years - impossible follow-up",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00740454.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0074xxxx/NCT00740454.xml"
+  },
+  "NCT00224250": {
+    "name": "Ultrasound Study of the Uterine Healing Process After Cesarean Delivery",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 妇产科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00224250"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00224250",
+    "department_tag": "妇产科",
+    "department_role": "primary",
+    "department_tags": [
+      "妇产科"
+    ],
+    "primary_department": "妇产科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Ultrasound Study of the Uterine Healing Process After Cesarean Delivery",
+    "official_title": "Ultrasonographic Assessment of the Uterine Scarring Process Following Closure of the Uterus in One Versus Two Layer Technique.",
+    "conditions": [
+      "Myometrial Remodeling"
+    ],
+    "mesh_terms": [],
+    "keywords": [],
+    "interventions": [
+      "One- versus two-layer hysterotomy closure"
+    ],
+    "brief_summary": "Our hypothesis is that there is no difference in the healing process in those women who have a one- or two-layer uterine closure at the time of cesarean delivery.",
+    "eligibility_text": "Inclusion Criteria: - singleton gestation - term pregnancy - Kerr uterine incision employed - age > 18 Exclusion Criteria: - Pain score > 4 - Current cesarean delivery for non-reassuring fetal status or other emergent situation (eg. maternal bleeding, etc.) - Prior cesarean section - Prior uterine surgery - Hysterotomy other than Kerr (low transverse) incision in current cesarean - Extension of the uterine incision in current cesarean - Multifetal pregnancy - Maternal diabetes mellitus - Maternal connective tissue disorder - Uterine malformation - Uterine myomas (fibroids) in the anterior lower uterine segment - Chorioamnionitis - Non-English speaking",
+    "study_type": "Interventional",
+    "phase": "N/A",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00224250.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0022xxxx/NCT00224250.xml"
+  },
+  "NCT00201448": {
+    "name": "Evaluation of the Safety and Immune Responses of the Towne Strain of CMV in Seronegative Women",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "abandoned",
+    "rationale": "ClinicalTrials.gov overall_status=Terminated; aligned to MedAI status=abandoned for department tag 妇产科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00201448"
+    ],
+    "actions": [
+      "Do not surface this trial as a direct option for the current patient.",
+      "Keep it only as historical context if the protocol remains clinically informative."
+    ],
+    "nct_id": "NCT00201448",
+    "department_tag": "妇产科",
+    "department_role": "secondary",
+    "department_tags": [
+      "传染科",
+      "妇产科"
+    ],
+    "primary_department": "传染科",
+    "secondary_departments": [
+      "妇产科"
+    ],
+    "overall_status": "Terminated",
+    "status_reason": "The trial lifecycle indicates that it is halted or unavailable, so MedAI should not treat it as a current treatment-trial option.",
+    "enrollment_open": false,
+    "brief_title": "Evaluation of the Safety and Immune Responses of the Towne Strain of CMV in Seronegative Women",
+    "official_title": "Epidemiology of Cytomegalovirus -- Evaluation of the Immunogenicity and Efficacy of the Towne Strain of CMV in Seronegative Women: A Phase II-III Study",
+    "conditions": [
+      "Cytomegalovirus Infections"
+    ],
+    "mesh_terms": [
+      "Cytomegalovirus Infections"
+    ],
+    "keywords": [
+      "CMV, cytomegalovirus, vaccine, Towne strain"
+    ],
+    "interventions": [
+      "Hepatitis A Vaccine",
+      "Towne CMV Vaccine"
+    ],
+    "brief_summary": "The purpose of this study is to evaluate the safety and effectiveness of a vaccine given to women ages 18-45 to prevent cytomegalovirus (CMV), which they may catch from their children who attend daycare centers. Cytomegalovirus does not usually cause serious illness in adults and children. However, CMV can be a cause of deafness and mental retardation in a child born from a mother who has the infection during pregnancy. Women in the study will be given either cytomegalovirus or Hepatitis A vaccine. A blood sample will be taken before the vaccination is given. After vaccination, urine, saliva, and blood will be collected every 1-6 months for up to 3 years. Information regarding any reaction to the vaccination will be collected. All family members will be asked to provide urine and saliva to test for CMV every few months for up to 3 years. All children born to women who have been vaccinated will be tested for CMV infection. 180 women who are not infected with CMV will be vaccinated.",
+    "eligibility_text": "Inclusion Criteria: 1. Women between 18 and 45 years of age 2. Good general health without significant physical examination findings 3. With children < 2 years old attending daycare centers 4. Willingness to sign informed consent for screening and before enrollment 5. Available to participate for the entire study period of 36 months 6. Negative cytomegalovirus (CMV) serology 7. Negative serum pregnancy test within two days prior to vaccination 8. Willingness to have blood stored for future evaluations 9. Willingness to have children provide saliva and urine samples 10. Able to complete a demographic profile 11. Agreement to practice effective contraception. Contraception is defined as using any of the following methods: 1. Condoms (male or female) 2. Diaphragm or cervical cap with spermicide 3. Intrauterine device (IUD) 4. Hormone contraception 5. Abstinence 6. Successful vasectomy in male partner 7. Hysterectomy, bilateral oophorectomy, or tubal ligation 8. Infertility confirmed by a gynecologist will also be acceptable Exclusion Criteria: 1. Acute febrile illness (>/=38C / 100.4F) within 72 hours preceding the vaccination (vaccination may be deferred until febrile illness is resolved, but a repeat pregnancy test will be required if deferred more than 48 hours.) 2. Positive pregnancy test 3. Breastfeeding 4. Venous access deemed inadequate for the phlebotomy demands of the study 5. Receipt of any vaccine, blood products, or investigational agents within 30 days prior to enrollment 6. History of serious adverse reactions to any vaccine, including anaphylaxis and related symptoms such as hives, respiratory difficulty, angioedema or abdominal pain 7. History of immunodeficiency, autoimmune diseases, or malignancy 8. History of severe cardiopulmonary diseases or serious metabolic disorders 9. Psychiatric condition that precludes compliance with the protocol. Specifically excluded are persons with history of psychosis within the past 3 years or history of suicidal attempt or gesture within the past 3 years 10. Any acute or chronic condition (including alcohol or drug use) which in the opinion of the principle investigator would limit the volunteer's ability to complete the study",
+    "study_type": "Interventional",
+    "phase": "Phase 2/Phase 3",
+    "primary_purpose": "Prevention",
+    "copied_xml_relpath": "xml/NCT00201448.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0020xxxx/NCT00201448.xml"
+  },
+  "NCT00461838": {
+    "name": "Outcome After Multidisciplinary CO2 Laser Laparoscopic Excision of Deep Infiltrating Colorectal Endometriosis",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 妇产科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00461838"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00461838",
+    "department_tag": "妇产科",
+    "department_role": "primary",
+    "department_tags": [
+      "妇产科",
+      "外科"
+    ],
+    "primary_department": "妇产科",
+    "secondary_departments": [
+      "外科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Outcome After Multidisciplinary CO2 Laser Laparoscopic Excision of Deep Infiltrating Colorectal Endometriosis",
+    "official_title": "Outcome After Multidisciplinary CO2 Laser Laparoscopic Excision of Deep Infiltrating Colorectal Endometriosis",
+    "conditions": [
+      "Endometriosis"
+    ],
+    "mesh_terms": [
+      "Endometriosis"
+    ],
+    "keywords": [
+      "colorectal endometriosis",
+      "deep infiltrating endometriosis",
+      "dysmenorroe",
+      "dyspareunia",
+      "quality of life"
+    ],
+    "interventions": [
+      "multidisciplinary laparoscopy",
+      "Questionnaires"
+    ],
+    "brief_summary": "Improved pain, sexuality and quality of life, high fertility and low complication and recurrence rates after multidisciplinary CO2 laser laparoscopic excision of deep infiltrating colorectal endometriosis.",
+    "eligibility_text": "Inclusion Criteria: - All women (n=56) who had undergone CO2 laser laparoscopic radical excision of deep infiltrating endometriosis with active involvement of colorectal surgeon and/or urologist - operated at the Leuven University Fertility Centre (LUFc) between September 1996 and July 2004 Exclusion Criteria: - Women who had undergone CO2 laser laparoscopic excision of deep infiltrating endometriosis without active involvement of colorectal surgeon and/or urologist",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00461838.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0046xxxx/NCT00461838.xml"
+  },
+  "NCT00543049": {
+    "name": "Randomized Multicenter Trial With SU11248 Evaluating Dosage,Tolerability,Toxicity and Effectiveness of a Multitargeted Receptor Tyrosine Kinase Inhibitor",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 妇产科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00543049"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00543049",
+    "department_tag": "妇产科",
+    "department_role": "secondary",
+    "department_tags": [
+      "肿瘤科",
+      "妇产科"
+    ],
+    "primary_department": "肿瘤科",
+    "secondary_departments": [
+      "妇产科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Randomized Multicenter Trial With SU11248 Evaluating Dosage,Tolerability,Toxicity and Effectiveness of a Multitargeted Receptor Tyrosine Kinase Inhibitor",
+    "official_title": "Phase II Trial in Platinum-refractory Ovarian Cancer: A Randomized Multicenter Trial With SU11248 to Evaluate Dosage, Tolerability, Toxicity and Effectiveness of a Multitargeted Receptor Tyrosine Kinase Inhibitor Monotherapy",
+    "conditions": [
+      "Platinum Refractory Epithelial Ovarian Cancer",
+      "Primary Cancer of the Peritoneum",
+      "Cancer of the Fallopian Tube"
+    ],
+    "mesh_terms": [
+      "Ovarian Neoplasms",
+      "Carcinoma, Ovarian Epithelial",
+      "Fallopian Tube Neoplasms"
+    ],
+    "keywords": [
+      "platinum refractory",
+      "epithelial ovarian cancer",
+      "primary cancer of the peritoneum",
+      "cancer of the fallopian tube"
+    ],
+    "interventions": [
+      "Sunitinib",
+      "SUNITINIB"
+    ],
+    "brief_summary": "Ovarian cancer is most often recognized in advanced clinical state, the initial therapeutic strategies consist of a platinum containing chemotherapy subsequent to primary surgery. Although initially responsive to platinum-paclitaxel containing chemotherapy, a significant number of patients will show tumor progression during first line chemotherapy or relapse within six months after completion of first line chemotherapy, therefore being characterized as chemotherapy resistant. Any second line chemotherapy will result in approximately 10% of overall response, underlining the poor prognosis for these patients with an estimated median overall survival of 20 weeks. In addition to conventional chemotherapeutics, so called small molecules are of high interest to establish new strategies in chemotherapy-refractory ovarian cancer (and in the long run first line chemotherapy). SU11248 is a polytargeting tyrosine kinase inhibitor. SU11248 has demonstrated clinical efficacy in kidney cancer and GIST, further clinical trials have been initiated in other tumor entities. Growth pattern and biological targets present in ovarian cancer indicate that SU11248 might be a promising compound for the treatment of ovarian cancer. Especially, VEGFR, PDGFR and c-kit are specific targets for SU11248, which are expressed in ovarian cancer. The different targets of SU11248 provide a potential advantage of this compound compared to single-target molecules in chemotherapy-refractory ovarian cancer.",
+    "eligibility_text": "Inclusion Criteria: - Women, 18 years and older, written (signed and dated) informed consent - Histological confirmed epithelial ovarian cancer, primary cancer of the peritoneum or fallopian tube - Up to three prior chemotherapies, at least one platinum based chemotherapy - Platinum refractory or resistant ovarian cancer (defined as stable (SD) or progressive disease (PD) during platinum containing chemotherapy, or treatment free interval < 6 months after stop of platinum based chemotherapy) - Measurable or non-measurable disease - Elevated CA°125 level (> 2 x ULN in case of normal CA°125 after prior chemotherapy; or ≥ 2 x nadir CA°125 value after prior chemotherapy, when CA° 125 levels remained elevated above normal) in case of non-measurable disease - ECOG performance status 0-2 - Negative pregnancy test within 5 days before randomization and adequate contraception in women with childbearing potential Adequate organ function as defined by the following criteria: - Serum aspartate aminotransferase (AST; serum glutamate-oxalate transferase [SGOT]) and serum alanine aminotransferase (ALT; serum glutamate-pyruvate transferase [SGPT]) <=2.5 x upper limit of normal (ULN). If liver function abnormalities are due to underlying malignancy, then AST and ALT may be <=5x ULN - Total serum bilirubin <=1.5 x ULN - Prothrombin time (PT) and partial thromboplastin time (PTT) <=1.5 x ULN - Serum albumin >= 3.0 g/dL - Absolute neutrophil count (ANC) >=1500/µl - Platelets >=100,000/µl - Hemoglobin >=9.0 g/dL - Serum creatinine <=1.5 x ULN - TSH within normal range Willingness and ability to comply with scheduled visits, treatment plans, laboratory tests, and other study procedures Resolution of all toxic effects of any prior chemotherapy, surgical procedures, radiotherapy, or other cancer related therapies to NCI CTCAE (Version 3.0) grade >=1 and to the baseline laboratory values as defined in inclusion criterion (see before) Exclusion Criteria: - Borderline tumor of the ovaries - Acute or chronic infection - Any required concurrent cancer chemotherapy or antineoplastic endocrine therapy or radiotherapy - Exposure to investigational trial medication, cancer chemo- or radiotherapy within the last 28 days prior to start of study treatment - Known or suspected hypersensitivity to investigational compound - Second malignancy interfering with prognosis of the patient - Cachectic patients with a body weight <45 kg - Patients requiring parenteral nutrition - Patients with ileus within the last 28 days - Any of the following within the 12 months prior to study drug administration: myocardial infarction, severe/unstable angina, coronary/peripheral artery bypass graft, symptomatic congestive heart failure, cerebrovascular accident or transient ischemic attack, pulmonary embolism, deep vein thrombosis, or other thromboembolic event - Current treatment with therapeutic doses of anticoagulant - Current treatment with CYP3A4 inhibitors or -inducers - Hypertension that cannot be controlled by medications (>150/100 mmHg despite optimal medical therapy) - Ongoing cardiac dysrhythmias of NCI CTCAE grade >=2, atrial fibrillation of any grade, or prolongation of the QTc interval to >470 msec for females - Left ventricular ejection fraction (LVEF) <=50% as measured by echocardiogram - NCI CTCAE Grade 3 hemorrhage within 4 weeks of starting study treatment - Evidence of neurological signs/symptoms suggestive of brain metastases, spinal cord compression, or new evidence of brain or leptomeningeal disease - Known human immunodeficiency virus (HIV) positivity or acquired immunodeficiency syndrome (AIDS)-related illness - Patients with any other severe concurrent disease, which is an undue risk for the patient by participating in the present study - Any further condition which according to the investigator results in an undue risk of the patient by participating in the present study - Major surgery, radiation therapy, or systemic therapy within 3 weeks of first study treatment. At least 7 days should elapse from the time of minor surgical procedure including placement of an access device or fine needle aspiration before randomization into this study can occur. - Wounds that have not completely healed, active ulcer(s), or bone fracture(s). - Prior high-dose chemotherapy requiring hematopoietic stem cell rescue. - Prior radiation therapy to >25% of the bone marrow.",
+    "study_type": "Interventional",
+    "phase": "Phase 2",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00543049.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0054xxxx/NCT00543049.xml"
+  }
+}

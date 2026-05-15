@@ -1,0 +1,316 @@
+{
+  "NCT00048204": {
+    "name": "A Study Of A New Medicine (GW597599B) For The Treatment Of Major Depressive Disorder",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 精神心理科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00048204"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00048204",
+    "department_tag": "精神心理科",
+    "department_role": "primary",
+    "department_tags": [
+      "精神心理科"
+    ],
+    "primary_department": "精神心理科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "A Study Of A New Medicine (GW597599B) For The Treatment Of Major Depressive Disorder",
+    "official_title": "An 8-Week, Randomized, Double-Blind, Placebo-Controlled, Multicenter, Fixed-Dose Study Comparing the Efficacy and Safety of GW597599B or Paroxetine to Placebo in Moderately to Severely Depressed Patients With Major Depressive Disorder",
+    "conditions": [
+      "Depressive Disorder, Major"
+    ],
+    "mesh_terms": [
+      "Disease",
+      "Depressive Disorder",
+      "Depression",
+      "Depressive Disorder, Major"
+    ],
+    "keywords": [
+      "Depression",
+      "Psychiatry",
+      "Major Depressive Disorder"
+    ],
+    "interventions": [
+      "GW597599B",
+      "paroxetine"
+    ],
+    "brief_summary": "A Placebo Controlled Study Evaluating Efficacy And Safety of Medication In Patients With Major Depressive Disorder (MDD)",
+    "eligibility_text": "Inclusion Criteria: - Patients meet the diagnosis of Major Depressive Disorder (MDD). Exclusion Criteria: - Patients with a primary diagnosis other than MDD. - Patients with a history of schizophrenia, schizoaffective disorders, seizure disorders or bipolar affective disorder. - Patients receiving formal psychotherapy or cognitive/behavioral therapy concurrently or in the 12 weeks prior to screening visit. - Patient is actively suicidal. - Patients who have a history of migraine headaches.",
+    "study_type": "Interventional",
+    "phase": "Phase 2",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00048204.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0004xxxx/NCT00048204.xml"
+  },
+  "NCT00951197": {
+    "name": "Evaluation of Alteration by Magnetic Resonance Imaging (MRI) in Dementia Among Elderly Subjects",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 精神心理科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00951197"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00951197",
+    "department_tag": "精神心理科",
+    "department_role": "primary",
+    "department_tags": [
+      "精神心理科",
+      "医学影像科"
+    ],
+    "primary_department": "精神心理科",
+    "secondary_departments": [
+      "医学影像科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Evaluation of Alteration by Magnetic Resonance Imaging (MRI) in Dementia Among Elderly Subjects",
+    "official_title": "Estimation of Microstructure Alteration by MRI in Dementia Among Elderly Subjects Retired From Agricultural Profession and Living in Rural Area in Gironde - Participants From the AMI Cohort.",
+    "conditions": [
+      "Dementia",
+      "Alzheimer Disease"
+    ],
+    "mesh_terms": [
+      "Alzheimer Disease",
+      "Dementia"
+    ],
+    "keywords": [
+      "dementia",
+      "Alzheimer's Disease",
+      "diagnostic",
+      "biomarkers",
+      "neuroimaging",
+      "PET",
+      "MRI",
+      "mild cognitive impairment"
+    ],
+    "interventions": [
+      "Neuroimaging"
+    ],
+    "brief_summary": "Capturing the earliest stages of Dementia especially Alzheimer's Disease (AD) is a great challenge. Until now the NINCDS-ADRDA and the DSM criteria for AD were largely used as diagnostic standards in research. However, the research on AD progresses and some biomarkers have been recently suggested to improve the diagnostic criteria of AD, such as cerebrospinal fluid markers, neuroimaging with Positon Emission Tomography (PET) or Magnetic Resonance Imaging (MRI).",
+    "eligibility_text": "Inclusion Criteria: - participate in the AMI cohort - be aged 65 and older - be retired from agricultural profession - live in rural area in Gironde Exclusion Criteria: - contraindication of MRI - left-handed - severe dementia - Parkinson's disease - poor health incompatible with the transport to neuroimaging service - to be left handed",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00951197.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0095xxxx/NCT00951197.xml"
+  },
+  "NCT00699946": {
+    "name": "Prophylactic Olanzapine Versus Placebo for Prevention of Postoperative Delirium After Joint Replacement Surgery",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 精神心理科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00699946"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00699946",
+    "department_tag": "精神心理科",
+    "department_role": "secondary",
+    "department_tags": [
+      "外科",
+      "精神心理科"
+    ],
+    "primary_department": "外科",
+    "secondary_departments": [
+      "精神心理科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Prophylactic Olanzapine Versus Placebo for Prevention of Postoperative Delirium After Joint Replacement Surgery",
+    "official_title": "A Double-Blind, Randomized, Placebo-Controlled Study of Perioperative Administration of Olanzapine to Prevent Postoperative Delirium in Joint Replacement Patients",
+    "conditions": [
+      "Delirium"
+    ],
+    "mesh_terms": [
+      "Delirium"
+    ],
+    "keywords": [
+      "delirium, atypical antipsychotics, olanzapine, orthopedic"
+    ],
+    "interventions": [
+      "olanzapine",
+      "placebo"
+    ],
+    "brief_summary": "In this study we wanted to determine if perioperative administration of olanzapine prior to knee or hip replacement surgery in high risk patients would prevent the onset of postoperative delirium.",
+    "eligibility_text": "Inclusion Criteria: - High risk for delirium age > 65 history of delirium medical comorbidities ability to give informed consent Exclusion Criteria: - Dementia Alcohol abuse Current use of an antipsychotic Allergy to olanzapine",
+    "study_type": "Interventional",
+    "phase": "N/A",
+    "primary_purpose": "Prevention",
+    "copied_xml_relpath": "xml/NCT00699946.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0069xxxx/NCT00699946.xml"
+  },
+  "NCT00894842": {
+    "name": "Study of a Neurocognition Enhancing Agent in Patients With Schizophrenia",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 精神心理科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00894842"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00894842",
+    "department_tag": "精神心理科",
+    "department_role": "primary",
+    "department_tags": [
+      "精神心理科"
+    ],
+    "primary_department": "精神心理科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Study of a Neurocognition Enhancing Agent in Patients With Schizophrenia",
+    "official_title": "A 10-week, Randomized, Double-Blind, Placebo-Controlled Trial of a Neurocognition Enhancing Agent(Pregnenolone) in Patients With Schizophrenia.",
+    "conditions": [
+      "Schizophrenia"
+    ],
+    "mesh_terms": [
+      "Schizophrenia"
+    ],
+    "keywords": [
+      "Schizophrenia",
+      "Pregnenolone",
+      "Neurocognition"
+    ],
+    "interventions": [
+      "Pregnenolone",
+      "Placebo"
+    ],
+    "brief_summary": "The purpose of this study is to determine whether pregnenolone will demonstrate significant improvements in cognitive functioning and negative symptoms compared to patients receiving placebo.",
+    "eligibility_text": "Inclusion Criteria: - Male and female subjects aged 21 to 65 years inclusively at screening. - Current diagnosis of Schizophrenia established by Diagnostic and Statistical Manual of Mental Disorders (DSM-IV) criteria for at least 1 year prior to screening. - Subjects can be either inpatients or outpatients. - Provision of written informed consent. - Able to understand and comply with the requirements of the study, as judged by the investigator. - Subjects have to be treated with a first generation and/or second generation antipsychotic for the previous 8 weeks or longer, with no change in dose in ≥ 4 weeks at screening. - Women of childbearing potential (less than two years post-menopausal or not surgically sterile), must have a negative urine pregnancy test at screening - and must use a highly effective method of birth control for at least one month prior to screening such as barrier methods, implants, sexual abstinence or vasectomised partner. Exclusion Criteria: - Subjects with a DSM-IV diagnosis of alcohol or other substance dependence (other than nicotine) within the last month. - Subjects with a history of significant head injury/trauma, with loss of consciousness (LOC) for more than 1 hour, recurring seizures resulting from the head injury, clear cognitive sequelae of the injury, or cognitive rehabilitation following the injury. - Subjects with a history of clinically significant neurological, metabolic, hepatic, renal, hematological, pulmonary, cardiovascular, gastrointestinal, and/or urological disorders (e.g., unstable angina, seizures, cerebrovascular accident, decompensate congestive heart failure, CNS infection, HIV seropositivity), which would pose a risk to the patient if they were to participate in the study or that might confound the results of the study. - Active medical conditions that are minor or well-controlled are not exclusionary if they are not likely to affect risk to the patient or the study results. - Patients with hormone-sensitive tumours (such as breast, uterine, or prostate cancer) will be excluded. - Clinically significant abnormalities in physical examination, ECG, or laboratory assessments. - Pregnant women or sexually active women of child-bearing potential, who are either not surgically-sterile or not using appropriate methods of birth control (urine pregnancy test will be performed at baseline and week 10 of the study to exclude pregnancy). - Women who are breast-feeding. - ECT treatment within the last 3 months. - Use of oral contraceptives or other hormonal supplementation such as oestrogen. - Subjects who, in the opinion of the investigator, pose an imminent risk of suicide or a danger to self or others. - Known allergy to study medication. - Participation in another drug trial within 4 weeks of this study.",
+    "study_type": "Interventional",
+    "phase": "Phase 2/Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00894842.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0089xxxx/NCT00894842.xml"
+  },
+  "NCT00534599": {
+    "name": "Generalized Anxiety Disorder Adjunct Study",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 精神心理科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00534599"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00534599",
+    "department_tag": "精神心理科",
+    "department_role": "primary",
+    "department_tags": [
+      "精神心理科"
+    ],
+    "primary_department": "精神心理科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Generalized Anxiety Disorder Adjunct Study",
+    "official_title": "A Multicenter, Rand., Double-blind, Parallel-group, Pbo-controlled Study of the Efficacy and Safety of SEROQUEL® XR Compared With Pbo as an Adjunct to Treatment in Patients With Generalized Anxiety Disorder Who Demonstrate Partial or No Response to a SSRI or SNRI Alone or in Combination With a Benzo",
+    "conditions": [
+      "Anxiety",
+      "Anxiety Disorders",
+      "Anxiety Neuroses",
+      "Anxiety States"
+    ],
+    "mesh_terms": [
+      "Disease",
+      "Anxiety Disorders"
+    ],
+    "keywords": [
+      "Generalized anxiety disorders",
+      "anxiety",
+      "adjunct treatment in anxiety",
+      "anxiety disorder",
+      "partial or non-responder in anxiety"
+    ],
+    "interventions": [
+      "Placebo",
+      "quetiapine fumarate XR"
+    ],
+    "brief_summary": "This study is being carried out to see if extended release quetiapine fumarate (Seroquel®XL) when added to standard selective serotonin reuptake inhibitor (SSRI) / serotonin-norepinephrine reuptake inhibitor (SNRI) therapy is effective and safe for the treatment of Generalized Anxiety Disorder in patients with partial or no response to SSRI/SNRI alone or in combination with a benzodiazepine, and if so, how it compares with placebo",
+    "eligibility_text": "Inclusion Criteria: Provision of Informed Consent - Documented diagnosis of Generalized Anxiety Disorder - Female patients must not be pregnant and be willing to use a reliable method of birth control - Be able to understand and comply with study requirements Exclusion Criteria: Other psychiatric disorders that could confound the study results, as judged by the study doctor - Moderate to severe depression - Other clinically relevant diseases, as judged by the study doctor - Medication that you are taking, as judged by the study doctor",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00534599.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0053xxxx/NCT00534599.xml"
+  },
+  "NCT00906191": {
+    "name": "Study Evaluating How Quickly And To What Extent The 14-Carbon-SAM-531 Is Absorbed/Converted/Eliminated In Male Subjects",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 精神心理科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00906191"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00906191",
+    "department_tag": "精神心理科",
+    "department_role": "primary",
+    "department_tags": [
+      "精神心理科"
+    ],
+    "primary_department": "精神心理科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Study Evaluating How Quickly And To What Extent The 14-Carbon-SAM-531 Is Absorbed/Converted/Eliminated In Male Subjects",
+    "official_title": "An Open-Label, Single-Dose, Nonrandomized Study Of The Mass Balance And Metabolic Disposition Of Orally Administered 14C-Labeled SAM-531 In Healthy Male Subjects",
+    "conditions": [
+      "Alzheimer Disease"
+    ],
+    "mesh_terms": [
+      "Alzheimer Disease"
+    ],
+    "keywords": [],
+    "interventions": [
+      "SAM-531"
+    ],
+    "brief_summary": "The objective of this study is to investigate how quickly and to what extent the 14-Carbon labeled SAM-531 is absorbed into the bloodstream, converted and eliminated from the body after oral administration in healthy male subjects. As 14-Carbon labeled SAM-531 is radioactive, this enables the compound to be traced in blood, urine and feces.",
+    "eligibility_text": "Inclusion Criteria: - Men aged 18 to 50 years inclusive at screening - Healthy as determined by the investigator on the basis of screening evaluations Exclusion Criteria: - Presence or history of any disorder that may prevent the successful completion of the study. - Any significant cardiovascular, hepatic, renal, respiratory, gastrointestinal, endocrine, immunologic, dermatologic, hematologic, neurologic, or psychiatric disease.",
+    "study_type": "Interventional",
+    "phase": "Phase 1",
+    "primary_purpose": "Health Services Research",
+    "copied_xml_relpath": "xml/NCT00906191.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0090xxxx/NCT00906191.xml"
+  }
+}
