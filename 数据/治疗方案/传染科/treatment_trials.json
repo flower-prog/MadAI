@@ -1,0 +1,285 @@
+{
+  "NCT00201448": {
+    "name": "Evaluation of the Safety and Immune Responses of the Towne Strain of CMV in Seronegative Women",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "abandoned",
+    "rationale": "ClinicalTrials.gov overall_status=Terminated; aligned to MedAI status=abandoned for department tag 传染科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00201448"
+    ],
+    "actions": [
+      "Do not surface this trial as a direct option for the current patient.",
+      "Keep it only as historical context if the protocol remains clinically informative."
+    ],
+    "nct_id": "NCT00201448",
+    "department_tag": "传染科",
+    "department_role": "primary",
+    "department_tags": [
+      "传染科",
+      "妇产科"
+    ],
+    "primary_department": "传染科",
+    "secondary_departments": [
+      "妇产科"
+    ],
+    "overall_status": "Terminated",
+    "status_reason": "The trial lifecycle indicates that it is halted or unavailable, so MedAI should not treat it as a current treatment-trial option.",
+    "enrollment_open": false,
+    "brief_title": "Evaluation of the Safety and Immune Responses of the Towne Strain of CMV in Seronegative Women",
+    "official_title": "Epidemiology of Cytomegalovirus -- Evaluation of the Immunogenicity and Efficacy of the Towne Strain of CMV in Seronegative Women: A Phase II-III Study",
+    "conditions": [
+      "Cytomegalovirus Infections"
+    ],
+    "mesh_terms": [
+      "Cytomegalovirus Infections"
+    ],
+    "keywords": [
+      "CMV, cytomegalovirus, vaccine, Towne strain"
+    ],
+    "interventions": [
+      "Hepatitis A Vaccine",
+      "Towne CMV Vaccine"
+    ],
+    "brief_summary": "The purpose of this study is to evaluate the safety and effectiveness of a vaccine given to women ages 18-45 to prevent cytomegalovirus (CMV), which they may catch from their children who attend daycare centers. Cytomegalovirus does not usually cause serious illness in adults and children. However, CMV can be a cause of deafness and mental retardation in a child born from a mother who has the infection during pregnancy. Women in the study will be given either cytomegalovirus or Hepatitis A vaccine. A blood sample will be taken before the vaccination is given. After vaccination, urine, saliva, and blood will be collected every 1-6 months for up to 3 years. Information regarding any reaction to the vaccination will be collected. All family members will be asked to provide urine and saliva to test for CMV every few months for up to 3 years. All children born to women who have been vaccinated will be tested for CMV infection. 180 women who are not infected with CMV will be vaccinated.",
+    "eligibility_text": "Inclusion Criteria: 1. Women between 18 and 45 years of age 2. Good general health without significant physical examination findings 3. With children < 2 years old attending daycare centers 4. Willingness to sign informed consent for screening and before enrollment 5. Available to participate for the entire study period of 36 months 6. Negative cytomegalovirus (CMV) serology 7. Negative serum pregnancy test within two days prior to vaccination 8. Willingness to have blood stored for future evaluations 9. Willingness to have children provide saliva and urine samples 10. Able to complete a demographic profile 11. Agreement to practice effective contraception. Contraception is defined as using any of the following methods: 1. Condoms (male or female) 2. Diaphragm or cervical cap with spermicide 3. Intrauterine device (IUD) 4. Hormone contraception 5. Abstinence 6. Successful vasectomy in male partner 7. Hysterectomy, bilateral oophorectomy, or tubal ligation 8. Infertility confirmed by a gynecologist will also be acceptable Exclusion Criteria: 1. Acute febrile illness (>/=38C / 100.4F) within 72 hours preceding the vaccination (vaccination may be deferred until febrile illness is resolved, but a repeat pregnancy test will be required if deferred more than 48 hours.) 2. Positive pregnancy test 3. Breastfeeding 4. Venous access deemed inadequate for the phlebotomy demands of the study 5. Receipt of any vaccine, blood products, or investigational agents within 30 days prior to enrollment 6. History of serious adverse reactions to any vaccine, including anaphylaxis and related symptoms such as hives, respiratory difficulty, angioedema or abdominal pain 7. History of immunodeficiency, autoimmune diseases, or malignancy 8. History of severe cardiopulmonary diseases or serious metabolic disorders 9. Psychiatric condition that precludes compliance with the protocol. Specifically excluded are persons with history of psychosis within the past 3 years or history of suicidal attempt or gesture within the past 3 years 10. Any acute or chronic condition (including alcohol or drug use) which in the opinion of the principle investigator would limit the volunteer's ability to complete the study",
+    "study_type": "Interventional",
+    "phase": "Phase 2/Phase 3",
+    "primary_purpose": "Prevention",
+    "copied_xml_relpath": "xml/NCT00201448.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0020xxxx/NCT00201448.xml"
+  },
+  "NCT00068809": {
+    "name": "4-Day-A-Week Treatment Plan for HIV Infected Adolescents",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 传染科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00068809"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00068809",
+    "department_tag": "传染科",
+    "department_role": "primary",
+    "department_tags": [
+      "传染科",
+      "儿科"
+    ],
+    "primary_department": "传染科",
+    "secondary_departments": [
+      "儿科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "4-Day-A-Week Treatment Plan for HIV Infected Adolescents",
+    "official_title": "Short-Cycle Therapy in Adolescents Following Continuous Therapy With Established Viral Suppression: The Impact on Viral Load Suppression",
+    "conditions": [
+      "HIV Infections"
+    ],
+    "mesh_terms": [
+      "HIV Infections"
+    ],
+    "keywords": [
+      "Treatment experienced",
+      "Treatment interruption"
+    ],
+    "interventions": [
+      "Short Cycle Antiretroviral Therapy"
+    ],
+    "brief_summary": "This study will determine if taking anti-HIV drugs 4 days a week will control HIV-1 viral replication in patients who have already had at least 6 months of documented viral suppression with full-time treatment. If this strategy is shown to be safe in this study, a larger study will be undertaken to determine if the strategy can decrease overall drug exposure and help young people adjust more easily to a chronic medication schedule.",
+    "eligibility_text": "Inclusion Criteria: - Twelve to 24 years of age, regardless of the mode of transmission. - Subjects must have been on a stable HAART regimen containing at least one PI and two NRTIs and no NNRTI for at least 3 months and be willing to continue the PI-containing regimen throughout the study period. - Acceptable viral load defined as at least three plasma HIV-1 RNA levels ≤ 400 copies/ml within 12 months of study entry and no plasma HIV-1 RNA levels > 400 copies/ml within 6 months of entry date employing any clinically available viral load assay. - Pre entry plasma HIV-1 RNA level <200 copies/ml by ultra-sensitive assay (Roche 1.5) within 30 days of study entry, performed in an assigned PACTG core virology laboratory. - CD4+ T cell count >350 cells/microL within 30 days of study entry. - Ability of subject and parent or legal guardian (when appropriate) to give written informed assent/consent and permission respectively. - Subjects currently enrolled in ATN 015 Version 2.0 are eligible as follows: - Subjects randomized to standard continuous therapy (control arm). These subjects are eligible to be enrolled in ATN 015 Version 3.0 as new subjects if they meet the entry criteria for ATN Version 3.0. If eligible, they will be followed for the full 48 weeks. - Subjects randomized to short cycle therapy (experimental arm). These subjects are eligible to rollover to ATN 015 Version 3.0 and continue on SCT if they have not met a study endpoint. These subjects may not have a viral load value that meets a study endpoint (viz. a confirmed viral load of >400 copies/ml) and will continue on the intensive monitoring until they have completed 24 weeks when they will enter the less intensive 24 week phase of the study. - Female subjects must be non-pregnant and willing to remain on effective contraception for the duration of the study. (Examples of acceptable forms of birth control include but are not limited to any form of hormonal contraception along with a barrier method, double barrier method, tubal ligation, or abstinence if it is the choice of the subject.) Exclusion Criteria: - On a HAART regimen containing an NNRTI or a HAART regimen with Abacavir (including Trizivir®). - On any prohibited medication at the time of screening. Subjects with underlying reactive airway disease who are on either inhaled or brief, intermittent systemic steroids can be considered but their status must be reviewed with the protocol chair or vice chair through the standard ATN protocol query process. - Active HIV-related opportunistic infection or any malignancy at the time of screening. (Female subjects who have been treated adequately for cervical dysplasia or CIN are eligible for study unless they are on systemic immunosuppressive therapy). - Current treatment for known or suspected active serious bacterial infection. - Pregnancy. - Any laboratory abnormalities Grade 3 or greater as defined in Appendix III at the time of screening. - Subjects receiving pharmacological treatment for elevated cholesterol and triglyceride levels. If a candidate fails the eligibility criteria (inclusion or exclusion), she or he may be screened again for eligibility after a period of 30 days.",
+    "study_type": "Interventional",
+    "phase": "Phase 4",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00068809.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0006xxxx/NCT00068809.xml"
+  },
+  "NCT00966160": {
+    "name": "CD4 Cell Recovery in HIV-1 Patients Comparing 2 Treatment Regimes",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 传染科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00966160"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00966160",
+    "department_tag": "传染科",
+    "department_role": "primary",
+    "department_tags": [
+      "传染科"
+    ],
+    "primary_department": "传染科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "CD4 Cell Recovery in HIV-1 Patients Comparing 2 Treatment Regimes",
+    "official_title": "Phase 3, Single Center, Controlled, Investigator-blinded, Randomized Matched Pair Design Study of CD4 Cell Recovery in HIV-1 Patients With Sustained Virologic Response Comparing Protease Inhibitor and Non-nucleoside Reverse Transcriptase Inhibitor Based Treatment Regimes",
+    "conditions": [
+      "Acquired Immunodeficiency Syndrome",
+      "HIV Infections"
+    ],
+    "mesh_terms": [
+      "HIV Infections",
+      "Acquired Immunodeficiency Syndrome",
+      "Immunologic Deficiency Syndromes"
+    ],
+    "keywords": [
+      "treatment naive"
+    ],
+    "interventions": [
+      "Lopinavir/Ritonavir plus Lamivudine/Zidovudine",
+      "Efavirenz plus Lamivudine/Zidovudine"
+    ],
+    "brief_summary": "Therapy guidelines recommend the use of either the non-nucleoside reverse transcriptase inhibitor (NNRTI) efavirenz or a ritonavir-boostered protease inhibitor (PI) plus 2 nucleoside reverse transcriptase inhibitors (NRTI) as first-line treatment regimes of HIV-1 infection. Recent clinical studies suggest potential advantages of NNRTI- over PI-based regimes in therapy initiation due to lower rates of virologic failure and less metabolic side-effects. In contrast, PI regimes were claimed to cause greater increases in CD4 cell count than NNRTI regimes, which has been attributed to intrinsic antiapoptotic effects of the PI. However, it is still unclear whether the immunological response to a PI-containing regime is greater than to an NNRTI-containing regime, whether there is a difference in the extent of reduction of apoptosis between PI and NNRTI regimes and whether a difference in apoptosis is associated with a difference in CD4 cell recovery. We conducted a controlled, long-term, random matched pair design study in HIV-1 infected individuals under sustained virologic suppression to evaluate in head-to-head comparison the clinical effects of a constant PI-based or NNRTI-based regime on CD4 cell recovery and the underlying molecular, biochemical and functional mechanisms.",
+    "eligibility_text": "Inclusion Criteria: - Recent, non-acute HIV-1 infection - Caucasians - BMI between 17.5 and 30 kg/m2 - CD4 count <200 cells/µl - Plasma viral load >100,000 HIV-1 RNA copies/ml Exclusion Criteria: - Actual or previous antiretroviral therapy - Acute illness - Coinfection with HBV or HCV - Opportunistic infection (Pneumocystis jiroveci pneumonia, Toxoplasma gondii encephalitis, Mycobacterium ssp. infection, syphilis, cryptosporidiosis, cryptococcosis, aspergillosis, cytomegalovirus infection or progressive multifocal leukoencephalopathy) - Hepatic or renal disorder - Severe cardiovascular disease - Hematologic disorder - Autoimmune disorder - Diabetes mellitus or other severe endocrine disorder - Malignancy - Neurocognitive disorder - Psychiatric disorder - Drug or alcohol addiction - Chronic drug use (except of blood pressure-lowering or lipid-lowering drugs or proton-pump inhibitors) - Any acute medication within 7 days or vaccination within 30 days prior to entry - Pregnancy or lactation",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00966160.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0096xxxx/NCT00966160.xml"
+  },
+  "NCT00717730": {
+    "name": "Folic Acid and Vitamin B12 in Young Indian Children",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 传染科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00717730"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00717730",
+    "department_tag": "传染科",
+    "department_role": "primary",
+    "department_tags": [
+      "传染科",
+      "儿科"
+    ],
+    "primary_department": "传染科",
+    "secondary_departments": [
+      "儿科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Folic Acid and Vitamin B12 in Young Indian Children",
+    "official_title": "Routine Administration of Folic Acid and Vitamin B12 to Prevent Childhood Infections in Young Indian Children",
+    "conditions": [
+      "Diarrhea",
+      "Pneumonia"
+    ],
+    "mesh_terms": [
+      "Pneumonia",
+      "Diarrhea"
+    ],
+    "keywords": [
+      "Nutrition",
+      "Children",
+      "Folate",
+      "Vitamin B12",
+      "India",
+      "Homocysteine",
+      "Methyl Malonic Acid"
+    ],
+    "interventions": [
+      "Folic Acid",
+      "Vitamin B12",
+      "Placebo",
+      "Folic acid and vitamin B12"
+    ],
+    "brief_summary": "Hypothesis: Supplementation of two recommended daily allowances (RDA) of folic acid with or without simultaneous administration of vitamin B12 reduces the rates of acute lower respiratory tract infections (ALRI), clinical pneumonia and diarrhea. Design/Methods We will conduct a preventive randomized placebo controlled clinical trial of folic acid and vitamin B12 supplementation in 1000 children aged 6 to 30 months living in a low to middle-income socioeconomic setting in New Delhi, India. Children aged 6-30 months will be identified through a survey. Eligible and willing Children aged 6-30 months will be randomized to 4 treatment groups. Trial to enrollment informed consent will be obtained by the Study Physician/Supervisor. At enrollment a baseline form will be filled and the child weight and length taken. The baseline blood samples will be collected. The supplements will be given daily for 6 months. Morbidity will be ascertained through biweekly home visits by field workers.",
+    "eligibility_text": "Inclusion Criteria: - Age: 6 to 30 months - Either sex - Likely to reside in area for next 6 months Exclusion Criteria: - Severe systemic illness requiring hospitalization - Severe malnutrition, i.e. weight for height < -3 z of the WHO standard for this age group. For ethical reasons these children require micronutrient supplementation and adequate medical care. - Non consent - Consuming vitamin supplements that include folic acid and vitamin B12. - Severe anemia (Hb < 7 g/dL).",
+    "study_type": "Interventional",
+    "phase": "Phase 2",
+    "primary_purpose": "Prevention",
+    "copied_xml_relpath": "xml/NCT00717730.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0071xxxx/NCT00717730.xml"
+  },
+  "NCT00001142": {
+    "name": "Metabolism and Body Shape of Healthy Children and Children With Chronic Infections",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 传染科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00001142"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00001142",
+    "department_tag": "传染科",
+    "department_role": "primary",
+    "department_tags": [
+      "传染科",
+      "儿科",
+      "内科"
+    ],
+    "primary_department": "传染科",
+    "secondary_departments": [
+      "儿科",
+      "内科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Metabolism and Body Shape of Healthy Children and Children With Chronic Infections",
+    "official_title": "Metabolism and Body Composition of Healthy Children and Children With Chronic Infections",
+    "conditions": [
+      "HIV Infections",
+      "Healthy",
+      "Hyperlipidemia",
+      "Lipodystrophy"
+    ],
+    "mesh_terms": [
+      "Infection",
+      "Communicable Diseases",
+      "Lipodystrophy",
+      "Hyperlipidemias",
+      "Hyperlipoproteinemias"
+    ],
+    "keywords": [
+      "Body Fat",
+      "DXA",
+      "HAART",
+      "Hyperlipidemia",
+      "Insulin Resistance",
+      "Lipodystrophy",
+      "MRI",
+      "Protease Inhibitor",
+      "Side-Effects",
+      "Visceral Fat",
+      "Chronic Infection",
+      "HIV",
+      "Healthy Volunteer"
+    ],
+    "interventions": [],
+    "brief_summary": "Some HIV-infected adults develop lipodystrophy that includes significant changes in body shape, with fat losses in the face, arms and legs, and fat gain in the trunk. This lipodystrophy is often accompanied by other disorders of metabolism, such as increased levels of fat and insulin in the blood. The majority of these cases have been seen when patients are taking medications called protease inhibitors. These are anti-retroviral medications designed to treat patients with HIV. It is unclear if lipodystrophy is a result of having HIV or the medication used to treat HIV. It has been suggested, but not proven, that lipodystrophy is a direct side effect of protease inhibitors. In addition, it is unknown if HIV-infected children develop significant lipodystrophy after taking protease inhibitors. This study will investigate the prevalence of metabolic disorders and changes in body fat distribution in children taking protease inhibitor anti-retroviral medications. The results will be compared to three other groups; (1) children suffering from other non-HIV chronic infections, (2) HIV-infected children not taking protease inhibitors, and (3) healthy children. The study will look at HIV-infected children who have already started taking protease inhibitors. It will evaluate these children for disorders in metabolism as well as body fat changes. In addition, the study will follow HIV-infected children who will begin taking protease inhibitors. The study will follow these children for 18 months to detect the development of disorders in metabolism and / or body fat changes.",
+    "eligibility_text": "FOR PROTEASE INHIBITOR-NAIVE HIV-INFECTED CHILDREN AND HIV-INFECTED CHILDREN ON PROTEASE INHIBITOR-CONTAINING ANTIRETROVIRAL REGIMENS: Evidence of HIV infection based on Center for Disease Control and Prevention criteria. Enrollment on protocol 98-C-0041 or other HIV treatment protocol for children. No other chronic disease unrelated to infection that may cause changes in body composition or in lipid or glucose homeostasis. No previous use of a protease inhibitor-containing antiretroviral regimen (PROTEASE INHIBITOR-NAIVE HIV-INFECTED CHILDREN ONLY). Data available concerning the start date of protease inhibitor treatment (HIV-INFECTED CHILDREN ON PROTEASE INHIBITOR-CONTAINING ANTIRETROVIRAL REGIMENS ONLY). HEALTHY PEDIATRIC VOLUNTEERS: Good general health. No significant hematologic, renal, hepatic, endocrinologic, or pulmonary disorders. No evidence of HIV infection by standard HIV antibody testing. Body mass index for age below 85th percentile. Not currently using prescription medications on a continuing basis; the use of over-the-counter medications will be reviewed on a case-by-case basis. Stable clinical condition during evaluation. CHILDREN WITH CONDITIONS CAUSING CHRONIC INFECTIONS OTHER THAN HIV: Evidence of chronic, non-HIV-related infection such as chronic granulomatous disease, hyperimmunoglobin E syndrome, etc. Evidence of non-growth hormone-deficient growth failure, defined as a 12-month height velocity at or below the fifth percentile for age using standard reference norms and by clinically-indicated testing. No evidence of HIV infection by standard HIV antibody testing. No current (last 2 months) use of sex steroid supplementation. Enrollment in an ongoing NIH protocol for treatment of their disorders. Age between 4 and 18 years. No other chronic disease unrelated to infection that may cause either changes in body composition or lipid or glucose homeostasis such as Type I diabetes mellitus, lipodystrophic diabetes, Cushing's syndrome etc. No pregnancy. No inability to undergo MRI because of metal objects within their bodies that are contraindications for MRI. These include cardiac pacemakers, neural pacemakers, aneurysmal clips, schrapnel, ocular foreign bodies, cochlear implants, non-detachable electronic or electromechanical devices. No allergic reaction to heparin.",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00001142.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0000xxxx/NCT00001142.xml"
+  }
+}

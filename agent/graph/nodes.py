@@ -7,9 +7,11 @@ import os
 import re
 from typing import Any
 
+from agent.case_structuring import build_structured_case_payload
 from agent.protocol import (
     ProtocolGraphConfig,
     ProtocolGraphState,
+    build_matched_trials,
     build_protocol_trial_selection,
     build_treatment_recommendations,
     run_protocol_subgraph,
@@ -17,11 +19,14 @@ from agent.protocol import (
 )
 from agent.prompt import build_agent_run_spec
 from agent.tools import (
+    LiveMedicalKnowledgeRetriever,
+    PubMedRealtimeSearchTool,
     RiskCalcComputationRetrievalTool,
     RiskCalcExecutionTool,
     RiskCalcRetrievalTool,
     StructuredRetrievalTool,
     TrialChunkRetrievalTool,
+    WikidataKnowledgeGraphTool,
     append_agent_trace,
     build_agent_trace,
     build_case_summary,
@@ -74,6 +79,9 @@ _QUESTION_INSTRUCTION_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"^\s*end your final answer with the format", re.IGNORECASE),
     re.compile(r"^\s*answer\s*:\s*<letter>", re.IGNORECASE),
 )
+_PROTOCOL_CONFIG_REGISTRY_KEY = "protocol_config"
+_PROTOCOL_CONFIG_FACTORY_REGISTRY_KEY = "protocol_config_factory"
+_TRIAL_RETRIEVER_FACTORY_REGISTRY_KEY = "trial_retriever_factory"
 _PROTOCOL_CONFIG = ProtocolGraphConfig.from_env
 
 
@@ -109,6 +117,37 @@ def _skip_protocol_enabled(state: GraphState) -> bool:
 
 def _protocol_async_fanout_enabled() -> bool:
     return _env_flag("MEDAI_PROTOCOL_ASYNC_FANOUT", default=True)
+
+
+def _resolve_protocol_config(state: GraphState) -> ProtocolGraphConfig:
+    """Resolve protocol config from explicit test/runtime injection before env defaults."""
+    config = state.tool_registry.get(_PROTOCOL_CONFIG_REGISTRY_KEY)
+    if isinstance(config, ProtocolGraphConfig):
+        return config
+    if isinstance(config, dict):
+        resolved = ProtocolGraphConfig.from_env(config)
+        state.tool_registry[_PROTOCOL_CONFIG_REGISTRY_KEY] = resolved
+        return resolved
+
+    factory = state.tool_registry.get(_PROTOCOL_CONFIG_FACTORY_REGISTRY_KEY)
+    if callable(factory):
+        resolved = factory()
+        if not isinstance(resolved, ProtocolGraphConfig):
+            raise TypeError("protocol_config_factory must return ProtocolGraphConfig.")
+        state.tool_registry[_PROTOCOL_CONFIG_REGISTRY_KEY] = resolved
+        return resolved
+
+    return _PROTOCOL_CONFIG()
+
+
+def _resolve_protocol_eligibility_chat_client(state: GraphState, config: ProtocolGraphConfig):
+    client = state.tool_registry.get("protocol_eligibility_chat_client")
+    if client is not None:
+        return client
+    if not config.enable_llm_eligibility_judge:
+        return None
+    model = state.clinical_tool_job.llm_model if state.clinical_tool_job is not None else None
+    return build_default_chat_client(model=model)
 
 
 def _mark_step(state: GraphState, agent_name: AgentName, *, status: str, result: str | None = None) -> None:
@@ -195,6 +234,9 @@ def _default_tool_specs() -> list[ToolSpec]:
             RiskCalcRetrievalTool,
             RiskCalcComputationRetrievalTool,
             RiskCalcExecutionTool,
+            PubMedRealtimeSearchTool,
+            WikidataKnowledgeGraphTool,
+            LiveMedicalKnowledgeRetriever,
         )
     }
     return [
@@ -220,6 +262,9 @@ def _default_tool_specs() -> list[ToolSpec]:
         decorated_tool_specs["structured_vector_retriever"],
         decorated_tool_specs["trial_coarse_retriever"],
         decorated_tool_specs["trial_candidate_retriever"],
+        decorated_tool_specs["pubmed_realtime_search"],
+        decorated_tool_specs["wikidata_entity_graph_search"],
+        decorated_tool_specs["live_medical_knowledge_retriever"],
         decorated_tool_specs["riskcalc_coarse_retriever"],
         decorated_tool_specs["riskcalc_computation_retriever"],
         decorated_tool_specs["riskcalc_executor"],
@@ -695,22 +740,11 @@ def _build_structured_case(
     patient_case = state.patient_case
     seeded_structured_case = _seed_structured_case(state)
 
-    structured_inputs = (
-        dict(seeded_structured_case.get("structured_inputs") or {})
-        if isinstance(seeded_structured_case.get("structured_inputs"), dict)
-        else {}
-    )
+    structured_inputs: dict[str, Any] = {}
     if patient_case is not None:
         structured_inputs.update(dict(patient_case.structured_inputs))
 
-    interval_inputs = (
-        {
-            str(name): dict(value)
-            for name, value in dict(seeded_structured_case.get("interval_inputs") or {}).items()
-        }
-        if isinstance(seeded_structured_case.get("interval_inputs"), dict)
-        else {}
-    )
+    interval_inputs: dict[str, Any] = {}
     if patient_case is not None:
         interval_inputs.update(
             {
@@ -719,32 +753,26 @@ def _build_structured_case(
             }
         )
 
-    multimodal_inputs = (
-        dict(seeded_structured_case.get("multimodal_inputs") or {})
-        if isinstance(seeded_structured_case.get("multimodal_inputs"), dict)
-        else {}
-    )
+    multimodal_inputs: dict[str, Any] = {}
     if patient_case is not None:
         multimodal_inputs.update(dict(patient_case.multimodal_inputs))
 
-    return {
-        **seeded_structured_case,
-        "source_mode": state.clinical_tool_job.mode if state.clinical_tool_job is not None else "baseline",
-        "patient_id": patient_case.patient_id if patient_case is not None else None,
-        "raw_request": str(seeded_structured_case.get("raw_request") or state.request),
-        "raw_text": str(seeded_structured_case.get("raw_text") or _retrieval_source_text(state)),
-        "case_summary": case_summary,
-        "problem_list": list(problem_list),
-        "known_facts": _coerce_string_list(seeded_structured_case.get("known_facts")),
-        "missing_information": _coerce_string_list(seeded_structured_case.get("missing_information")),
-        "department": state.department,
-        "department_tags": list(state.department_tags),
-        "data_readiness": data_readiness,
-        "structured_inputs": structured_inputs,
-        "interval_inputs": interval_inputs,
-        "multimodal_inputs": multimodal_inputs,
-        "reporter_feedback": list(state.reporter_feedback),
-    }
+    return build_structured_case_payload(
+        seeded_structured_case=seeded_structured_case,
+        source_mode=state.clinical_tool_job.mode if state.clinical_tool_job is not None else "baseline",
+        patient_id=patient_case.patient_id if patient_case is not None else None,
+        raw_request=state.request,
+        raw_text=_retrieval_source_text(state),
+        case_summary=case_summary,
+        problem_list=list(problem_list),
+        department=state.department,
+        department_tags=list(state.department_tags),
+        data_readiness=data_readiness,
+        structured_inputs=structured_inputs,
+        interval_inputs=interval_inputs,
+        multimodal_inputs=multimodal_inputs,
+        reporter_feedback=list(state.reporter_feedback),
+    )
 
 
 def _issue(severity: str, message: str, source: str, *, blocking: bool = False) -> SafetyIssue:
@@ -1475,11 +1503,13 @@ def _merge_clinical_branch_state(target: GraphState, clinical_state: GraphState)
 
 def _merge_protocol_branch_state(target: GraphState, protocol_state: GraphState) -> None:
     target.protocol_recommendations = list(protocol_state.protocol_recommendations)
+    target.trial_search_intent = dict(protocol_state.trial_search_intent or {})
     target.trial_retrieval_bundle = dict(protocol_state.trial_retrieval_bundle or {})
     target.treatment_bundle = dict(protocol_state.treatment_bundle or {})
     target.treatment_recommendations = list(protocol_state.treatment_recommendations)
     for key in (
         "trial_retrieval_bundle",
+        "trial_search_intent",
         "eligibility_assessment_bundle",
         "patient_evidence_bundle",
         "calculator_evidence_bundle",
@@ -1911,7 +1941,7 @@ def protocol_node(state: GraphState, *, preflight: bool = False) -> GraphState:
     _mark_step(state, "protocol", status="in_progress")
 
     backend = state.clinical_tool_job.retriever_backend if state.clinical_tool_job is not None else "hybrid"
-    protocol_config = _PROTOCOL_CONFIG()
+    protocol_config = _resolve_protocol_config(state)
     protocol_state = run_protocol_subgraph(
         ProtocolGraphState(
             request=state.request,
@@ -1921,7 +1951,11 @@ def protocol_node(state: GraphState, *, preflight: bool = False) -> GraphState:
             calculation_bundle=dict(state.calculation_bundle or {}),
             department_tags=list(state.department_tags),
             trial_retriever=_resolve_trial_retriever(state),
+            eligibility_chat_client=_resolve_protocol_eligibility_chat_client(state, protocol_config),
+            medical_phrase_parser=state.tool_registry.get("medical_phrase_parser"),
+            trial_query_planner=state.tool_registry.get("trial_query_planner"),
             medical_knowledge_retriever=state.tool_registry.get("medical_knowledge_retriever"),
+            llm_model=state.clinical_tool_job.llm_model if state.clinical_tool_job is not None else None,
             retriever_backend=backend,
         ),
         config=protocol_config,
@@ -1933,12 +1967,15 @@ def protocol_node(state: GraphState, *, preflight: bool = False) -> GraphState:
             "schema_version": 1,
             "status": "completed",
             "mode": "protocol_preflight",
+            "trial_search_intent": protocol_state.trial_search_intent,
             "trial_retrieval_bundle": trial_retrieval_bundle,
             "eligibility_assessment_bundle": eligibility_assessment_bundle,
+            "medical_phrase_bundle": protocol_state.medical_phrase_bundle,
             "medical_knowledge_bundle": protocol_state.medical_knowledge_bundle,
             "protocol_decision_bundle": protocol_state.protocol_decision_bundle,
         }
         state.final_output["protocol_preflight_bundle"] = preflight_bundle
+        state.trial_search_intent = dict(protocol_state.trial_search_intent or {})
         state.trial_retrieval_bundle = trial_retrieval_bundle
         append_agent_trace(
             state.final_output,
@@ -1981,6 +2018,10 @@ def protocol_node(state: GraphState, *, preflight: bool = False) -> GraphState:
         for item in list(trial_retrieval_bundle.get("candidate_ranking") or [])
         if isinstance(item, dict)
     ]
+    matched_trials = build_matched_trials(
+        trial_retrieval_bundle,
+        eligibility_assessment_bundle=eligibility_assessment_bundle,
+    )
     treatment_bundle = {
         "recommendations": [asdict(item) for item in recommendations],
         "trial_candidates": trial_candidates,
@@ -1989,10 +2030,17 @@ def protocol_node(state: GraphState, *, preflight: bool = False) -> GraphState:
             for item in trial_candidates
             if str(item.get("nct_id") or "").strip()
         ],
+        "matched_trials": matched_trials,
+        "matched_trial_ids": [
+            str(item.get("nct_id") or "").strip()
+            for item in matched_trials
+            if str(item.get("nct_id") or "").strip()
+        ],
         "trial_selection": trial_selection,
         "eligibility_assessment_bundle": eligibility_assessment_bundle,
         "patient_evidence_bundle": protocol_state.patient_evidence_bundle,
         "calculator_evidence_bundle": protocol_state.calculator_evidence_bundle,
+        "medical_phrase_bundle": protocol_state.medical_phrase_bundle,
         "medical_knowledge_bundle": protocol_state.medical_knowledge_bundle,
         "missing_data_bundle": protocol_state.missing_data_bundle,
         "protocol_decision_bundle": protocol_state.protocol_decision_bundle,
@@ -2001,12 +2049,15 @@ def protocol_node(state: GraphState, *, preflight: bool = False) -> GraphState:
 
     state.treatment_recommendations = recommendations
     state.protocol_recommendations = protocol_recommendations
+    state.trial_search_intent = dict(protocol_state.trial_search_intent or {})
     state.trial_retrieval_bundle = trial_retrieval_bundle
     state.treatment_bundle = treatment_bundle
+    state.final_output["trial_search_intent"] = dict(protocol_state.trial_search_intent or {})
     state.final_output["trial_retrieval_bundle"] = trial_retrieval_bundle
     state.final_output["eligibility_assessment_bundle"] = eligibility_assessment_bundle
     state.final_output["patient_evidence_bundle"] = protocol_state.patient_evidence_bundle
     state.final_output["calculator_evidence_bundle"] = protocol_state.calculator_evidence_bundle
+    state.final_output["medical_phrase_bundle"] = protocol_state.medical_phrase_bundle
     state.final_output["medical_knowledge_bundle"] = protocol_state.medical_knowledge_bundle
     state.final_output["missing_data_bundle"] = protocol_state.missing_data_bundle
     state.final_output["protocol_decision_bundle"] = protocol_state.protocol_decision_bundle
@@ -2023,6 +2074,7 @@ def protocol_node(state: GraphState, *, preflight: bool = False) -> GraphState:
             "trial_retrieval_bundle": dict(trial_retrieval_bundle),
             "patient_evidence_bundle": dict(protocol_state.patient_evidence_bundle),
             "calculator_evidence_bundle": dict(protocol_state.calculator_evidence_bundle),
+            "medical_phrase_bundle": dict(protocol_state.medical_phrase_bundle),
             "medical_knowledge_bundle": dict(protocol_state.medical_knowledge_bundle),
             "missing_data_bundle": dict(protocol_state.missing_data_bundle),
             "protocol_decision_bundle": dict(protocol_state.protocol_decision_bundle),
@@ -2107,6 +2159,17 @@ def reporter_node(state: GraphState) -> GraphState:
         for candidate in list(treatment_bundle.get("trial_candidates") or [])
         if isinstance(candidate, dict)
     ]
+    matched_trial_summary = [
+        {
+            "nct_id": str(candidate.get("nct_id") or "").strip(),
+            "title": str(candidate.get("title") or "").strip(),
+            "overall_status": str(candidate.get("overall_status") or "").strip(),
+            "enrollment_open": bool(candidate.get("enrollment_open")),
+            "reason": str(candidate.get("reason") or "").strip(),
+        }
+        for candidate in list(treatment_bundle.get("matched_trials") or [])
+        if isinstance(candidate, dict)
+    ]
 
     report_payload = {
         "iteration_attempt": attempt,
@@ -2120,6 +2183,7 @@ def reporter_node(state: GraphState) -> GraphState:
         "calculation_highlights": calculation_highlights,
         "recommendation_summary": recommendation_summary,
         "trial_candidate_summary": trial_candidate_summary,
+        "matched_trial_summary": matched_trial_summary,
         "incoming_feedback": list(state.reporter_feedback),
         "errors": list(state.errors),
     }

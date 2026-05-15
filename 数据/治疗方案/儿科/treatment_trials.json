@@ -1,0 +1,389 @@
+{
+  "NCT00462085": {
+    "name": "Muscle Activity With the Use of Ankle Foot Orthoses in Cerebral Palsy",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 儿科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00462085"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00462085",
+    "department_tag": "儿科",
+    "department_role": "primary",
+    "department_tags": [
+      "儿科",
+      "外科"
+    ],
+    "primary_department": "儿科",
+    "secondary_departments": [
+      "外科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Muscle Activity With the Use of Ankle Foot Orthoses in Cerebral Palsy",
+    "official_title": "Muscle Activity With the Use of Ankle Foot Orthoses in Cerebral Palsy",
+    "conditions": [
+      "Cerebral Palsy"
+    ],
+    "mesh_terms": [
+      "Paralysis",
+      "Cerebral Palsy"
+    ],
+    "keywords": [
+      "cerebral palsy",
+      "ankle foot orthosis",
+      "emg",
+      "surface electromyography",
+      "gait analysis"
+    ],
+    "interventions": [],
+    "brief_summary": "The purpose of this study is to investigate the change in muscle activity during gait with the use of ankle foot orthoses in children diagnosed with hemiplegic cerebral palsy.",
+    "eligibility_text": "Inclusion Criteria: - clinical diagnosis of spastic hemiplegic cerebral palsy - age between 8 and 18 years - must have an equinus barefoot gait pattern - must have a heel-toe gait pattern with ankle foot orthosis - no prior operations Exclusion Criteria: - no Botulinumtoxin treatment for at least 6 months prior to investigation",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00462085.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0046xxxx/NCT00462085.xml"
+  },
+  "NCT00984230": {
+    "name": "A New Adaptive Feeding Plan for Newborns",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 儿科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00984230"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00984230",
+    "department_tag": "儿科",
+    "department_role": "primary",
+    "department_tags": [
+      "儿科"
+    ],
+    "primary_department": "儿科",
+    "secondary_departments": [],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "A New Adaptive Feeding Plan for Newborns",
+    "official_title": "A New Adaptive Feeding Plan for Newborns: Effects on Gut Maturity and Gut Microbiota",
+    "conditions": [
+      "Infant Nutrition"
+    ],
+    "mesh_terms": [],
+    "keywords": [
+      "Infant Formula",
+      "Gut"
+    ],
+    "interventions": [
+      "BSF",
+      "BSF + Lactoferrin + Probiotics",
+      "BSF + Lactoferrin + Probiotics + OS"
+    ],
+    "brief_summary": "The purpose of this clinical trial is to identify the infant formula(s) for which the investigators get the closest gut maturation index compared to the one they get with breastfed babies.",
+    "eligibility_text": "Inclusion Criteria: - Healthy newborn infant - Full term infant (≥ 37 weeks gestation; < 42 weeks gestation) - Birth weight from 2500g to 4500g - For the formula-fed groups: babies whose mothers elected not to breastfeed at all - For the breastfed group: babies whose mothers elected to exclusively breastfeed for at least 2 months - Newborn whose parents / caregivers can be expected to comply with the protocol - Study explained and written information given - Informed consent signed Exclusion Criteria: - Mother who had antibiotics in the 7 days preceding delivery - Caesarian section - Multiple birth - Congenital illness or malformation that may affect normal growth - Significant pre-natal and/or post-natal disease - Newborn participating in another clinical trial",
+    "study_type": "Interventional",
+    "phase": "N/A",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00984230.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0098xxxx/NCT00984230.xml"
+  },
+  "NCT00068809": {
+    "name": "4-Day-A-Week Treatment Plan for HIV Infected Adolescents",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 儿科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00068809"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00068809",
+    "department_tag": "儿科",
+    "department_role": "secondary",
+    "department_tags": [
+      "传染科",
+      "儿科"
+    ],
+    "primary_department": "传染科",
+    "secondary_departments": [
+      "儿科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "4-Day-A-Week Treatment Plan for HIV Infected Adolescents",
+    "official_title": "Short-Cycle Therapy in Adolescents Following Continuous Therapy With Established Viral Suppression: The Impact on Viral Load Suppression",
+    "conditions": [
+      "HIV Infections"
+    ],
+    "mesh_terms": [
+      "HIV Infections"
+    ],
+    "keywords": [
+      "Treatment experienced",
+      "Treatment interruption"
+    ],
+    "interventions": [
+      "Short Cycle Antiretroviral Therapy"
+    ],
+    "brief_summary": "This study will determine if taking anti-HIV drugs 4 days a week will control HIV-1 viral replication in patients who have already had at least 6 months of documented viral suppression with full-time treatment. If this strategy is shown to be safe in this study, a larger study will be undertaken to determine if the strategy can decrease overall drug exposure and help young people adjust more easily to a chronic medication schedule.",
+    "eligibility_text": "Inclusion Criteria: - Twelve to 24 years of age, regardless of the mode of transmission. - Subjects must have been on a stable HAART regimen containing at least one PI and two NRTIs and no NNRTI for at least 3 months and be willing to continue the PI-containing regimen throughout the study period. - Acceptable viral load defined as at least three plasma HIV-1 RNA levels ≤ 400 copies/ml within 12 months of study entry and no plasma HIV-1 RNA levels > 400 copies/ml within 6 months of entry date employing any clinically available viral load assay. - Pre entry plasma HIV-1 RNA level <200 copies/ml by ultra-sensitive assay (Roche 1.5) within 30 days of study entry, performed in an assigned PACTG core virology laboratory. - CD4+ T cell count >350 cells/microL within 30 days of study entry. - Ability of subject and parent or legal guardian (when appropriate) to give written informed assent/consent and permission respectively. - Subjects currently enrolled in ATN 015 Version 2.0 are eligible as follows: - Subjects randomized to standard continuous therapy (control arm). These subjects are eligible to be enrolled in ATN 015 Version 3.0 as new subjects if they meet the entry criteria for ATN Version 3.0. If eligible, they will be followed for the full 48 weeks. - Subjects randomized to short cycle therapy (experimental arm). These subjects are eligible to rollover to ATN 015 Version 3.0 and continue on SCT if they have not met a study endpoint. These subjects may not have a viral load value that meets a study endpoint (viz. a confirmed viral load of >400 copies/ml) and will continue on the intensive monitoring until they have completed 24 weeks when they will enter the less intensive 24 week phase of the study. - Female subjects must be non-pregnant and willing to remain on effective contraception for the duration of the study. (Examples of acceptable forms of birth control include but are not limited to any form of hormonal contraception along with a barrier method, double barrier method, tubal ligation, or abstinence if it is the choice of the subject.) Exclusion Criteria: - On a HAART regimen containing an NNRTI or a HAART regimen with Abacavir (including Trizivir®). - On any prohibited medication at the time of screening. Subjects with underlying reactive airway disease who are on either inhaled or brief, intermittent systemic steroids can be considered but their status must be reviewed with the protocol chair or vice chair through the standard ATN protocol query process. - Active HIV-related opportunistic infection or any malignancy at the time of screening. (Female subjects who have been treated adequately for cervical dysplasia or CIN are eligible for study unless they are on systemic immunosuppressive therapy). - Current treatment for known or suspected active serious bacterial infection. - Pregnancy. - Any laboratory abnormalities Grade 3 or greater as defined in Appendix III at the time of screening. - Subjects receiving pharmacological treatment for elevated cholesterol and triglyceride levels. If a candidate fails the eligibility criteria (inclusion or exclusion), she or he may be screened again for eligibility after a period of 30 days.",
+    "study_type": "Interventional",
+    "phase": "Phase 4",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00068809.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0006xxxx/NCT00068809.xml"
+  },
+  "NCT00146185": {
+    "name": "Efficacy and Safety of ALGRX 3268 in Children Undergoing Minor Needle-Stick Procedures.",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 儿科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00146185"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00146185",
+    "department_tag": "儿科",
+    "department_role": "primary",
+    "department_tags": [
+      "儿科",
+      "麻醉医学科"
+    ],
+    "primary_department": "儿科",
+    "secondary_departments": [
+      "麻醉医学科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Efficacy and Safety of ALGRX 3268 in Children Undergoing Minor Needle-Stick Procedures.",
+    "official_title": "A Phase III, Randomized, Double-Blind, Placebo-Controlled Study to Confirm the Effectiveness and Safety of ALGRX 3268 in Pediatric Subjects.",
+    "conditions": [
+      "Pain"
+    ],
+    "mesh_terms": [],
+    "keywords": [
+      "Needlestick pain",
+      "Venipuncture pain",
+      "Procedural pain"
+    ],
+    "interventions": [
+      "ALGRX 3268"
+    ],
+    "brief_summary": "Minor needlestick procedures often cause significant pain and distress in pediatric patients yet interventions to reduce pain are used infrequently. ALGRX 3268 is a novel, single-use, prefilled, needle-free product that immediately delivers powdered lidocaine into the epidermis and provides local analgesia in 2-3 minutes. The purpose of this phase III, prospective, randomized, double-blind, placebo-controlled study is to investigate the efficacy, safety and tolerability of ALGRX 3268 versus placebo in pediatric patients aged 3 to 18 years undergoing venipuncture or peripheral venous canulation procedures. The trial will enroll approximate 504 evaluable subjects at centers located in the US.",
+    "eligibility_text": "Inclusion Criteria: - Outpatient children of either gender [M/F: 1:1] undergoing venipuncture or peripheral venous cannulation at the ATF or BOH. Children must have sufficient cognitive skills to identify faces depicting extremes of pain on the Wong-Baker FACES Pain Rating Scale, (ages 3-12) and/or the extremes of pain on a 100 VAS (ages 8-18). - Ages 3-7, 8-12, 13-18 years inclusive. Informed consent forms must have been approved by the appropriate IRB. Signed informed consent must have been granted by the parent/legal guardian and assent to participate should have been sought (either verbally or in writting) from each child. - In females of childbearing potential who in the judgement of the investigator or designee were sexually active, a negative preganancy test must have been documented prior to enrollment. A negative urine preganancy test was required in all teenage girls over the age of 14 years. Surgically sterile females do not require a pregnancy test. Exclusion Criteria: - Previous history of allergic reactions to any local anesthetic. Any medical condition or instability that in the judgement of the investigator might have adversely impacted the conduct of the study and the collection of data. - Subjects in whom the investigator determined that venipuncture could not be accomplished cleanly. - Active local infection or other skin pathology on the dorsum of the hand. Subjects with tattos, surgical scars, ports, implantable devices or a skin condition that may have interfered with placement of study treatment or skin site assessments. - Female subjects who were pregnant or lactating; females with a positive serum or urine pregnancy test; females of childbearing potential who were not using adequate contraception. - Prior participation in an ALGRX 3268 study. - Venipuncture at the proposed site within the prior 2 weeks (longer if bruising was apparent).",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00146185.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0014xxxx/NCT00146185.xml"
+  },
+  "NCT00717730": {
+    "name": "Folic Acid and Vitamin B12 in Young Indian Children",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 儿科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00717730"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00717730",
+    "department_tag": "儿科",
+    "department_role": "secondary",
+    "department_tags": [
+      "传染科",
+      "儿科"
+    ],
+    "primary_department": "传染科",
+    "secondary_departments": [
+      "儿科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Folic Acid and Vitamin B12 in Young Indian Children",
+    "official_title": "Routine Administration of Folic Acid and Vitamin B12 to Prevent Childhood Infections in Young Indian Children",
+    "conditions": [
+      "Diarrhea",
+      "Pneumonia"
+    ],
+    "mesh_terms": [
+      "Pneumonia",
+      "Diarrhea"
+    ],
+    "keywords": [
+      "Nutrition",
+      "Children",
+      "Folate",
+      "Vitamin B12",
+      "India",
+      "Homocysteine",
+      "Methyl Malonic Acid"
+    ],
+    "interventions": [
+      "Folic Acid",
+      "Vitamin B12",
+      "Placebo",
+      "Folic acid and vitamin B12"
+    ],
+    "brief_summary": "Hypothesis: Supplementation of two recommended daily allowances (RDA) of folic acid with or without simultaneous administration of vitamin B12 reduces the rates of acute lower respiratory tract infections (ALRI), clinical pneumonia and diarrhea. Design/Methods We will conduct a preventive randomized placebo controlled clinical trial of folic acid and vitamin B12 supplementation in 1000 children aged 6 to 30 months living in a low to middle-income socioeconomic setting in New Delhi, India. Children aged 6-30 months will be identified through a survey. Eligible and willing Children aged 6-30 months will be randomized to 4 treatment groups. Trial to enrollment informed consent will be obtained by the Study Physician/Supervisor. At enrollment a baseline form will be filled and the child weight and length taken. The baseline blood samples will be collected. The supplements will be given daily for 6 months. Morbidity will be ascertained through biweekly home visits by field workers.",
+    "eligibility_text": "Inclusion Criteria: - Age: 6 to 30 months - Either sex - Likely to reside in area for next 6 months Exclusion Criteria: - Severe systemic illness requiring hospitalization - Severe malnutrition, i.e. weight for height < -3 z of the WHO standard for this age group. For ethical reasons these children require micronutrient supplementation and adequate medical care. - Non consent - Consuming vitamin supplements that include folic acid and vitamin B12. - Severe anemia (Hb < 7 g/dL).",
+    "study_type": "Interventional",
+    "phase": "Phase 2",
+    "primary_purpose": "Prevention",
+    "copied_xml_relpath": "xml/NCT00717730.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0071xxxx/NCT00717730.xml"
+  },
+  "NCT00001142": {
+    "name": "Metabolism and Body Shape of Healthy Children and Children With Chronic Infections",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 儿科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00001142"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00001142",
+    "department_tag": "儿科",
+    "department_role": "secondary",
+    "department_tags": [
+      "传染科",
+      "儿科",
+      "内科"
+    ],
+    "primary_department": "传染科",
+    "secondary_departments": [
+      "儿科",
+      "内科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Metabolism and Body Shape of Healthy Children and Children With Chronic Infections",
+    "official_title": "Metabolism and Body Composition of Healthy Children and Children With Chronic Infections",
+    "conditions": [
+      "HIV Infections",
+      "Healthy",
+      "Hyperlipidemia",
+      "Lipodystrophy"
+    ],
+    "mesh_terms": [
+      "Infection",
+      "Communicable Diseases",
+      "Lipodystrophy",
+      "Hyperlipidemias",
+      "Hyperlipoproteinemias"
+    ],
+    "keywords": [
+      "Body Fat",
+      "DXA",
+      "HAART",
+      "Hyperlipidemia",
+      "Insulin Resistance",
+      "Lipodystrophy",
+      "MRI",
+      "Protease Inhibitor",
+      "Side-Effects",
+      "Visceral Fat",
+      "Chronic Infection",
+      "HIV",
+      "Healthy Volunteer"
+    ],
+    "interventions": [],
+    "brief_summary": "Some HIV-infected adults develop lipodystrophy that includes significant changes in body shape, with fat losses in the face, arms and legs, and fat gain in the trunk. This lipodystrophy is often accompanied by other disorders of metabolism, such as increased levels of fat and insulin in the blood. The majority of these cases have been seen when patients are taking medications called protease inhibitors. These are anti-retroviral medications designed to treat patients with HIV. It is unclear if lipodystrophy is a result of having HIV or the medication used to treat HIV. It has been suggested, but not proven, that lipodystrophy is a direct side effect of protease inhibitors. In addition, it is unknown if HIV-infected children develop significant lipodystrophy after taking protease inhibitors. This study will investigate the prevalence of metabolic disorders and changes in body fat distribution in children taking protease inhibitor anti-retroviral medications. The results will be compared to three other groups; (1) children suffering from other non-HIV chronic infections, (2) HIV-infected children not taking protease inhibitors, and (3) healthy children. The study will look at HIV-infected children who have already started taking protease inhibitors. It will evaluate these children for disorders in metabolism as well as body fat changes. In addition, the study will follow HIV-infected children who will begin taking protease inhibitors. The study will follow these children for 18 months to detect the development of disorders in metabolism and / or body fat changes.",
+    "eligibility_text": "FOR PROTEASE INHIBITOR-NAIVE HIV-INFECTED CHILDREN AND HIV-INFECTED CHILDREN ON PROTEASE INHIBITOR-CONTAINING ANTIRETROVIRAL REGIMENS: Evidence of HIV infection based on Center for Disease Control and Prevention criteria. Enrollment on protocol 98-C-0041 or other HIV treatment protocol for children. No other chronic disease unrelated to infection that may cause changes in body composition or in lipid or glucose homeostasis. No previous use of a protease inhibitor-containing antiretroviral regimen (PROTEASE INHIBITOR-NAIVE HIV-INFECTED CHILDREN ONLY). Data available concerning the start date of protease inhibitor treatment (HIV-INFECTED CHILDREN ON PROTEASE INHIBITOR-CONTAINING ANTIRETROVIRAL REGIMENS ONLY). HEALTHY PEDIATRIC VOLUNTEERS: Good general health. No significant hematologic, renal, hepatic, endocrinologic, or pulmonary disorders. No evidence of HIV infection by standard HIV antibody testing. Body mass index for age below 85th percentile. Not currently using prescription medications on a continuing basis; the use of over-the-counter medications will be reviewed on a case-by-case basis. Stable clinical condition during evaluation. CHILDREN WITH CONDITIONS CAUSING CHRONIC INFECTIONS OTHER THAN HIV: Evidence of chronic, non-HIV-related infection such as chronic granulomatous disease, hyperimmunoglobin E syndrome, etc. Evidence of non-growth hormone-deficient growth failure, defined as a 12-month height velocity at or below the fifth percentile for age using standard reference norms and by clinically-indicated testing. No evidence of HIV infection by standard HIV antibody testing. No current (last 2 months) use of sex steroid supplementation. Enrollment in an ongoing NIH protocol for treatment of their disorders. Age between 4 and 18 years. No other chronic disease unrelated to infection that may cause either changes in body composition or lipid or glucose homeostasis such as Type I diabetes mellitus, lipodystrophic diabetes, Cushing's syndrome etc. No pregnancy. No inability to undergo MRI because of metal objects within their bodies that are contraindications for MRI. These include cardiac pacemakers, neural pacemakers, aneurysmal clips, schrapnel, ocular foreign bodies, cochlear implants, non-detachable electronic or electromechanical devices. No allergic reaction to heparin.",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00001142.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0000xxxx/NCT00001142.xml"
+  },
+  "NCT00116675": {
+    "name": "Four Week Safety and Efficacy Study With a Topical Gel to Treat Common Warts in Pediatric Subjects",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 儿科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00116675"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00116675",
+    "department_tag": "儿科",
+    "department_role": "secondary",
+    "department_tags": [
+      "皮肤性病科",
+      "儿科"
+    ],
+    "primary_department": "皮肤性病科",
+    "secondary_departments": [
+      "儿科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Four Week Safety and Efficacy Study With a Topical Gel to Treat Common Warts in Pediatric Subjects",
+    "official_title": "A Single-Blind, Dose-Escalating Study to Assess Efficacy and Safety of Resiquimod Gel Applied 3 Times Per Week for 4 Weeks for the Treatment of Common Warts in Pediatric Subjects",
+    "conditions": [
+      "Warts"
+    ],
+    "mesh_terms": [
+      "Warts"
+    ],
+    "keywords": [
+      "Common Wart(s)",
+      "Pediatric",
+      "Wart(s)",
+      "Children",
+      "3M Pharmaceuticals",
+      "Resiquimod"
+    ],
+    "interventions": [
+      "Resiquimod"
+    ],
+    "brief_summary": "The primary purpose of this study is to evaluate the effectiveness in pediatric subjects of three different strengths of resiquimod gel applied to common wart(s) three times a week for four weeks. A second purpose is to evaluate the safety of the drug.",
+    "eligibility_text": "Inclusion Criteria: - Diagnosis of common warts - Ages between 3 to 11 Exclusion Criteria: - Other types of wart(s), ie. plantar - Currently participating in another clinical study - Chronic viral hepatitis B or C",
+    "study_type": "Interventional",
+    "phase": "Phase 2",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00116675.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0011xxxx/NCT00116675.xml"
+  }
+}

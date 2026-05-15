@@ -1,0 +1,209 @@
+{
+  "NCT00209586": {
+    "name": "A Study of AQUAVAN® Injection for Sedation in Elderly Patients Undergoing Flexible Bronchoscopy",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "abandoned",
+    "rationale": "ClinicalTrials.gov overall_status=Terminated; aligned to MedAI status=abandoned for department tag 麻醉医学科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00209586"
+    ],
+    "actions": [
+      "Do not surface this trial as a direct option for the current patient.",
+      "Keep it only as historical context if the protocol remains clinically informative."
+    ],
+    "nct_id": "NCT00209586",
+    "department_tag": "麻醉医学科",
+    "department_role": "primary",
+    "department_tags": [
+      "麻醉医学科",
+      "内科"
+    ],
+    "primary_department": "麻醉医学科",
+    "secondary_departments": [
+      "内科"
+    ],
+    "overall_status": "Terminated",
+    "status_reason": "The trial lifecycle indicates that it is halted or unavailable, so MedAI should not treat it as a current treatment-trial option.",
+    "enrollment_open": false,
+    "brief_title": "A Study of AQUAVAN® Injection for Sedation in Elderly Patients Undergoing Flexible Bronchoscopy",
+    "official_title": "A Phase III, Randomized, Open-label Study to Assess the Safety and Efficacy of AQUAVAN® Injection Versus Midazolam HCl for Sedation in Patients Undergoing Flexible Bronchoscopy Procedures",
+    "conditions": [
+      "Flexible Bronchoscopy"
+    ],
+    "mesh_terms": [],
+    "keywords": [
+      "Bronchoscopy",
+      "Sedation"
+    ],
+    "interventions": [
+      "fospropofol disodium"
+    ],
+    "brief_summary": "This study was designed to demonstrate that AQUAVAN® is effective in providing adequate sedation in patients undergoing flexible bronchoscopy as well as to assess the safety profile of AQUAVAN versus that of midazolam. Prior to the procedure, patients receive fentanyl citrate for pain management followed five minutes later by either AQUAVAN® Injection or midazolam HCl for sedation. During the procedure, study personnel assess the patient's vital signs and depth of sedation. After the procedure, the patient, physician, and an evaluator are asked to complete satisfaction surveys.",
+    "eligibility_text": "Inclusion Criteria: 1. Patient provided signed/dated Informed Consent and HIPAA Authorization after receiving a full explanation of the extent and nature of the study. 2. Patient was at least 18 years of age at the time of screening. 3. Female patient must have been surgically sterile, postmenopausal, or not pregnant or lactating, and must have been using an acceptable method of birth control for at least 1 month prior to dosing, with a negative urine pregnancy test result at screening and predosing periods. 4. Patient met the American Society of Anesthesiologists (ASA) Physical Status Classification of I to III. Exclusion Criteria: 1. Patient had a history of allergic reaction or hypersensitivity to any anesthetic agent, narcotic or benzodiazepine. 2. Patient did not meet nils per os (NPO) status per ASA Guideline or institution's guideline. 3. Patient had condition(s) that, in the opinion of the Investigator, could interfere with appropriate airway management. 4. Patient required artificial ventilation prior to the initiation of bronchoscopy or was admitted to the intensive care unit. 5. Patient had a history of mental or visual impairment that would not permit successful measurement of cognitive evaluations. 6. Patient was unwilling to adhere to pre- and postprocedural instructions. 7. The use of fentanyl or midazolam was contraindicated for the patient. 8. Patient had participated in an investigational study within 1 month prior to study start.",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00209586.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0020xxxx/NCT00209586.xml"
+  },
+  "NCT00361582": {
+    "name": "A Study to Evaluate the Effectiveness and Safety of Multiple Doses of Tapentadol(CG5503) in Patients Awaiting Joint Replacement Surgery",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 麻醉医学科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00361582"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00361582",
+    "department_tag": "麻醉医学科",
+    "department_role": "primary",
+    "department_tags": [
+      "麻醉医学科",
+      "外科"
+    ],
+    "primary_department": "麻醉医学科",
+    "secondary_departments": [
+      "外科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "A Study to Evaluate the Effectiveness and Safety of Multiple Doses of Tapentadol(CG5503) in Patients Awaiting Joint Replacement Surgery",
+    "official_title": "A Randomized, Double-Blind, Active- and Placebo-Controlled, Parallel Group, Multicenter Study to Evaluate the Efficacy and Safety of Multiple Doses of CG5503 Immediate Release Formulation in Subjects Awaiting Primary Joint Replacement Surgery for End-Stage Joint Disease",
+    "conditions": [
+      "Osteoarthritis",
+      "Pain Assessment",
+      "Arthralgia"
+    ],
+    "mesh_terms": [
+      "Osteoarthritis",
+      "Arthralgia"
+    ],
+    "keywords": [
+      "Osteoarthritis",
+      "tapentadol",
+      "knee-replacement",
+      "hip replacement",
+      "pain"
+    ],
+    "interventions": [
+      "CG5503 IR; tapentadol"
+    ],
+    "brief_summary": "The purpose of this study is to evaluate in patients who are eligible for elective primary total or partial joint replacement of the hip or knee due to chronic osteoarthritis the efficacy (level of pain control) of CG5503 over 5 and 10 days compared with placebo, and to assess the safety and tolerability of multiple doses of CG5503 IR patients.",
+    "eligibility_text": "Inclusion Criteria: - Clinical diagnosis of chronic osteoarthritis of the hip or the knee based on clinical and radiographic (X-Ray) criteria defined by standard accepted guidelines - candidate (qualifies) for primary one-sided total or partial joint replacement surgery due to noninflammatory, end-stage degenerative joint disease (arthritis) - requires daily doses of analgesic medication for chronic pain. Exclusion Criteria: - History of seizure disorder or epilepsy suggested by the presence of any of the following - History of chronic hepatitis B and C or human immunodeficiency virus, or presence of active hepatitis B and C within the past 3 months before screening - currently treated with anticonvulsants, monoamine oxidase inhibitors, tricyclic antidepressant, neuroleptics, or serotonin norepinephrine reuptake inhibitors.",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00361582.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0036xxxx/NCT00361582.xml"
+  },
+  "NCT00706823": {
+    "name": "Comparison of I-gel to the Laryngeal Mask Airway",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 麻醉医学科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00706823"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00706823",
+    "department_tag": "麻醉医学科",
+    "department_role": "primary",
+    "department_tags": [
+      "麻醉医学科",
+      "外科"
+    ],
+    "primary_department": "麻醉医学科",
+    "secondary_departments": [
+      "外科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Comparison of I-gel to the Laryngeal Mask Airway",
+    "official_title": "A Randomized Clinical Comparison of the Intersurgical I-gel and the Laryngeal Mask Airway Unique in Non-Obese Adult Patients During General Surgery",
+    "conditions": [
+      "Endotracheal Intubation",
+      "Supraglottic Airway"
+    ],
+    "mesh_terms": [],
+    "keywords": [
+      "Endotracheal Intubation",
+      "Supraglottic Airway"
+    ],
+    "interventions": [
+      "i-gel airway (Intersurgical Ltd., Wokingham, England)",
+      "Laryngeal Mask Airway-Unique"
+    ],
+    "brief_summary": "The purpose of this study is to evaluate a new disposable supra-glottic airway device, the i-gel airway (Intersurgical Ltd., Wokingham, England). We propose to test its ease of insertion, position within the airway, drain tube patency and anatomic sealing properties during mechanical ventilation in non-obese anesthetized patients undergoing elective general surgery. The study device will be compared to the current standard in the industry, the LMA Unique.",
+    "eligibility_text": "Inclusion Criteria: 1. The subjects will be adult surgical candidates aged 18-80, ASA I-II, Mallampati I or II, presenting for elective surgery who require general anesthesia in whom tracheal intubation is not necessary. 2. Both male and female patients will be included. Exclusion Criteria: Patients will be excluded from the study if they present as Mallampati III or IV, ASA III-V or emergency status. Additionally, they will be excluded if they meet one of the contraindication criteria of the LMA including: 1. obesity, (BMI > 35 kg/m2) 2. pregnancy 3. history of gastric regurgitation, heart burn, ileus or \"full stomach\" 4. history of low pulmonary compliance or high pulmonary resistance 5. known history of difficult endotracheal intubation or signs suggesting the possibility of difficult intubation 6. pharyngeal pathology 7. upper airway obstruction due to laryngeal pathology",
+    "study_type": "Interventional",
+    "phase": "N/A",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00706823.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0070xxxx/NCT00706823.xml"
+  },
+  "NCT00146185": {
+    "name": "Efficacy and Safety of ALGRX 3268 in Children Undergoing Minor Needle-Stick Procedures.",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 麻醉医学科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00146185"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00146185",
+    "department_tag": "麻醉医学科",
+    "department_role": "secondary",
+    "department_tags": [
+      "儿科",
+      "麻醉医学科"
+    ],
+    "primary_department": "儿科",
+    "secondary_departments": [
+      "麻醉医学科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Efficacy and Safety of ALGRX 3268 in Children Undergoing Minor Needle-Stick Procedures.",
+    "official_title": "A Phase III, Randomized, Double-Blind, Placebo-Controlled Study to Confirm the Effectiveness and Safety of ALGRX 3268 in Pediatric Subjects.",
+    "conditions": [
+      "Pain"
+    ],
+    "mesh_terms": [],
+    "keywords": [
+      "Needlestick pain",
+      "Venipuncture pain",
+      "Procedural pain"
+    ],
+    "interventions": [
+      "ALGRX 3268"
+    ],
+    "brief_summary": "Minor needlestick procedures often cause significant pain and distress in pediatric patients yet interventions to reduce pain are used infrequently. ALGRX 3268 is a novel, single-use, prefilled, needle-free product that immediately delivers powdered lidocaine into the epidermis and provides local analgesia in 2-3 minutes. The purpose of this phase III, prospective, randomized, double-blind, placebo-controlled study is to investigate the efficacy, safety and tolerability of ALGRX 3268 versus placebo in pediatric patients aged 3 to 18 years undergoing venipuncture or peripheral venous canulation procedures. The trial will enroll approximate 504 evaluable subjects at centers located in the US.",
+    "eligibility_text": "Inclusion Criteria: - Outpatient children of either gender [M/F: 1:1] undergoing venipuncture or peripheral venous cannulation at the ATF or BOH. Children must have sufficient cognitive skills to identify faces depicting extremes of pain on the Wong-Baker FACES Pain Rating Scale, (ages 3-12) and/or the extremes of pain on a 100 VAS (ages 8-18). - Ages 3-7, 8-12, 13-18 years inclusive. Informed consent forms must have been approved by the appropriate IRB. Signed informed consent must have been granted by the parent/legal guardian and assent to participate should have been sought (either verbally or in writting) from each child. - In females of childbearing potential who in the judgement of the investigator or designee were sexually active, a negative preganancy test must have been documented prior to enrollment. A negative urine preganancy test was required in all teenage girls over the age of 14 years. Surgically sterile females do not require a pregnancy test. Exclusion Criteria: - Previous history of allergic reactions to any local anesthetic. Any medical condition or instability that in the judgement of the investigator might have adversely impacted the conduct of the study and the collection of data. - Subjects in whom the investigator determined that venipuncture could not be accomplished cleanly. - Active local infection or other skin pathology on the dorsum of the hand. Subjects with tattos, surgical scars, ports, implantable devices or a skin condition that may have interfered with placement of study treatment or skin site assessments. - Female subjects who were pregnant or lactating; females with a positive serum or urine pregnancy test; females of childbearing potential who were not using adequate contraception. - Prior participation in an ALGRX 3268 study. - Venipuncture at the proposed site within the prior 2 weeks (longer if bruising was apparent).",
+    "study_type": "Interventional",
+    "phase": "Phase 3",
+    "primary_purpose": "Treatment",
+    "copied_xml_relpath": "xml/NCT00146185.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0014xxxx/NCT00146185.xml"
+  }
+}

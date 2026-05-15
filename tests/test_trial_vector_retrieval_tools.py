@@ -130,8 +130,150 @@ class TrialVectorRetrievalToolTests(unittest.TestCase):
         self.assertEqual(profile["payload_filters"]["must"][0]["field"], "condition_terms")
         self.assertEqual(profile["payload_filters"]["must"][0]["values"], ["atrial fibrillation"])
         self.assertEqual(profile["payload_filters"]["must_not"][0]["values"], ["diabetes", "congestive heart failure"])
+        self.assertEqual(profile["coarse_payload_filters"], {"must": [], "should": [], "must_not": []})
         self.assertIn("clinical trial eligibility search", profile["query_text"])
         self.assertNotIn("estimated stroke rate per 100 patient-years", profile["query_text"])
+        self.assertIn("trial_retrieval_context", profile)
+        self.assertTrue(profile["retrieval_queries"])
+
+    def test_protocol_trial_query_profile_does_not_negate_heart_failure_from_unrelated_not_tolerated(self) -> None:
+        profile = build_protocol_trial_query_profile(
+            {
+                "raw_text": (
+                    "48 M with bicuspid aortic valve presented with progressive SOB and LE edema. "
+                    "TTE revealed severe aortic stenosis with worsening LV function. EF was 25%. "
+                    "He was sent home from cardiology clinic with Lasix and BB "
+                    "(which he did not tolerate), continued to have worsening SOB and LE edema. "
+                    "Repeat echo confirmed critical aortic stenosis with severe global hypokinesis."
+                ),
+                "case_summary": "Severe aortic stenosis with heart failure symptoms and EF 25%.",
+                "problem_list": [
+                    "critical aortic stenosis",
+                    "heart failure symptoms",
+                    "reduced left ventricular ejection fraction",
+                    "severe global hypokinesis",
+                ],
+                "known_facts": [
+                    "left ventricular ejection fraction 25%",
+                    "beta blocker not tolerated",
+                    "progressive shortness of breath",
+                    "lower extremity edema",
+                ],
+            }
+        )
+
+        self.assertIn("congestive heart failure", profile["patient_positive_terms"])
+        self.assertNotIn("congestive heart failure", profile["patient_negative_terms"])
+        self.assertNotIn("no heart failure", profile["negative_profile_terms"])
+        self.assertNotIn("no heart failure", profile["expanded_terms"]["negative"])
+        self.assertNotIn("screening constraints: no heart failure", profile["query_text"])
+
+    def test_protocol_trial_query_profile_extracts_stroke_rehab_tdcs_without_assessment_noise(self) -> None:
+        profile = build_protocol_trial_query_profile(
+            {
+                "raw_text": (
+                    "Patient is 34 days after corpus callosum infarction with aphasia and apraxia. "
+                    "中文病历写作胼胝体梗死后失用症伴失语。"
+                    "Treatment includes rehabilitation training and tDCS localization treatment. "
+                    "Assessments include MMSE, Fugl-Meyer, PASS, and ADL."
+                ),
+                "case_summary": "Post-stroke aphasia/apraxia rehabilitation with tDCS.",
+                "problem_list": ["post-stroke aphasia", "apraxia", "motor impairment"],
+                "known_facts": ["rehabilitation training", "tDCS localization treatment", "Fugl-Meyer assessment"],
+            }
+        )
+
+        condition_terms = {term.casefold() for term in profile["trial_condition_terms"]}
+        intervention_terms = {term.casefold() for term in profile["trial_intervention_terms"]}
+        self.assertIn("stroke", condition_terms)
+        self.assertIn("stroke rehabilitation", condition_terms)
+        self.assertIn("aphasia", condition_terms)
+        self.assertIn("apraxia", condition_terms)
+        self.assertIn("tdcs", intervention_terms)
+        self.assertIn("transcranial direct current stimulation", intervention_terms)
+        self.assertIn("rehabilitation training", intervention_terms)
+        self.assertNotIn("mmse", intervention_terms)
+        self.assertNotIn("fugl-meyer", intervention_terms)
+        self.assertEqual(profile["coarse_payload_filters"], {"must": [], "should": [], "must_not": []})
+        self.assertGreaterEqual(len(profile["retrieval_queries"]), 3)
+
+    def test_protocol_trial_query_profile_prefers_protocol_entry_trial_search_intent(self) -> None:
+        profile = build_protocol_trial_query_profile(
+            {
+                "raw_text": "Patient has nonspecific breast symptoms.",
+                "case_summary": "Breast case with protocol-entry trial intent.",
+                "problem_list": ["breast symptom"],
+                "known_facts": ["surgery discussed"],
+                "trial_search_intent": {
+                    "schema_version": 1,
+                    "primary_conditions": [
+                        {
+                            "text": "导管内乳头状瘤",
+                            "canonical": "Intraductal Papilloma",
+                            "role": "diagnosis",
+                        },
+                        {
+                            "text": "乳头溢液",
+                            "canonical": "Nipple Discharge",
+                            "role": "presenting_symptom",
+                        },
+                    ],
+                    "interventions_of_interest": [
+                        {
+                            "text": "乳管镜",
+                            "canonical": "Ductoscopy",
+                            "role": "diagnostic_or_therapeutic_procedure",
+                        }
+                    ],
+                    "trial_intents": ["diagnostic", "procedure"],
+                    "query_variants": [
+                        {
+                            "name": "breast_duct",
+                            "text": "intraductal papilloma nipple discharge ductoscopy clinical trial",
+                            "source_terms": ["Intraductal Papilloma", "Nipple Discharge", "Ductoscopy"],
+                        }
+                    ],
+                    "hard_filters": [],
+                },
+            }
+        )
+
+        self.assertEqual(profile["trial_condition_terms"], ["Intraductal Papilloma", "Nipple Discharge"])
+        self.assertEqual(profile["trial_intervention_terms"], ["Ductoscopy"])
+        self.assertIn("diagnostic", profile["trial_intent_terms"])
+        self.assertEqual(profile["retrieval_queries"][0]["name"], "breast_duct")
+        self.assertEqual(profile["coarse_payload_filters"], {"must": [], "should": [], "must_not": []})
+        self.assertEqual(profile["trial_search_intent"]["schema_version"], 1)
+
+    def test_protocol_trial_query_profile_builds_lightweight_trial_retrieval_context(self) -> None:
+        profile = build_protocol_trial_query_profile(
+            {
+                "raw_text": (
+                    "58-year-old female with metastatic lung adenocarcinoma, EGFR exon 19 deletion, "
+                    "progression after osimertinib, ECOG 1, and stable treated brain metastases."
+                ),
+                "case_summary": "EGFR-mutant metastatic lung adenocarcinoma after osimertinib progression.",
+                "problem_list": [
+                    "metastatic lung adenocarcinoma",
+                    "EGFR exon 19 deletion",
+                    "osimertinib progression",
+                ],
+                "known_facts": ["ECOG 1", "stable treated brain metastases"],
+                "structured_inputs": {"age": 58, "sex": "female", "ecog": 1},
+            }
+        )
+
+        context = profile["trial_retrieval_context"]
+        self.assertIn("non-small cell lung cancer", profile["trial_condition_terms"])
+        self.assertIn("NSCLC", context["expanded_terms"]["conditions"])
+        self.assertIn("EGFR-mutant", context["expanded_terms"]["biomarkers"])
+        self.assertIn("progression after osimertinib", context["expanded_terms"]["treatment_context"])
+        self.assertIn("ECOG 1", context["expanded_terms"]["eligibility"])
+        query_by_name = {item["name"]: item["text"] for item in profile["retrieval_queries"]}
+        self.assertIn("biomarker", query_by_name)
+        self.assertIn("EGFR-mutant", query_by_name["biomarker"])
+        self.assertIn("treatment_context", query_by_name)
+        self.assertIn("post-osimertinib", query_by_name["treatment_context"])
 
     def test_trial_chunk_retrieval_aggregates_chunks_back_to_trial_candidates(self) -> None:
         _write_jsonl(
@@ -465,9 +607,11 @@ class TrialVectorRetrievalToolTests(unittest.TestCase):
         self.assertTrue(bundle["candidate_ranking"][0]["actions"])
         self.assertTrue(tool.vector_retriever.calls)
         self.assertEqual(
-            tool.vector_retriever.calls[0]["payload_filters"]["must"][0]["field"],
-            "condition_terms",
+            tool.vector_retriever.calls[0]["payload_filters"],
+            {},
         )
+        self.assertTrue(all(call["payload_filters"] == {} for call in tool.vector_retriever.calls))
+        self.assertGreaterEqual(len(tool.vector_retriever.calls), 2)
         completed_row = next(row for row in bundle["candidate_ranking"] if row["nct_id"] == "NCTLUNG001")
         self.assertEqual(completed_row["status"], "trial_matched")
         self.assertFalse(completed_row["enrollment_open"])

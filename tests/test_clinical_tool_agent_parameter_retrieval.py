@@ -533,6 +533,109 @@ class ClinicalToolAgentParameterRetrievalTests(unittest.TestCase):
             "AF stroke-risk calculator matches the question.",
         )
 
+    def test_patient_note_plan_selection_preserves_retrieval_top_candidate(self) -> None:
+        class LocalCatalog(_FakeCatalog):
+            def __init__(self) -> None:
+                self._documents = {
+                    "rhd": _FakeDocument(
+                        "rhd",
+                        "Echocardiographic Score Model for Predicting Rheumatic Heart Disease Outcome",
+                        "Predict mid-term outcomes of latent Rheumatic Heart Disease in children.",
+                        "Children with latent rheumatic heart disease.",
+                    ),
+                    "tavi": _FakeDocument(
+                        "tavi",
+                        "TAVI2-SCORe",
+                        "Predict 1-year mortality after transcatheter aortic valve implantation.",
+                        "Patients undergoing TAVI for severe aortic stenosis.",
+                    ),
+                    "ehfs": _FakeDocument(
+                        "ehfs",
+                        "Echo Heart Failure Score (EHFS)",
+                        "Predict mortality in systolic heart failure.",
+                        "Patients with systolic heart failure.",
+                    ),
+                }
+
+        class LocalCoarseRetriever:
+            @tool(
+                name="riskcalc_coarse_retriever",
+                description="Retrieve coarse calculator matches from structured_case.",
+                input_schema={"structured_case": {"raw_text": "str"}, "top_k": "int"},
+                state_fields={"structured_case": ("structured_case", "clinical_tool_job.structured_case")},
+            )
+            def retrieve_coarse_from_structured_case(self, structured_case, *, top_k: int = 10, candidate_pmids=None):
+                del structured_case, candidate_pmids
+                rows = [
+                    {"pmid": "rhd", "title": "Echocardiographic Score Model for Predicting Rheumatic Heart Disease Outcome"},
+                    {"pmid": "tavi", "title": "TAVI2-SCORe"},
+                    {"pmid": "ehfs", "title": "Echo Heart Failure Score (EHFS)"},
+                ]
+                return {"query_text": "critical aortic stenosis valve replacement", "candidate_ranking": rows[:top_k]}
+
+        class LocalComputationRetriever:
+            @tool(
+                name="riskcalc_computation_retriever",
+                description="Refine calculator matches with computation parameters.",
+                input_schema={"structured_case": {"raw_text": "str"}, "candidate_pmids": "list[str]"},
+                state_fields={"structured_case": ("structured_case", "clinical_tool_job.structured_case")},
+            )
+            def retrieve_from_structured_case(self, structured_case, *, candidate_pmids, top_k_per_channel: int = 3):
+                del structured_case, top_k_per_channel
+                rows = [
+                    {
+                        "pmid": "rhd",
+                        "title": "Echocardiographic Score Model for Predicting Rheumatic Heart Disease Outcome",
+                        "purpose": "Predict mid-term outcomes of latent Rheumatic Heart Disease in children.",
+                        "eligibility": "Children with latent rheumatic heart disease.",
+                        "parameter_names": ["mitral_thickening", "leaflet_motion", "aortic_thickening", "regurgitation"],
+                    },
+                    {
+                        "pmid": "tavi",
+                        "title": "TAVI2-SCORe",
+                        "purpose": "Predict 1-year mortality after transcatheter aortic valve implantation.",
+                        "eligibility": "Patients undergoing TAVI for severe aortic stenosis.",
+                        "parameter_names": ["lv_dysfunction", "critical_av_stenosis", "male_sex"],
+                    },
+                    {
+                        "pmid": "ehfs",
+                        "title": "Echo Heart Failure Score (EHFS)",
+                        "purpose": "Predict mortality in systolic heart failure.",
+                        "eligibility": "Patients with systolic heart failure.",
+                        "parameter_names": ["left_atrial_volume_index", "pulmonary_artery_systolic_pressure"],
+                    },
+                ]
+                candidate_set = {str(item) for item in candidate_pmids}
+                rows = [row for row in rows if row["pmid"] in candidate_set]
+                return {"candidate_ranking": rows, "retrieved_tools": rows}
+
+        agent = ClinicalToolAgent(
+            catalog=LocalCatalog(),
+            retriever=LocalCoarseRetriever(),
+            computation_retriever=LocalComputationRetriever(),
+            chat_client=_FakeChatClient(
+                response='{"selected_tool_id":"ehfs","parameter_names":["left_atrial_volume_index"],"reason":"generic HF"}'
+            ),
+        )
+        job = ClinicalToolJob(
+            mode="patient_note",
+            text="48 M with critical bicuspid aortic stenosis, EF 25%, and valve replacement workup.",
+            structured_case={
+                "raw_text": "48 M with critical bicuspid aortic stenosis, EF 25%, and valve replacement workup.",
+                "problem_list": ["critical aortic stenosis", "bicuspid aortic valve", "reduced EF"],
+                "known_facts": ["preoperative workup for valve replacement"],
+            },
+            top_k=5,
+        )
+
+        selection_bundle = agent.plan_selection(job)
+
+        self.assertEqual(selection_bundle["candidate_ranking"][0]["pmid"], "rhd")
+        self.assertEqual(selection_bundle["selected_tool"]["pmid"], "tavi")
+        self.assertEqual(selection_bundle["selection_mode"], "retrieval_ranked")
+        self.assertIsNone(selection_bundle["selected_tool"]["model_selected_tool_id"])
+        self.assertIsNone(selection_bundle["selected_tool"]["raw_response"])
+
     def test_execution_tool_extract_inputs_uses_selected_calculator_payload_and_structured_case(self) -> None:
         registration = _build_registration()
         registry = RiskCalcRegistry({registration.calc_id: registration})

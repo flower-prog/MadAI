@@ -17,6 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from agent import workflow as workflow_module
 from agent.graph.nodes import protocol_node, reporter_node
 from agent.graph.types import CalculationArtifact, GraphState, TreatmentRecommendation
+from agent.protocol import build_matched_trials
 from agent.tools.trial_retrieval_tools import TrialKeywordRetriever, create_trial_retrieval_tool
 
 
@@ -496,6 +497,13 @@ class TrialRetrievalToolTests(unittest.TestCase):
 
         result = protocol_node(state)
 
+        self.assertIn("trial_search_intent", fake_retriever.calls[0]["structured_case"])
+        self.assertEqual(
+            fake_retriever.calls[0]["structured_case"]["trial_search_intent"]["primary_conditions"][0]["canonical"],
+            "melanoma",
+        )
+        self.assertIn("trial_search_intent", result.final_output)
+        self.assertEqual(result.trial_search_intent["source"], "protocol_entry_trial_structurer")
         self.assertEqual(result.trial_retrieval_bundle["coarse_candidate_ids"], ["NCT5001", "NCT5002"])
         self.assertEqual(result.treatment_bundle["trial_candidate_ids"], ["NCT5001", "NCT5002"])
         self.assertEqual(result.treatment_bundle["trial_candidates"][0]["nct_id"], "NCT5001")
@@ -794,6 +802,51 @@ class TrialRetrievalToolTests(unittest.TestCase):
         )
         self.assertEqual(summary["clinical_answer"][0]["linked_trials"], ["NCT7001"])
         self.assertEqual(summary["trial_candidates"][0]["nct_id"], "NCT7001")
+
+    def test_matched_trials_keep_primary_anchor_matches_only(self) -> None:
+        trial_bundle = {
+            "query_profile": {
+                "trial_condition_terms": ["Aortic Valve Stenosis", "critical aortic stenosis"],
+                "trial_intervention_terms": ["Aortic Valve Replacement"],
+            },
+            "candidate_ranking": [
+                {
+                    "nct_id": "NCTMR001",
+                    "title": "Moderate Mitral Regurgitation in CABG Patients",
+                    "status": "manual_review",
+                    "overall_status": "Unknown status",
+                    "enrollment_open": False,
+                    "conditions": ["Moderate Mitral Regurgitation"],
+                    "interventions": ["CABG alone", "CABG + Mitral repair"],
+                    "matched_condition_terms": ["mild mitral regurgitation"],
+                },
+                {
+                    "nct_id": "NCTAS001",
+                    "title": "Reverse Remodelling After Aortic Valve Replacement",
+                    "status": "manual_review",
+                    "overall_status": "Unknown status",
+                    "enrollment_open": False,
+                    "conditions": ["Aortic Valve Stenosis", "Left Ventricular Hypertrophy"],
+                    "interventions": ["Candesartan"],
+                    "best_evidence_text": "Severe valvular aortic stenosis after aortic valve replacement.",
+                },
+                {
+                    "nct_id": "NCTAGE001",
+                    "title": "Aortic Valve Replacement in Older Adults",
+                    "status": "manual_review",
+                    "overall_status": "Unknown status",
+                    "enrollment_open": False,
+                    "conditions": ["Aortic Valve Stenosis"],
+                    "interventions": ["Aortic Valve Replacement"],
+                    "eligibility_conflicts": ["Case age 48 is below trial minimum age 75."],
+                },
+            ],
+        }
+
+        matched_trials = build_matched_trials(trial_bundle)
+
+        self.assertEqual([item["nct_id"] for item in matched_trials], ["NCTAS001"])
+        self.assertIn("aortic", matched_trials[0]["reason"].lower())
 
     def test_trial_retrieval_degrades_to_bm25_when_vector_backend_is_unavailable(self) -> None:
         _write_department_payload(

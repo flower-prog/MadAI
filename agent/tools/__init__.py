@@ -28,6 +28,12 @@ from .execution_tools import (
     summarize_text,
     tool,
 )
+from .medical_knowledge_tools import (
+    LiveMedicalKnowledgeRetriever,
+    PubMedRealtimeSearchTool,
+    WikidataKnowledgeGraphTool,
+    create_live_medical_knowledge_retriever,
+)
 from .computation_retrieval_tools import (
     RiskCalcComputationRetrievalTool,
     build_case_parameter_query_text,
@@ -89,6 +95,7 @@ __all__ = [
     "FieldedBM25Index",
     "HybridRetriever",
     "KeywordToolRetriever",
+    "LiveMedicalKnowledgeRetriever",
     "MedCPTRetriever",
     "OpenAIChatClient",
     "RiskCalcCatalog",
@@ -100,6 +107,8 @@ __all__ = [
     "RiskCalcRegistry",
     "RiskCalcRetrievalTool",
     "ToolDefinition",
+    "PubMedRealtimeSearchTool",
+    "WikidataKnowledgeGraphTool",
     "append_agent_trace",
     "build_agent_trace",
     "build_case_query_text",
@@ -116,6 +125,7 @@ __all__ = [
     "collect_tools",
     "create_computation_retrieval_tool",
     "create_execution_tool",
+    "create_live_medical_knowledge_retriever",
     "create_parameter_retrieval_tool",
     "create_retriever",
     "create_retrieval_tool",

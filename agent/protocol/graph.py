@@ -6,8 +6,10 @@ from typing import Any
 from .config import ProtocolGraphConfig
 from .evidence_retriever import build_patient_evidence_index
 from .medical_knowledge import retrieve_medical_knowledge_for_protocol
+from .medical_phrase_parser import parse_medical_phrases_for_protocol
 from .pipeline import assess_trial_eligibility_candidates
 from .state import ProtocolGraphState
+from .trial_query_planner import build_trial_search_intent
 from .types import to_plain_dict
 
 
@@ -152,6 +154,8 @@ def _retrieve_trial_candidates(state: ProtocolGraphState, config: ProtocolGraphC
     structured_case = dict(state.structured_case_json or {})
     if not structured_case:
         return _empty_trial_retrieval_bundle(state)
+    if state.trial_search_intent:
+        structured_case["trial_search_intent"] = dict(state.trial_search_intent)
 
     trial_retriever = state.trial_retriever
     if trial_retriever is None:
@@ -202,6 +206,10 @@ def _assess_trial_eligibility(
         trial_bundle=dict(trial_bundle or {}),
         trial_retriever=state.trial_retriever,
         limit=config.eligibility_limit,
+        trial_search_intent=dict(state.trial_search_intent or {}),
+        patient_evidence_bundle=dict(state.patient_evidence_bundle or {}),
+        eligibility_chat_client=state.eligibility_chat_client,
+        llm_model=state.llm_model,
     )
 
 
@@ -244,6 +252,30 @@ def _skipped_medical_knowledge_bundle(reason: str) -> dict[str, Any]:
     }
 
 
+def _build_medical_phrase_bundle(
+    state: ProtocolGraphState,
+    *,
+    config: ProtocolGraphConfig,
+) -> dict[str, Any]:
+    return parse_medical_phrases_for_protocol(
+        structured_case=dict(state.structured_case_json or {}),
+        trial_retrieval_bundle=dict(state.trial_retrieval_bundle or {}),
+        eligibility_assessment_bundle=dict(state.eligibility_assessment_bundle or {}),
+        parser=state.medical_phrase_parser,
+        limit=config.eligibility_limit,
+    )
+
+
+def _build_trial_search_intent(state: ProtocolGraphState) -> dict[str, Any]:
+    return build_trial_search_intent(
+        structured_case=dict(state.structured_case_json or {}),
+        calculation_bundle=dict(state.calculation_bundle or {}),
+        calculator_matches=list(state.calculator_matches or []),
+        department_tags=list(state.department_tags or []),
+        planner=state.trial_query_planner,
+    )
+
+
 def _build_protocol_decision_bundle(
     state: ProtocolGraphState,
     *,
@@ -259,6 +291,7 @@ def _build_protocol_decision_bundle(
             "medical_knowledge_agent": str((state.medical_knowledge_bundle or {}).get("status") or "unknown"),
             "risk_evidence_agent": str((state.calculator_evidence_bundle or {}).get("status") or "completed"),
             "patient_calculator_evidence_agent": str((state.patient_evidence_bundle or {}).get("status") or "unknown"),
+            "medical_phrase_parser": str((state.medical_phrase_bundle or {}).get("status") or "unknown"),
         },
         "skip_flags": {
             "skip_trial_agent": config.skip_trial_agent,
@@ -269,11 +302,13 @@ def _build_protocol_decision_bundle(
             "trial_candidates": len(trial_candidates),
             "assessed_trials": len(assessed_trials),
             "patient_evidence_spans": int((state.patient_evidence_bundle or {}).get("evidence_span_count") or 0),
+            "medical_concepts": int((state.medical_phrase_bundle or {}).get("concept_count") or 0),
             "medical_knowledge_items": len(list((state.medical_knowledge_bundle or {}).get("retrieved_items") or [])),
             "missing_questions": int((state.missing_data_bundle or {}).get("missing_question_count") or 0),
         },
         "warnings": [
             *list((state.trial_retrieval_bundle or {}).get("warnings") or []),
+            *list((state.medical_phrase_bundle or {}).get("warnings") or []),
             *list((state.medical_knowledge_bundle or {}).get("warnings") or []),
             *list((state.patient_evidence_bundle or {}).get("warnings") or []),
             *list((state.missing_data_bundle or {}).get("warnings") or []),
@@ -307,6 +342,7 @@ def run_protocol_subgraph(
 
     if resolved_config.skip_trial_agent:
         reason = "trial_agent skipped by protocol config"
+        state.trial_search_intent = _build_trial_search_intent(state)
         state.trial_retrieval_bundle = _skipped_trial_retrieval_bundle(state, reason)
         state.eligibility_assessment_bundle = {
             "schema_version": 1,
@@ -316,6 +352,7 @@ def run_protocol_subgraph(
             "warnings": [reason],
         }
     else:
+        state.trial_search_intent = _build_trial_search_intent(state)
         state.trial_retrieval_bundle = _retrieve_trial_candidates(state, resolved_config)
         state.eligibility_assessment_bundle = _assess_trial_eligibility(
             state,
@@ -325,6 +362,8 @@ def run_protocol_subgraph(
 
     if not state.missing_data_bundle:
         state.missing_data_bundle = _extract_missing_data_bundle(state.eligibility_assessment_bundle)
+
+    state.medical_phrase_bundle = _build_medical_phrase_bundle(state, config=resolved_config)
 
     if resolved_config.skip_medical_knowledge_agent:
         state.medical_knowledge_bundle = _skipped_medical_knowledge_bundle(
@@ -336,6 +375,7 @@ def run_protocol_subgraph(
             trial_retrieval_bundle=dict(state.trial_retrieval_bundle or {}),
             eligibility_assessment_bundle=dict(state.eligibility_assessment_bundle or {}),
             calculator_evidence_bundle=dict(state.calculator_evidence_bundle or {}),
+            medical_phrase_bundle=dict(state.medical_phrase_bundle or {}),
             retriever=state.medical_knowledge_retriever,
             limit=resolved_config.eligibility_limit,
         )

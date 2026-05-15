@@ -1,0 +1,276 @@
+{
+  "NCT00740454": {
+    "name": "Single Complete Compression Ultrasonography to Rule Out Deep Vein Thrombosis During Pregnancy and Postpartum",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 医学影像科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00740454"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00740454",
+    "department_tag": "医学影像科",
+    "department_role": "secondary",
+    "department_tags": [
+      "妇产科",
+      "医学影像科"
+    ],
+    "primary_department": "妇产科",
+    "secondary_departments": [
+      "医学影像科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Single Complete Compression Ultrasonography to Rule Out Deep Vein Thrombosis During Pregnancy and Postpartum",
+    "official_title": "Diagnostic Exclusion Value of a Negative Single Distal and Proximal Lower Limb Veins Compression Ultrasonography in Pregnant and Post-partum Women With a Clinically Suspected Deep Vein Thrombosis",
+    "conditions": [
+      "Deep Vein Thrombosis"
+    ],
+    "mesh_terms": [
+      "Thrombosis",
+      "Venous Thrombosis"
+    ],
+    "keywords": [
+      "pregnancy",
+      "postpartum",
+      "deep vein thrombosis",
+      "venous thromboembolism",
+      "diagnosis",
+      "compression ultrasonography"
+    ],
+    "interventions": [
+      "Lower limb veins compression ultrasonography"
+    ],
+    "brief_summary": "The objective of the EDVIGE study is to determine whether a negative single distal and proximal leg veins compression ultrasonography safely rules out the diagnosis of deep vein thrombosis in pregnant and post-partum women with clinical suspicion of DVT.",
+    "eligibility_text": "Inclusion Criteria: - Women with an ongoing pregnancy or within three-months post-partum and a clinically suspected deep vein thrombosis Exclusion Criteria: - suspicion of pulmonary embolism - age less than 18 years - impossible follow-up",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00740454.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0074xxxx/NCT00740454.xml"
+  },
+  "NCT00951197": {
+    "name": "Evaluation of Alteration by Magnetic Resonance Imaging (MRI) in Dementia Among Elderly Subjects",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 医学影像科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00951197"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00951197",
+    "department_tag": "医学影像科",
+    "department_role": "secondary",
+    "department_tags": [
+      "精神心理科",
+      "医学影像科"
+    ],
+    "primary_department": "精神心理科",
+    "secondary_departments": [
+      "医学影像科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Evaluation of Alteration by Magnetic Resonance Imaging (MRI) in Dementia Among Elderly Subjects",
+    "official_title": "Estimation of Microstructure Alteration by MRI in Dementia Among Elderly Subjects Retired From Agricultural Profession and Living in Rural Area in Gironde - Participants From the AMI Cohort.",
+    "conditions": [
+      "Dementia",
+      "Alzheimer Disease"
+    ],
+    "mesh_terms": [
+      "Alzheimer Disease",
+      "Dementia"
+    ],
+    "keywords": [
+      "dementia",
+      "Alzheimer's Disease",
+      "diagnostic",
+      "biomarkers",
+      "neuroimaging",
+      "PET",
+      "MRI",
+      "mild cognitive impairment"
+    ],
+    "interventions": [
+      "Neuroimaging"
+    ],
+    "brief_summary": "Capturing the earliest stages of Dementia especially Alzheimer's Disease (AD) is a great challenge. Until now the NINCDS-ADRDA and the DSM criteria for AD were largely used as diagnostic standards in research. However, the research on AD progresses and some biomarkers have been recently suggested to improve the diagnostic criteria of AD, such as cerebrospinal fluid markers, neuroimaging with Positon Emission Tomography (PET) or Magnetic Resonance Imaging (MRI).",
+    "eligibility_text": "Inclusion Criteria: - participate in the AMI cohort - be aged 65 and older - be retired from agricultural profession - live in rural area in Gironde Exclusion Criteria: - contraindication of MRI - left-handed - severe dementia - Parkinson's disease - poor health incompatible with the transport to neuroimaging service - to be left handed",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00951197.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0095xxxx/NCT00951197.xml"
+  },
+  "NCT00951678": {
+    "name": "Determination of Anatomic Variations of the Internal Jugular and Femoral Veins Using Ultrasound in the Emergency Department",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "manual_review",
+    "rationale": "ClinicalTrials.gov overall_status=Unknown status; aligned to MedAI status=manual_review for department tag 医学影像科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00951678"
+    ],
+    "actions": [
+      "Review the full XML and the current ClinicalTrials.gov record manually before use.",
+      "Do not promote this trial to a direct recommendation until the lifecycle status is confirmed."
+    ],
+    "nct_id": "NCT00951678",
+    "department_tag": "医学影像科",
+    "department_role": "primary",
+    "department_tags": [
+      "医学影像科"
+    ],
+    "primary_department": "医学影像科",
+    "secondary_departments": [],
+    "overall_status": "Unknown status",
+    "status_reason": "The trial lifecycle is unclear, so MedAI should require manual review before using it in protocol recommendations.",
+    "enrollment_open": false,
+    "brief_title": "Determination of Anatomic Variations of the Internal Jugular and Femoral Veins Using Ultrasound in the Emergency Department",
+    "official_title": "Determination of Anatomic Variations of the Internal Jugular and Femoral Veins Using Ultrasound in the Emergency Department",
+    "conditions": [
+      "Vascular Anatomy"
+    ],
+    "mesh_terms": [
+      "Emergencies"
+    ],
+    "keywords": [
+      "ultrasound",
+      "femoral vein",
+      "internal jugular vein"
+    ],
+    "interventions": [
+      "Observational ultrasonography of venous anatomy"
+    ],
+    "brief_summary": "Central venous catheterization is a common and important procedure done in the emergency department. The internal jugular vein (IJV), subclavian vein (SV) and femoral vein (FV) are commonly used for central venous access. Unfortunately, this procedure has high-risk complications. Traditionally, physicians have relied on the use of anatomic landmarks and physical manipulation such as moving the head or rotating the leg in order to place central catheters; however, studies have demonstrated that significant anatomic variations exist within large percentages of study populations. In addition, although studies have demonstrated that the use of ultrasonography for placement of femoral catheters leads to lower rates of complications, no previous studies have specifically determined anatomic variations in the femoral triangle. Therefore, this study will examine the anatomic variation of the IJV vs. carotid artery and the femoral vein vs. femoral artery in the emergency room setting. The investigators will study the variation as a function of sex, age, race, body habitus and degree of head rotation (measured using a goniometer) and in doing so, the investigators will demonstrate the utility of using ultrasound to place central lines in order to decrease morbidity.",
+    "eligibility_text": "Inclusion Criteria: - Patients being cared for in the Tampa General Hospital Emergency Department - 18 yrs or older - male or female - have the anatomy that will be examined (lateral neck and femoral regions) - speak either English or Spanish - alert and oriented to person, place, time and situation - stable vital signs Exclusion Criteria: - under 18 yrs - incarcerated individuals - those with acute changes in mental status (intoxicated, encephalopathy, psychosis) - those from whom consent could not be obtained - those requiring intensive care monitoring - persons having pathologies that would interfere with the ultrasound investigation - persons who do not speak English or Spanish - persons with acute or severe mental or cognitive disabilities - individuals in a sedated, traumatized or crisis state",
+    "study_type": "Observational",
+    "phase": "",
+    "primary_purpose": "",
+    "copied_xml_relpath": "xml/NCT00951678.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0095xxxx/NCT00951678.xml"
+  },
+  "NCT00310479": {
+    "name": "Clinico-pathologic Correlative Study of 3T Magnetic Resonance Spectroscopy in the Localization of Prostate Cancer",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 医学影像科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00310479"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00310479",
+    "department_tag": "医学影像科",
+    "department_role": "primary",
+    "department_tags": [
+      "医学影像科",
+      "肿瘤科"
+    ],
+    "primary_department": "医学影像科",
+    "secondary_departments": [
+      "肿瘤科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "Clinico-pathologic Correlative Study of 3T Magnetic Resonance Spectroscopy in the Localization of Prostate Cancer",
+    "official_title": "Clinico-pathologic Correlative Study of 3T Magnetic Resonance Spectroscopy in the Localization of Prostate Cancer",
+    "conditions": [
+      "Prostate Cancer"
+    ],
+    "mesh_terms": [
+      "Prostatic Neoplasms"
+    ],
+    "keywords": [
+      "Magnetic Resonance Imaging",
+      "prostate cancer imaging",
+      "3T MRS",
+      "functional imaging"
+    ],
+    "interventions": [
+      "Magnetic Resonance Spectroscopy (3Tesla)"
+    ],
+    "brief_summary": "We seek to develop an advanced imaging approach to identifying and localizing prostate cancer. We believe that high field MRI (magnetic resonance imaging) has the potential to do this and we will endeavor to prove this by having patients with prostate cancer pre-operatively undergo a technique called magnetic resonance spectroscopy. After surgery, the microscopic locations of cancer will be compared with the pre-operative images to assess how well the imaging technique succeeds.",
+    "eligibility_text": "Inclusion Criteria: - Histologically verified prostate cancer - Patient has opted for surgery - Low risk prostate cancer PSA <1 0, Gleason < 7, Stage < T2b - No contraindication to MR scanning - No prior history of malignancy - Fit for surgery Exclusion Criteria: - Nonbiopsied lesion - Intermediate or high risk prostate cancer - Unfit for surgery - Contraindication to MR scanning (i.e. pacemaker, aneurysm clips, claustrophobia)",
+    "study_type": "Interventional",
+    "phase": "N/A",
+    "primary_purpose": "Diagnostic",
+    "copied_xml_relpath": "xml/NCT00310479.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0031xxxx/NCT00310479.xml"
+  },
+  "NCT00564382": {
+    "name": "CMR in the Assessment of Patient With ACS in the Emergency Room",
+    "strategy": "trial_match",
+    "source": "clinicaltrials.gov",
+    "status": "trial_matched",
+    "rationale": "ClinicalTrials.gov overall_status=Completed; aligned to MedAI status=trial_matched for department tag 医学影像科.",
+    "linked_calculators": [],
+    "linked_trials": [
+      "NCT00564382"
+    ],
+    "actions": [
+      "Use the trial as protocol or evidence support instead of assuming active enrollment.",
+      "If a current trial option is needed, search for an active successor or related study before surfacing."
+    ],
+    "nct_id": "NCT00564382",
+    "department_tag": "医学影像科",
+    "department_role": "primary",
+    "department_tags": [
+      "医学影像科",
+      "内科"
+    ],
+    "primary_department": "医学影像科",
+    "secondary_departments": [
+      "内科"
+    ],
+    "overall_status": "Completed",
+    "status_reason": "The trial is not currently open for enrollment, but it still provides a concrete trial-backed treatment path or protocol evidence that MedAI can treat as a matched trial reference.",
+    "enrollment_open": false,
+    "brief_title": "CMR in the Assessment of Patient With ACS in the Emergency Room",
+    "official_title": "Cardiac MRI for the Diagnosis of Unstable Angina/ NSTEMI in the Emergency Room",
+    "conditions": [
+      "Infarction",
+      "Ischemia",
+      "Magnetic Resonance Imaging"
+    ],
+    "mesh_terms": [
+      "Infarction",
+      "Emergencies",
+      "Ischemia"
+    ],
+    "keywords": [
+      "Acute coronary syndrome",
+      "Cardiac Magnetic Resonance Imaging",
+      "Contrast agents",
+      "Gadolinium"
+    ],
+    "interventions": [
+      "Cardiac magnetic Resonance study"
+    ],
+    "brief_summary": "In this study, we investigate the role of Cardiac Magnetic Resonance Imaging in patients with suspected, but not yet proven, \"acute cardiac syndrome ACS\". Patients are included if they presented to the local Emergency Department with chest pain, but the first tests in the Emergency Department are negative or not clearly indicative of cardiac ischemia. For example, the first lab value Troponin T is negative or borderline elevated; or the first ECG is not clearly indicative of ischemia. The standard procedure for these patients is to wait 4-6 hours and then repeat the test; if they continue to be negative, the patients are discharged home, if the have become positive, an invasive coronary artery angiography has to be performed. We think, that a CMR study can shorten the time needed to make the decision of either \"discharge\" or \"admit to CCU and perform a coronary artery angiography\". CMR has been shown to be the gold standard for heart function (thus, can see even subtle wall motion abnormalities), for tissue characterization (so-called T2-weighted images can identify tissue edema (swelling); perfusion images can identify areas with reduced blood supply; late enhancement images can safely identify fibrotic or irreversibly damaged tissue) and can even be used to stress the patients to exclude a critical or non-critical narrowing of coronary arteries. The primary endpoint of this study will be the impact of CMR on the time-to-decision in these patients. It should be possible to a) identify all patients WITH an acute infarct by CMR and send them to a cath lab sooner compared to waiting for a second test; b) identify all patients WITHOUT an acute infarct and c) perform a stress test in those patients to exclude severe coronary artery disease.",
+    "eligibility_text": "Inclusion Criteria: 1. 18+ years of age, informed consent obtained 2. Chest pain, suggestive of coronary artery disease, plus at least one more point from the TIMI risk score (TIMI score ≥2) 3. Troponin is negative on 1st draw; based on the Emergency Room Physician's discretion, a 2nd Troponin draw is indicated and pending Exclusion Criteria: 1. ST elevation on ECG, new Q-waves or dynamic ST-segment changes, 2nd or 3rd degree AV-block 2. Unstable patients 3. PCI or myocardial infarction within 3 months 4. Ferromagnetic objects precluding MRI imaging (e.g., pacemaker, defibrillator, cerebral aneurysm clip, metal in eye, insulin pumps, neural stimulators, cochlea implants) 5. Pregnancy 6. Extreme claustrophobia 7. Asthma 8. Inability to lie flat",
+    "study_type": "Interventional",
+    "phase": "N/A",
+    "primary_purpose": "Diagnostic",
+    "copied_xml_relpath": "xml/NCT00564382.xml",
+    "source_xml_path": "/home/yuanzy/trial-classifier/数据/ClinicalTrials.2021-04-27.part1/NCT0056xxxx/NCT00564382.xml"
+  }
+}

@@ -565,6 +565,12 @@ class ClinicalToolAgent:
                 forced_tool_pmid=override_pmid,
             )
             selection_mode = "oracle_forced" if job.forced_tool_pmid else "parent_selected"
+        elif job.mode == "patient_note":
+            selected_tool = self._select_top_retrieved_tool(
+                job,
+                selection_candidates,
+            )
+            selection_mode = "retrieval_ranked"
         else:
             selected_tool = self._select_tool_for_question(
                 job,
@@ -841,6 +847,181 @@ class ClinicalToolAgent:
             metadata={"stage": "question_selection", "selection_mode": "oracle_forced"},
         )
         return selection
+
+    def _select_top_retrieved_tool(
+        self,
+        job: ClinicalToolJob,
+        retrieved: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        """Select the calculator from retrieval order after applicability reranking.
+
+        Patient-note mode already runs structured case normalization plus coarse
+        calculator recall and computation-parameter reranking before selection.
+        Letting a second LLM selector override that order makes the calculator
+        path unstable and can drift toward generic downstream treatment themes.
+        We still apply a small deterministic applicability rerank because the
+        computation-parameter pass can over-promote wrong-cohort echo tools.
+        Question mode still uses the LLM selector because the user may be asking
+        an explicit tool-choice question rather than providing an admission note.
+        """
+        ranked_candidates = self._rank_patient_note_candidates(job, retrieved)
+        selected_candidate = ranked_candidates[0] if ranked_candidates else None
+        if selected_candidate is None:
+            selection = {
+                "pmid": "",
+                "title": "",
+                "purpose": "",
+                "parameter_names": [],
+                "model_parameter_names": [],
+                "model_selected_tool_id": None,
+                "fallback_used": False,
+                "reason": "No candidate calculator was available after retrieval ranking.",
+                "raw_response": None,
+            }
+            self._record_tool_call(
+                "riskcalc_selector",
+                input_payload={
+                    "mode": job.mode,
+                    "clinical_text": summarize_text(job.text),
+                    "candidate_tools": retrieved,
+                },
+                output_payload=selection,
+                metadata={"stage": "patient_note_selection", "selection_mode": "retrieval_ranked"},
+            )
+            return selection
+
+        selected_tool_id = str(selected_candidate.get("pmid") or "").strip()
+        selected_doc = self.catalog.get(selected_tool_id)
+        parameter_names = self._resolve_candidate_parameter_names(
+            pmid=selected_tool_id,
+            candidate=selected_candidate,
+        )
+        selection = {
+            "pmid": selected_tool_id,
+            "title": selected_doc.title.strip(),
+            "purpose": selected_doc.purpose.strip(),
+            "parameter_names": parameter_names,
+            "model_parameter_names": [],
+            "model_selected_tool_id": None,
+            "fallback_used": False,
+            "reason": "Selected from calculator retrieval ranking with patient-note applicability reranking.",
+            "raw_response": None,
+            "present_in_retrieved_candidates": True,
+        }
+        self._record_tool_call(
+            "riskcalc_selector",
+            input_payload={
+                "mode": job.mode,
+                "clinical_text": summarize_text(job.text),
+                "candidate_tools": retrieved,
+            },
+            output_payload=selection,
+            metadata={"stage": "patient_note_selection", "selection_mode": "retrieval_ranked"},
+        )
+        return selection
+
+    @staticmethod
+    def _patient_note_case_text(job: ClinicalToolJob) -> str:
+        structured_case = dict(job.structured_case or {})
+        parts: list[str] = [job.text, job.case_summary]
+        for key in ("raw_text", "case_summary"):
+            parts.append(str(structured_case.get(key) or ""))
+        for key in ("problem_list", "known_facts"):
+            parts.extend(str(item) for item in list(structured_case.get(key) or []))
+        return " ".join(part for part in parts if str(part).strip()).casefold()
+
+    @staticmethod
+    def _candidate_text(candidate: dict[str, Any]) -> str:
+        return " ".join(
+            str(candidate.get(key) or "")
+            for key in ("title", "purpose", "eligibility")
+        ).casefold()
+
+    def _rank_patient_note_candidates(
+        self,
+        job: ClinicalToolJob,
+        retrieved: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        case_text = self._patient_note_case_text(job)
+        has_aortic_stenosis = (
+            "aortic stenosis" in case_text
+            or "aortic valve stenosis" in case_text
+            or "critical av stenosis" in case_text
+        )
+        has_valve_intervention = any(
+            cue in case_text
+            for cue in (
+                "valve replacement",
+                "valvular replacement",
+                "aortic valve replacement",
+                "tavi",
+                "tavr",
+                "avr",
+            )
+        )
+        has_rheumatic = "rheumatic" in case_text or "rhd" in case_text
+        has_subaortic = "subaortic" in case_text
+        has_iabp = "iabp" in case_text or "intra-aortic balloon" in case_text
+        has_af = (
+            "atrial fibrillation" in case_text
+            or "afib" in case_text
+            or " af " in f" {case_text} "
+        )
+        has_pediatric = any(cue in case_text for cue in ("child", "children", "pediatric", "paediatric"))
+
+        def score_candidate(index: int, raw_candidate: dict[str, Any]) -> tuple[float, int]:
+            candidate = dict(raw_candidate or {})
+            candidate_text = self._candidate_text(candidate)
+            score = 0.0
+
+            if has_aortic_stenosis and any(
+                cue in candidate_text
+                for cue in (
+                    "aortic stenosis",
+                    "aortic valve",
+                    "aortic valve replacement",
+                    "transcatheter aortic valve",
+                    "tavi",
+                    "tavr",
+                    "avr",
+                )
+            ):
+                score += 6.0
+            if has_valve_intervention and any(
+                cue in candidate_text
+                for cue in ("tavi", "tavr", "aortic valve replacement", "transcatheter aortic valve", "avr")
+            ):
+                score += 4.0
+            if "bicuspid aortic valve" in case_text and "aortic" in candidate_text:
+                score += 2.0
+            if "heart failure" in case_text and "heart failure" in candidate_text:
+                score += 1.0
+
+            if "rheumatic" in candidate_text and not has_rheumatic:
+                score -= 7.0
+            if any(cue in candidate_text for cue in ("children", "pediatric", "paediatric")) and not has_pediatric:
+                score -= 4.0
+            if "subaortic" in candidate_text and not has_subaortic:
+                score -= 3.0
+            if any(cue in candidate_text for cue in ("iabp", "intra-aortic balloon")) and not has_iabp:
+                score -= 3.0
+            if any(cue in candidate_text for cue in ("atrial fibrillation", "non-valvular atrial fibrillation", "nvaf")) and not has_af:
+                score -= 3.0
+
+            return (-score, index)
+
+        candidates = [
+            dict(candidate)
+            for candidate in list(retrieved or [])
+            if str(dict(candidate).get("pmid") or "").strip()
+        ]
+        return [
+            candidate
+            for _, candidate in sorted(
+                enumerate(candidates),
+                key=lambda item: score_candidate(item[0], item[1]),
+            )
+        ]
 
     def _run_patient_note(self, job: ClinicalToolJob) -> dict[str, Any]:
         if self._should_use_preselected_path(job):

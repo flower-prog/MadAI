@@ -1,0 +1,72 @@
+department_tag	department_role	nct_id	medai_status	overall_status	payload_relpath	copied_xml_relpath
+五官科	primary	NCT00135629	manual_review	Unknown status	五官科/treatment_trials.json	xml/NCT00135629.xml
+五官科	primary	NCT00403325	trial_matched	Completed	五官科/treatment_trials.json	xml/NCT00403325.xml
+五官科	primary	NCT00803803	trial_matched	Completed	五官科/treatment_trials.json	xml/NCT00803803.xml
+传染科	primary	NCT00001142	trial_matched	Completed	传染科/treatment_trials.json	xml/NCT00001142.xml
+传染科	primary	NCT00068809	trial_matched	Completed	传染科/treatment_trials.json	xml/NCT00068809.xml
+传染科	primary	NCT00201448	abandoned	Terminated	传染科/treatment_trials.json	xml/NCT00201448.xml
+传染科	primary	NCT00717730	trial_matched	Completed	传染科/treatment_trials.json	xml/NCT00717730.xml
+传染科	primary	NCT00966160	trial_matched	Completed	传染科/treatment_trials.json	xml/NCT00966160.xml
+儿科	primary	NCT00146185	trial_matched	Completed	儿科/treatment_trials.json	xml/NCT00146185.xml
+儿科	primary	NCT00462085	trial_matched	Completed	儿科/treatment_trials.json	xml/NCT00462085.xml
+儿科	primary	NCT00984230	trial_matched	Completed	儿科/treatment_trials.json	xml/NCT00984230.xml
+儿科	secondary	NCT00001142	trial_matched	Completed	儿科/treatment_trials.json	xml/NCT00001142.xml
+儿科	secondary	NCT00068809	trial_matched	Completed	儿科/treatment_trials.json	xml/NCT00068809.xml
+儿科	secondary	NCT00116675	trial_matched	Completed	儿科/treatment_trials.json	xml/NCT00116675.xml
+儿科	secondary	NCT00717730	trial_matched	Completed	儿科/treatment_trials.json	xml/NCT00717730.xml
+内科	primary	NCT00276250	trial_matched	Completed	内科/treatment_trials.json	xml/NCT00276250.xml
+内科	primary	NCT00365586	trial_matched	Completed	内科/treatment_trials.json	xml/NCT00365586.xml
+内科	primary	NCT00408824	manual_review	Unknown status	内科/treatment_trials.json	xml/NCT00408824.xml
+内科	primary	NCT00490178	trial_matched	Completed	内科/treatment_trials.json	xml/NCT00490178.xml
+内科	primary	NCT00529087	trial_matched	Completed	内科/treatment_trials.json	xml/NCT00529087.xml
+内科	primary	NCT00593489	trial_matched	Completed	内科/treatment_trials.json	xml/NCT00593489.xml
+内科	primary	NCT00628615	manual_review	Unknown status	内科/treatment_trials.json	xml/NCT00628615.xml
+内科	primary	NCT00704795	manual_review	Unknown status	内科/treatment_trials.json	xml/NCT00704795.xml
+内科	primary	NCT00731874	abandoned	Terminated	内科/treatment_trials.json	xml/NCT00731874.xml
+内科	primary	NCT00889707	trial_matched	Completed	内科/treatment_trials.json	xml/NCT00889707.xml
+内科	secondary	NCT00001142	trial_matched	Completed	内科/treatment_trials.json	xml/NCT00001142.xml
+内科	secondary	NCT00044720	trial_matched	Completed	内科/treatment_trials.json	xml/NCT00044720.xml
+内科	secondary	NCT00209586	abandoned	Terminated	内科/treatment_trials.json	xml/NCT00209586.xml
+内科	secondary	NCT00311896	abandoned	Terminated	内科/treatment_trials.json	xml/NCT00311896.xml
+内科	secondary	NCT00332631	trial_matched	Completed	内科/treatment_trials.json	xml/NCT00332631.xml
+内科	secondary	NCT00564382	trial_matched	Completed	内科/treatment_trials.json	xml/NCT00564382.xml
+医学影像科	primary	NCT00310479	trial_matched	Completed	医学影像科/treatment_trials.json	xml/NCT00310479.xml
+医学影像科	primary	NCT00564382	trial_matched	Completed	医学影像科/treatment_trials.json	xml/NCT00564382.xml
+医学影像科	primary	NCT00951678	manual_review	Unknown status	医学影像科/treatment_trials.json	xml/NCT00951678.xml
+医学影像科	secondary	NCT00740454	trial_matched	Completed	医学影像科/treatment_trials.json	xml/NCT00740454.xml
+医学影像科	secondary	NCT00951197	trial_matched	Completed	医学影像科/treatment_trials.json	xml/NCT00951197.xml
+外科	primary	NCT00044720	trial_matched	Completed	外科/treatment_trials.json	xml/NCT00044720.xml
+外科	primary	NCT00332631	trial_matched	Completed	外科/treatment_trials.json	xml/NCT00332631.xml
+外科	primary	NCT00567333	trial_matched	Completed	外科/treatment_trials.json	xml/NCT00567333.xml
+外科	primary	NCT00699946	trial_matched	Completed	外科/treatment_trials.json	xml/NCT00699946.xml
+外科	secondary	NCT00361582	trial_matched	Completed	外科/treatment_trials.json	xml/NCT00361582.xml
+外科	secondary	NCT00461838	trial_matched	Completed	外科/treatment_trials.json	xml/NCT00461838.xml
+外科	secondary	NCT00462085	trial_matched	Completed	外科/treatment_trials.json	xml/NCT00462085.xml
+外科	secondary	NCT00706823	trial_matched	Completed	外科/treatment_trials.json	xml/NCT00706823.xml
+妇产科	primary	NCT00224250	trial_matched	Completed	妇产科/treatment_trials.json	xml/NCT00224250.xml
+妇产科	primary	NCT00461838	trial_matched	Completed	妇产科/treatment_trials.json	xml/NCT00461838.xml
+妇产科	primary	NCT00740454	trial_matched	Completed	妇产科/treatment_trials.json	xml/NCT00740454.xml
+妇产科	secondary	NCT00201448	abandoned	Terminated	妇产科/treatment_trials.json	xml/NCT00201448.xml
+妇产科	secondary	NCT00543049	trial_matched	Completed	妇产科/treatment_trials.json	xml/NCT00543049.xml
+皮肤性病科	primary	NCT00116675	trial_matched	Completed	皮肤性病科/treatment_trials.json	xml/NCT00116675.xml
+皮肤性病科	primary	NCT00640393	trial_matched	Completed	皮肤性病科/treatment_trials.json	xml/NCT00640393.xml
+皮肤性病科	primary	NCT00871052	trial_matched	Completed	皮肤性病科/treatment_trials.json	xml/NCT00871052.xml
+精神心理科	primary	NCT00048204	trial_matched	Completed	精神心理科/treatment_trials.json	xml/NCT00048204.xml
+精神心理科	primary	NCT00534599	trial_matched	Completed	精神心理科/treatment_trials.json	xml/NCT00534599.xml
+精神心理科	primary	NCT00894842	trial_matched	Completed	精神心理科/treatment_trials.json	xml/NCT00894842.xml
+精神心理科	primary	NCT00906191	trial_matched	Completed	精神心理科/treatment_trials.json	xml/NCT00906191.xml
+精神心理科	primary	NCT00951197	trial_matched	Completed	精神心理科/treatment_trials.json	xml/NCT00951197.xml
+精神心理科	secondary	NCT00699946	trial_matched	Completed	精神心理科/treatment_trials.json	xml/NCT00699946.xml
+肿瘤科	primary	NCT00006254	trial_matched	Completed	肿瘤科/treatment_trials.json	xml/NCT00006254.xml
+肿瘤科	primary	NCT00022971	abandoned	Terminated	肿瘤科/treatment_trials.json	xml/NCT00022971.xml
+肿瘤科	primary	NCT00024362	manual_review	Unknown status	肿瘤科/treatment_trials.json	xml/NCT00024362.xml
+肿瘤科	primary	NCT00311896	abandoned	Terminated	肿瘤科/treatment_trials.json	xml/NCT00311896.xml
+肿瘤科	primary	NCT00540995	trial_matched	Active, not recruiting	肿瘤科/treatment_trials.json	xml/NCT00540995.xml
+肿瘤科	primary	NCT00543049	trial_matched	Completed	肿瘤科/treatment_trials.json	xml/NCT00543049.xml
+肿瘤科	primary	NCT00787267	abandoned	Terminated	肿瘤科/treatment_trials.json	xml/NCT00787267.xml
+肿瘤科	primary	NCT00842348	trial_matched	Completed	肿瘤科/treatment_trials.json	xml/NCT00842348.xml
+肿瘤科	secondary	NCT00310479	trial_matched	Completed	肿瘤科/treatment_trials.json	xml/NCT00310479.xml
+麻醉医学科	primary	NCT00209586	abandoned	Terminated	麻醉医学科/treatment_trials.json	xml/NCT00209586.xml
+麻醉医学科	primary	NCT00361582	trial_matched	Completed	麻醉医学科/treatment_trials.json	xml/NCT00361582.xml
+麻醉医学科	primary	NCT00706823	trial_matched	Completed	麻醉医学科/treatment_trials.json	xml/NCT00706823.xml
+麻醉医学科	secondary	NCT00146185	trial_matched	Completed	麻醉医学科/treatment_trials.json	xml/NCT00146185.xml

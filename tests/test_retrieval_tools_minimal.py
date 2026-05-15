@@ -4,6 +4,7 @@ import contextlib
 import json
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import agent.tools as tools
 import agent.tools.retrieval_tools as retrieval_tools
@@ -852,8 +853,11 @@ class RetrievalToolsMinimalTests(unittest.TestCase):
         riskcalcs_path = self._build_temp_riskcalcs_path("riskcalcs.computation.json")
         try:
             self._write_riskcalcs_payload(riskcalcs_path, _af_riskcalcs_payload())
-            tool_provider = create_computation_retrieval_tool(_FakeCatalogWithSourceFiles(riskcalcs_path))
-            tool_provider.vector_retriever = _FakeComputationVectorRetriever()
+            with patch(
+                "agent.tools.computation_retrieval_tools.MedCPTRetriever",
+                return_value=_FakeComputationVectorRetriever(),
+            ):
+                tool_provider = create_computation_retrieval_tool(_FakeCatalogWithSourceFiles(riskcalcs_path))
             payload = tool_provider.retrieve_from_structured_case(
                 {
                     "structured_inputs": {
@@ -894,8 +898,11 @@ class RetrievalToolsMinimalTests(unittest.TestCase):
         }
         try:
             self._write_riskcalcs_payload(riskcalcs_path, payload)
-            tool_provider = create_computation_retrieval_tool(_FakeCatalogWithSourceFiles(riskcalcs_path))
-            tool_provider.vector_retriever = _FiveWayComputationVectorRetriever()
+            with patch(
+                "agent.tools.computation_retrieval_tools.MedCPTRetriever",
+                return_value=_FiveWayComputationVectorRetriever(),
+            ):
+                tool_provider = create_computation_retrieval_tool(_FakeCatalogWithSourceFiles(riskcalcs_path))
             rows = tool_provider.retrieve_from_structured_case(
                 {
                     "structured_inputs": {

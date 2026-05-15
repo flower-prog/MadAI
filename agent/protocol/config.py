@@ -6,8 +6,8 @@ from typing import Any
 
 
 DEFAULT_PROTOCOL_TRIAL_COARSE_TOP_K = 300
-DEFAULT_PROTOCOL_TRIAL_TOP_K = 20
-DEFAULT_PROTOCOL_ELIGIBILITY_LIMIT = 5
+DEFAULT_PROTOCOL_TRIAL_TOP_K = 50
+DEFAULT_PROTOCOL_ELIGIBILITY_LIMIT = 10
 
 
 def _env_int(names: tuple[str, ...], *, default: int) -> int:
@@ -42,6 +42,7 @@ class ProtocolGraphConfig:
     coarse_top_k: int = DEFAULT_PROTOCOL_TRIAL_COARSE_TOP_K
     fine_top_k: int = DEFAULT_PROTOCOL_TRIAL_TOP_K
     eligibility_limit: int = DEFAULT_PROTOCOL_ELIGIBILITY_LIMIT
+    enable_llm_eligibility_judge: bool = False
     skip_trial_agent: bool = False
     skip_medical_knowledge_agent: bool = False
     skip_patient_calculator_evidence_agent: bool = False
@@ -80,6 +81,16 @@ class ProtocolGraphConfig:
                     )
                 ),
                 1,
+            ),
+            enable_llm_eligibility_judge=bool(
+                payload.get("enable_llm_eligibility_judge")
+                or _env_bool(
+                    (
+                        "MEDAI_PROTOCOL_ENABLE_LLM_ELIGIBILITY_JUDGE",
+                        "MEDAI_ENABLE_LLM_ELIGIBILITY_JUDGE",
+                    ),
+                    default=False,
+                )
             ),
             skip_trial_agent=bool(
                 payload.get("skip_trial_agent")

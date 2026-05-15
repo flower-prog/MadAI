@@ -1,0 +1,446 @@
+<clinical_study>
+  <!-- This xml conforms to an XML Schema at:
+    https://clinicaltrials.gov/ct2/html/images/info/public.xsd -->
+  <required_header>
+    <download_date>ClinicalTrials.gov processed this data on April 27, 2021</download_date>
+    <link_text>Link to the current ClinicalTrials.gov record.</link_text>
+    <url>https://clinicaltrials.gov/show/NCT00332631</url>
+  </required_header>
+  <id_info>
+    <org_study_id>H2004/01899</org_study_id>
+    <nct_id>NCT00332631</nct_id>
+  </id_info>
+  <brief_title>High-Dose N-Acetylcysteine in Cardiac Surgery</brief_title>
+  <official_title>High-Dose N-Acetylcysteine in Cardiac Surgery Patients at High-Risk of Postoperative Renal Dysfunction.</official_title>
+  <sponsors>
+    <lead_sponsor>
+      <agency>Austin Health</agency>
+      <agency_class>Other</agency_class>
+    </lead_sponsor>
+  </sponsors>
+  <source>Austin Health</source>
+  <brief_summary>
+    <textblock>
+      At least 14% of patients develop kidney failure after cardiac surgery. Although this kidney&#xD;
+      failure can usually be treated effectively, a longer stay in intensive care is often&#xD;
+      required. While many patients suffer no long term ill effects after developing post-operative&#xD;
+      kidney failure, some require long term kidney dialysis. The investigators also know that&#xD;
+      patients who develop post-operative kidney failure are much more likely to die before they&#xD;
+      leave hospital.&#xD;
+&#xD;
+      Why some people develop kidney failure after cardiac surgery is not known. However, doctors&#xD;
+      suspect that the process of cardiopulmonary bypass (where the functions of the heart and&#xD;
+      lungs are taken over by a machine during the operation, to allow the surgeon to operate)&#xD;
+      overactivates some of the same mechanisms the body uses to defend itself against severe&#xD;
+      infection. Many of the cell changes by which severe infection causes kidney failure also&#xD;
+      occur after cardiopulmonary bypass. One of the main overactive defence mechanisms is the&#xD;
+      release of highly toxic compounds derived from oxygen - a process called 'oxidative stress'.&#xD;
+&#xD;
+      Another well-known cause of oxidative stress is paracetamol (Panadol) overdose. In large&#xD;
+      doses the oxidative stress caused by paracetamol damages cells in the liver, where it is&#xD;
+      digested, and the kidney. N-acetylcysteine is a drug in common use for the treatment of&#xD;
+      paracetamol overdose. Patients who would otherwise die of liver failure are routinely saved&#xD;
+      by N-acetylcysteine, which acts as a strong anti-oxidant.&#xD;
+&#xD;
+      The investigators believe that N-acetylcysteine might similarly reduce the oxidative stress&#xD;
+      which occurs during cardiac surgery, and so prevent or decrease the kidney failure which&#xD;
+      occurs in many patients. The investigators hope to give N-acetylcysteine (in similar doses to&#xD;
+      those used safely for paracetamol poisoning) to patients during, and for a day after cardiac&#xD;
+      surgery, and compare the effects with patients who have not had N-acetylcysteine. The drug,&#xD;
+      or a 5% glucose placebo, will be given through the drip which is present in all cardiac&#xD;
+      surgery patients. Whether a particular patient receives the drug or placebo will be decided&#xD;
+      at random, and neither the patient nor the investigators will know which has been given. The&#xD;
+      investigators will measure kidney function before and after the operation using the standard&#xD;
+      tests which are performed for the purposes of clinical care of every patient. Also, the&#xD;
+      investigators will do an extra test involving the collection of urine (from the urinary&#xD;
+      catheter every patient has after cardiac surgery), which provides an even better measure of&#xD;
+      kidney function. This is a potential benefit to the patient, as while this test is not&#xD;
+      routinely performed, the results will be available to the doctors in the intensive care unit.&#xD;
+      The investigators will also take four 20ml samples of blood, spaced before, during, and after&#xD;
+      the operation, from the arterial catheter routinely inserted in every patient. This is an&#xD;
+      insignificant amount of blood compared to that taken for other tests, and would have no&#xD;
+      adverse effects. This blood would be used to measure oxidative stress, and also some of the&#xD;
+      proteins inside the blood cells which are responsible for creating the toxic oxygen&#xD;
+      compounds. In this way the investigators will discover not only the effect of&#xD;
+      N-acetylcysteine, but the mechanism of that effect.&#xD;
+&#xD;
+      N-acetylcysteine is routinely used to treat paracetamol overdose with few side effects. An&#xD;
+      itchy skin rash is the only common side effect. Sometimes patients develop nausea and&#xD;
+      vomiting, but the treatment for this is usually very effective, and the drug will be stopped&#xD;
+      if it occurs. Rarely, as with all drugs, allergic reactions have been reported, but there are&#xD;
+      no other reported adverse effects.&#xD;
+&#xD;
+      There will be no extra risk to a patient who participates in the study, and no discomfort&#xD;
+      other than that normally associated with cardiac surgery. The itchy rash which occasionally&#xD;
+      develops with N-acetylcysteine would occur under anaesthetic, and would almost certainly be&#xD;
+      gone by the time the patient wakes up.&#xD;
+&#xD;
+      Informed consent will be obtained from the patient prior to the operation by one of the&#xD;
+      investigators or the ICU research nurse.&#xD;
+    </textblock>
+  </brief_summary>
+  <detailed_description>
+    <textblock>
+      Background&#xD;
+&#xD;
+      Renal impairment following cardiopulmonary bypass is common. 11.4% (1) to 42% (2) of patients&#xD;
+      with previously normal renal function show a postoperative rise in serum creatinine. While&#xD;
+      most of these patients do not require either short or long term renal replacement, the&#xD;
+      mortality of patients with acute renal failure is substantially greater than those who do not&#xD;
+      develop renal dysfunction1.&#xD;
+&#xD;
+      Cardiopulmonary bypass activates components of the non-specific immune system, which leads to&#xD;
+      the generation of compounds containing oxygen free radicals. A study of 14 patients&#xD;
+      undergoing cardiac surgery found increased levels of serum lipid peroxidation products&#xD;
+      (thiobarbituric acid reactive substances) within 15 minutes of the commencement of&#xD;
+      cardiopulmonary bypass, which returned to preoperative levels by the following morning. The&#xD;
+      total serum antioxidative capacity was correspondingly decreased intraoperatively, and&#xD;
+      remained decreased at 24 hours postoperatively (3). A similar study of total plasma&#xD;
+      antioxidant status showed decreased levels up to 72 hours postoperatively(4). It is clear&#xD;
+      that cardiopulmonary bypass causes oxidative stress and depletion of antioxidant capacity.&#xD;
+&#xD;
+      N-acetylcysteine is routinely used in the treatment of paracetamol overdose. Paracetamol is&#xD;
+      metabolised by the liver by cytochrome p450 to form a toxic reactive oxygen compound. This&#xD;
+      metabolite is normally detoxified by conjugation with hepatic reduced glutathione (GSH). In&#xD;
+      overdose, the GSH stores are depleted, leading to liver cell necrosis through oxidative&#xD;
+      damage. N-acetylcysteine is a sulfydryl group donor, which allows regeneration of GSH, thus&#xD;
+      augmenting the antioxidant defence of the liver. Treatment of paracetamol overdose is&#xD;
+      currently the only approved indication for N-acetylcysteine. Possible adverse reactions&#xD;
+      include an urticarial rash, nausea and vomiting, and an anaphylactoid reaction (involving&#xD;
+      hypotension, tachycardia, bronchospasm, and facial oedema). These reactions occur most&#xD;
+      commonly either during, or at the end of, the period of the loading dose infusion, and may be&#xD;
+      concentration related (5).&#xD;
+&#xD;
+      Oxidative stress can be produced experimentally using hypertonic glycerol. Intramuscular&#xD;
+      injection of hypertonic glycerol in rats precipitated acute renal failure associated with a&#xD;
+      marked decrease in renal reduced glutathione (GSH) levels. Pretreatment with N-acetylcysteine&#xD;
+      largely prevented these changes (6). During reperfusion after renal ischaemia in rats, renal&#xD;
+      blood flow was reduced compared to pre-ischaemic values. GFR was also reduced, and plasma&#xD;
+      peroxynitrite (a marker of nitric oxide synthesis, a component of oxidative stress) was&#xD;
+      increased. Pretreatment with N-acetylcysteine partially prevented these changes (7).&#xD;
+      N-acetylcysteine (combined with a nitric oxide donor and an endothelin converting enzyme&#xD;
+      inhibitor) also decreased the effect of renal ischaemia/reperfusion injury in dogs, in terms&#xD;
+      of improved renal function as well as reduced interstitial pro-inflammatory cytokines and&#xD;
+      inducible nitric oxide synthase (8).&#xD;
+&#xD;
+      Radiocontrast commonly causes renal dysfunction, in part through oxidative stress in the&#xD;
+      kidney. While not an approved indication, intravenous N-acetylcysteine has been used&#xD;
+      successfully to attenuate radiocontrast induced nephropathy, and was more effective than&#xD;
+      standard intravenous fluid prophylaxis (relative risk 0.28) (9). While not an approved&#xD;
+      product indication, N-acetylcysteine is currently used in our hospital for this purpose.&#xD;
+&#xD;
+      Infrarenal abdominal aortic aneurysm repair commonly causes ischaemia/reperfusion injury to&#xD;
+      the kidney, producing a similar oxidative stress to that of radiocontrast. A mixture of&#xD;
+      antioxidants including N-acetylcysteine given to patients undergoing infrarenal abdominal&#xD;
+      aortic aneurysm repair produced a significantly better creatinine clearance (compared to&#xD;
+      placebo controls) 48 hours postoperatively (10).&#xD;
+&#xD;
+      While never investigated for its effects on renal function after cardiac surgery, the effect&#xD;
+      of perioperative N-acetylcysteine on other systems has been studied. The oxidative burst&#xD;
+      response of neutrophils from patients undergoing cardiopulmonary bypass was significantly&#xD;
+      attenuated by infusion of N-acetylcysteine into the bypass circuit (11).&#xD;
+&#xD;
+      A study of dogs undergoing cardiopulmonary bypass found preload-recruitable stroke work was&#xD;
+      maintained at pre-bypass levels in those animals given N-acetylcysteine, whereas it fell in&#xD;
+      control animals. N-acetylcysteine significantly enhanced myocardial oedema resolution, and&#xD;
+      prevented the rise in plasma 8-isoprostane (a marker of oxidative stress) seen in control&#xD;
+      animals (12). Similar results were found in a study of 40 patients undergoing cardiac&#xD;
+      surgery: left ventricular biopsy specimens showed less 8-isoprostane content and less&#xD;
+      nitrotyrosine (a marker of nitric oxide production; nitric oxide can act as an oxygen free&#xD;
+      radical). There were no differences in haemodynamics or clinical outcomes noted, but&#xD;
+      unfortunately indices of renal function were not examined in this study (13).&#xD;
+&#xD;
+      Ascorbate is an antioxidant which might be expected to have a similar action to&#xD;
+      N-acetylcysteine. Supplemental ascorbate was given to 43 patients before, and for 5 days&#xD;
+      after, coronary artery bypass surgery. Patients receiving ascorbate had a 16.3% incidence of&#xD;
+      postoperative AF, compared to 34.9% in control subjects, perhaps by reducing oxidative damage&#xD;
+      to the myocardium (14).&#xD;
+&#xD;
+      Pulmonary endothelium-dependent vasodilation is usually impaired after cardiopulmonary&#xD;
+      bypass, a process thought to be related to reactive oxygen species. Pulmonary vasodilation&#xD;
+      induced by acetylcholine following cardiopulmonary bypass was better maintained in 12&#xD;
+      patients given a cocktail of antioxidants (including N-acetylcysteine) compared to that in 10&#xD;
+      control patients (15).&#xD;
+&#xD;
+      There is thus evidence that in the immune, cardiovascular and respiratory systems,&#xD;
+      N-acetylcysteine may be of benefit to patients undergoing cardiac surgery.&#xD;
+&#xD;
+      Clinical sepsis or experimental exposure to lipopolysaccharide stimulate cells of the&#xD;
+      inflammatory system to form oxygen free radicals. N-acetylcysteine decreases cytokine and&#xD;
+      adhesion molecule gene expression and NF-kB activation in vitro. In animal models of sepsis&#xD;
+      N-acetylcysteine reduces inflammatory cell chemotaxis and improves survival (as reviewed by&#xD;
+      ref. 16). In patients suffering oxidative stress due to sepsis, N-acetylcysteine results in&#xD;
+      decreased NF-kB activation and decreased IL-8 production (16).&#xD;
+&#xD;
+      Hypotheses N-acetylcysteine administered from the time of induction of anaesthesia prior to&#xD;
+      cardiac surgery and for 24 hours postoperatively results in decreased change in serum&#xD;
+      creatinine from baseline to peak level within first 5 postoperative days.&#xD;
+&#xD;
+      Other secondary outcomes which will be measured include:&#xD;
+&#xD;
+        -  better creatinine clearance over the first postoperative day;&#xD;
+&#xD;
+        -  shorter ICU stay;&#xD;
+&#xD;
+        -  shorter hospital stay;&#xD;
+&#xD;
+        -  lower serum creatinine levels on day 2 post-op;&#xD;
+&#xD;
+        -  greater plasma antioxidant activity;&#xD;
+&#xD;
+        -  less oxidative stress;&#xD;
+&#xD;
+        -  less NF-kB activation in the cellular components of blood;&#xD;
+&#xD;
+        -  less pro-inflammatory cytokine response; and&#xD;
+&#xD;
+        -  less activation of the nitric oxide synthase pathway.&#xD;
+&#xD;
+      Study Design - overview and rationale&#xD;
+&#xD;
+      Patients will be randomised to receive N-acetylcysteine from the induction of anaesthesia&#xD;
+      until 24 hours postoperatively, or a placebo (5% glucose).&#xD;
+&#xD;
+      Serum creatinine is the most commonly used clinical indicator of renal function along with&#xD;
+      urine output. Both will be measured for 48 hours postoperatively - the time period during&#xD;
+      which renal impairment is most likely to develop. A more sensitive indicator of renal&#xD;
+      dysfunction is creatinine clearance. This will be measured over the first 24 hours&#xD;
+      postoperatively, and will form the primary end point of the study. As patients in our&#xD;
+      intensive care unit are routinely given frusemide to maintain a postoperative urine output of&#xD;
+      &gt;0.5ml/kg/hr (once fluid volume, inotropy and vascular tone have been manipulated into what&#xD;
+      is judged to be acceptable ranges), the dose of frusemide required is also an indicator of&#xD;
+      renal function. Rarely are other diuretics given, though where this is the case it will also&#xD;
+      be noted.&#xD;
+&#xD;
+      The efficacy of N-acetylcysteine in preventing oxidative stress will be assessed using a&#xD;
+      measure of total plasma antioxidant activity (the bathocuproine assay) (17) and by&#xD;
+      quantification of the 8-isoprostane levels (18). Total antioxidant activity and 8-isoprostane&#xD;
+      have previously been shown to be affected by cardiac surgery and N-acetylcysteine.&#xD;
+&#xD;
+      Any renal effect of N-acetylcysteine will be correlated with levels of plasma&#xD;
+      pro-inflammatory cytokines (IL-1, IL-6 and TNF-alpha), which are known to be associated with&#xD;
+      oxidative-stress induced renal failure (19, 20). Activation of inducible nitric oxide&#xD;
+      production is also associated with renal failure (21), and the effect of N-acetylcysteine on&#xD;
+      nitric oxide synthase mRNA expression in the cellular components of blood will be assayed by&#xD;
+      real-time PCR. Nitric oxide production will be assessed by measurement of by plasma&#xD;
+      nitrotyrosine concentration. Assay of nitrotyrosine is superior to the traditional Greiss&#xD;
+      reaction (which measures nitrate and nitrite derivatives of nitric oxide), as nitrate and&#xD;
+      nitrite undergo renal excretion, and many of these patients will have altered renal function.&#xD;
+&#xD;
+      At a molecular level, many of the genes responsible for stimulating oxidative stress are&#xD;
+      regulated by the promoter NF-kB. The cellular components of blood will be assayed for NF-kB&#xD;
+      using an established ELISA technique (22) thought to be more sensitive than the&#xD;
+      electrophoretic mobility shift assay used to demonstrate an effect of N-acetylcysteine in&#xD;
+      human sepsis (16). NF-kB in the cellular components of blood will also be assayed using&#xD;
+      real-time PCR.&#xD;
+&#xD;
+      Randomisation The randomisation will be based on random numbers generated by computer. Once&#xD;
+      consent is obtained, the allocation of either treatment with N-acetylcysteine or placebo will&#xD;
+      be organised by an independent person (clinical trials pharmacist) who will dispense the&#xD;
+      coded infusion bags. This will be delivered to the anaesthetic staff looking after the&#xD;
+      patient in theatre, and the ICU nurse caring for the patient postoperatively.&#xD;
+&#xD;
+      Detailed protocol Immediately following the induction of anaesthesia, prior to the first&#xD;
+      surgical incision, N-acetylcysteine will be administered in a dose of 150 mg/kg IV in 200 mL&#xD;
+      5% glucose over 15 minutes followed by continuous IV infusion of 50 mg/kg in 500 mL 5%&#xD;
+      glucose over 4 hours, then 100 mg/kg in 1 L 5% glucose over 20 hours (total dose 300 mg/kg in&#xD;
+      24 hours). This is the standard dose of N-acetylcysteine used clinically in paracetamol&#xD;
+      overdose (5.) Patients randomised to receive placebo will receive an equivalent volume of 5%&#xD;
+      glucose. The appearance of the 5% glucose and N-acetylcysteine solutions is similar, and&#xD;
+      there will be no marking on the infusion bag other than an identifying study number.&#xD;
+&#xD;
+      A 24 hour urine collection will begin immediately on arrival in ICU, to allow determination&#xD;
+      of creatinine clearance. This will be measured in the hospital clinical pathology laboratory.&#xD;
+      Creatinine clearance will be the primary endpoint of the study.&#xD;
+&#xD;
+      Clinical data will be recorded as detailed below by the investigators or the ICU research&#xD;
+      nurse.&#xD;
+&#xD;
+      Four 20 ml samples of heparinised blood will be taken from the arterial line for cytokine and&#xD;
+      molecular analysis. Samples will be taken immediately after the induction of anaesthesia, on&#xD;
+      arrival in the intensive care unit, and 6 and 24 hours postoperatively. Immediately following&#xD;
+      collection, the blood will be centrifuged at low speed to separate the plasma from the&#xD;
+      cellular components, both of which will be stored in aliquots at -70 degrees prior to batch&#xD;
+      analysis.&#xD;
+&#xD;
+      Analysis of plasma total antioxidant activity and 8-isoprostane, IL-1, IL-6, TNF-alpha and&#xD;
+      nitrotyrosine concentrations will be performed using commercially available ELISA reagent&#xD;
+      kits (Oxford Biomedical Research, Oxis Research, BioCore). The cellular components of blood&#xD;
+      will be assayed for NF-kB concentration using a commercially available ELISA kit (Oxford&#xD;
+      Biomedical Research), and for iNOS and NF-kB mRNAs using a real-time PCR machine and Applied&#xD;
+      Biosystems pre-developed assay reagents with 18S as the endogenous control. The principal&#xD;
+      investigator has experience of these or similar techniques.&#xD;
+&#xD;
+      Statistics and power calculation Using data available from our cardiac surgery database of&#xD;
+      over 2500 patients in the last 5 years, we expect a mean increase in serum creatinine from&#xD;
+      baseline to a peak value of 50 micromol/L in the control group, with a standard deviation of&#xD;
+      30 micromol/L. Given these changes, 60 patients are needed to have a 90% power of detecting a&#xD;
+      30 micromol/L difference between the control and the intervention group at an alpha of 0.05.&#xD;
+&#xD;
+      Data collection Data collection will be performed by the principal investigator, ICU research&#xD;
+      nurse and ICU nursing staff.&#xD;
+&#xD;
+      The following variables will be obtained:&#xD;
+&#xD;
+      Name gender, age, and medical record number Date of admission to ICU Operative procedure and&#xD;
+      time on cardiopulmonary bypass Preoperative assessment of left ventricular function Serum&#xD;
+      creatinine and urea preoperatively, immediately postoperatively, and every 24 hours&#xD;
+      thereafter (as measured for clinical purposes) Doses of frusemide administered (or rate of&#xD;
+      frusemide infusion) Use of inotropes Cardiac output whenever measured for clinical purposes&#xD;
+      in the first 24 hours postoperatively Urine output in each 6 hour period for the 24 hours&#xD;
+      postoperatively Date of discharge from ICU and hospital or death&#xD;
+&#xD;
+      Protocol violations All protocol violations will be recorded. It will then be decided whether&#xD;
+      the nature of such violation had been such that the patient should be excluded from primary&#xD;
+      data analysis. Such evaluation will be blinded to treatment.&#xD;
+    </textblock>
+  </detailed_description>
+  <overall_status>Completed</overall_status>
+  <start_date>August 2004</start_date>
+  <completion_date>March 2006</completion_date>
+  <phase>Phase 2</phase>
+  <study_type>Interventional</study_type>
+  <has_expanded_access>No</has_expanded_access>
+  <study_design_info>
+    <allocation>Randomized</allocation>
+    <intervention_model>Parallel Assignment</intervention_model>
+    <primary_purpose>Prevention</primary_purpose>
+    <masking>Double</masking>
+  </study_design_info>
+  <primary_outcome>
+    <measure>Absolute change in serum creatinine from baseline to peak level within the first five postoperative days.</measure>
+  </primary_outcome>
+  <secondary_outcome>
+    <measure>Relative change in serum creatinine,</measure>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Highest serum creatinine,</measure>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Change in estimated glomerular filtration rate (eGFR),</measure>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Change in serum cystatin C (as a serum creatinine-independent marker of renal function during and after NAC administration (Hoffmann et al. JASN 2004),</measure>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Urinary output</measure>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Use of renal replacement therapy (RRT)</measure>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Acute renal dysfunction</measure>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Duration of ventilation,</measure>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Chest tube drainage,</measure>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Need for return to operating room,</measure>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Incidence of post-operative atrial fibrillation (AF),</measure>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Duration of stay in the intensive care unit (ICU)</measure>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Duration of stay in hospital</measure>
+  </secondary_outcome>
+  <enrollment>60</enrollment>
+  <condition>Cardiac Surgery and Cardiopulmonary Bypass</condition>
+  <intervention>
+    <intervention_type>Drug</intervention_type>
+    <intervention_name>N-acetylcysteine</intervention_name>
+  </intervention>
+  <intervention>
+    <intervention_type>Drug</intervention_type>
+    <intervention_name>Placebo</intervention_name>
+  </intervention>
+  <eligibility>
+    <criteria>
+      <textblock>
+        Inclusion Criteria:&#xD;
+&#xD;
+          -  Age above 70 years&#xD;
+&#xD;
+          -  Preexisting renal impairment (preoperative serum creatinine level &gt;120µmol/L&#xD;
+&#xD;
+          -  New York Heart Association class III/IV or Moderate to poor left ventricular&#xD;
+             dysfunction&#xD;
+&#xD;
+          -  Valve surgery or complex cardiac surgery&#xD;
+&#xD;
+          -  Redo cardiac surgery&#xD;
+&#xD;
+          -  Insulin-dependent diabetes mellitus&#xD;
+&#xD;
+        Exclusion Criteria:&#xD;
+&#xD;
+          -  Age &lt;18 years&#xD;
+&#xD;
+          -  Known allergy or hypersensitivity to N-acetylcysteine&#xD;
+&#xD;
+          -  Emergency cardiac surgery&#xD;
+&#xD;
+          -  Planned off-pump cardiac surgery&#xD;
+&#xD;
+          -  Enrolled in conflicting research study&#xD;
+&#xD;
+          -  Known blood-borne infectious disease&#xD;
+&#xD;
+          -  Chronic inflammatory disease on immunosuppression&#xD;
+&#xD;
+          -  Chronic moderate to high dose corticosteroid therapy (&gt;10mg/d prednisone or&#xD;
+             equivalent)&#xD;
+&#xD;
+          -  End stage renal disease (serum creatinine &gt;300µmol/L)&#xD;
+&#xD;
+          -  Patients receiving pre-op IV nitrates&#xD;
+      </textblock>
+    </criteria>
+    <gender>All</gender>
+    <minimum_age>18 Years</minimum_age>
+    <maximum_age>N/A</maximum_age>
+    <healthy_volunteers>No</healthy_volunteers>
+  </eligibility>
+  <overall_official>
+    <last_name>Rinaldo Bellomo, MD, FRACP</last_name>
+    <role>Principal Investigator</role>
+    <affiliation>Austin Health</affiliation>
+  </overall_official>
+  <location>
+    <facility>
+      <name>Austin Hospital</name>
+      <address>
+        <city>Melbourne</city>
+        <state>Victoria</state>
+        <zip>3084</zip>
+        <country>Australia</country>
+      </address>
+    </facility>
+  </location>
+  <location_countries>
+    <country>Australia</country>
+  </location_countries>
+  <verification_date>July 2009</verification_date>
+  <study_first_submitted>May 31, 2006</study_first_submitted>
+  <study_first_submitted_qc>May 31, 2006</study_first_submitted_qc>
+  <study_first_posted type="Estimate">June 1, 2006</study_first_posted>
+  <last_update_submitted>July 6, 2009</last_update_submitted>
+  <last_update_submitted_qc>July 6, 2009</last_update_submitted_qc>
+  <last_update_posted type="Estimate">July 7, 2009</last_update_posted>
+  <keyword>Cardiac surgery,</keyword>
+  <keyword>Cardiopulmonary bypass,</keyword>
+  <keyword>Oxidative stress,</keyword>
+  <keyword>Acute renal dysfunction,</keyword>
+  <keyword>N-acetylcysteine</keyword>
+  <intervention_browse>
+    <!-- CAUTION:  The following MeSH terms are assigned with an imperfect algorithm            -->
+    <mesh_term>Acetylcysteine</mesh_term>
+    <mesh_term>N-monoacetylcystine</mesh_term>
+  </intervention_browse>
+  <!-- Results have not yet been posted for this study                                          -->
+</clinical_study>

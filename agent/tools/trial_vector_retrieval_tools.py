@@ -26,6 +26,8 @@ from .execution_tools import tool
 _CACHE_LOCK = threading.RLock()
 _TRIAL_CHUNK_RETRIEVER_CACHE: dict[tuple[str, str, str, str, str, str], "TrialChunkRetrievalTool"] = {}
 _DEFAULT_PROTOCOL_CHUNK_TOP_K = 40
+_COARSE_RRF_K = 60
+_COARSE_MAX_QUERY_VARIANTS = 6
 _OPEN_TRIAL_STATUSES = {
     "Recruiting",
     "Not yet recruiting",
@@ -54,6 +56,10 @@ _NEGATION_CUE_PATTERN = re.compile(
     r"no|not|without|denies|deny|negative for|absence of|free of|"
     r"does not have|doesn't have|is not|was not|not currently|not prescribed"
     r")\b",
+    re.IGNORECASE,
+)
+_NEGATION_SCOPE_BREAK_PATTERN = re.compile(
+    r"[,;:()\[\]]|\b(?:but|however|although|though|whereas|while|continued|continues|presented|presents)\b",
     re.IGNORECASE,
 )
 _QUESTION_STYLE_CUE_PATTERN = re.compile(
@@ -196,6 +202,28 @@ def _append_unique(target: list[str], value: Any) -> None:
     target.append(normalized)
 
 
+def _flatten_structured_input_terms(value: Any, *, prefix: str = "") -> list[str]:
+    terms: list[str] = []
+    if value is None:
+        return terms
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            child_prefix = f"{prefix}.{key}" if prefix else str(key)
+            terms.extend(_flatten_structured_input_terms(item, prefix=child_prefix))
+        return terms
+    if isinstance(value, (list, tuple, set)):
+        for index, item in enumerate(value, start=1):
+            child_prefix = f"{prefix}[{index}]" if prefix else f"item[{index}]"
+            terms.extend(_flatten_structured_input_terms(item, prefix=child_prefix))
+        return terms
+
+    text = _normalize_whitespace(value)
+    if not text:
+        return terms
+    terms.append(f"{prefix}: {text}" if prefix else text)
+    return terms
+
+
 def _extract_case_text_fragments(structured_case: Mapping[str, Any]) -> list[str]:
     case_payload = dict(structured_case or {})
     if isinstance(case_payload.get("structured_case"), Mapping):
@@ -213,6 +241,45 @@ def _extract_case_text_fragments(structured_case: Mapping[str, Any]) -> list[str
     for item in _coerce_text_list(case_payload.get("known_facts")):
         _append_unique(fragments, item)
     return fragments
+
+
+def _trial_search_intent_payload(structured_case: Mapping[str, Any]) -> dict[str, Any]:
+    case_payload = dict(structured_case or {})
+    if isinstance(case_payload.get("structured_case"), Mapping):
+        case_payload = dict(case_payload["structured_case"])
+    intent = case_payload.get("trial_search_intent")
+    return dict(intent) if isinstance(intent, Mapping) else {}
+
+
+def _intent_anchor_terms(intent: Mapping[str, Any], field_name: str) -> list[str]:
+    terms: list[str] = []
+    for item in list(intent.get(field_name) or []):
+        if isinstance(item, Mapping):
+            _append_unique(terms, item.get("canonical") or item.get("text"))
+        else:
+            _append_unique(terms, item)
+    return terms
+
+
+def _intent_query_variants(intent: Mapping[str, Any]) -> list[dict[str, Any]]:
+    variants: list[dict[str, Any]] = []
+    for index, item in enumerate(list(intent.get("query_variants") or []), start=1):
+        if isinstance(item, Mapping):
+            text = _normalize_whitespace(item.get("text") or item.get("query"))
+            if not text:
+                continue
+            variants.append(
+                {
+                    "name": _normalize_whitespace(item.get("name")) or f"intent_query_{index}",
+                    "text": text,
+                    "source_terms": _coerce_text_list(item.get("source_terms")),
+                }
+            )
+        else:
+            text = _normalize_whitespace(item)
+            if text:
+                variants.append({"name": f"intent_query_{index}", "text": text, "source_terms": []})
+    return variants
 
 
 def _extract_age_years(structured_case: Mapping[str, Any]) -> int | None:
@@ -259,6 +326,180 @@ def _extract_gender(structured_case: Mapping[str, Any]) -> str:
     return ""
 
 
+def _detect_lightweight_trial_terms(
+    *,
+    combined_text: str,
+    problem_items: list[str],
+    known_fact_items: list[str],
+    structured_inputs: Mapping[str, Any],
+) -> dict[str, list[str]]:
+    """Build a small deterministic trial-search view from existing case facts.
+
+    This deliberately stays lightweight: it expands only high-value terms that
+    the current trial eval/smoke paths already exercise. It is an attention
+    layer for retrieval, not a replacement for the structured case.
+    """
+
+    text = " ".join(
+        [
+            str(combined_text or ""),
+            " ".join(problem_items),
+            " ".join(known_fact_items),
+            " ".join(_flatten_structured_input_terms(structured_inputs)),
+        ]
+    )
+    lowered = text.casefold()
+    expanded: dict[str, list[str]] = {
+        "conditions": [],
+        "biomarkers": [],
+        "treatments": [],
+        "treatment_context": [],
+        "eligibility": [],
+        "negative": [],
+    }
+
+    has_metastatic = "metastatic" in lowered or "advanced" in lowered
+    if any(cue in lowered for cue in ("lung adenocarcinoma", "non-small cell lung", "nsclc")):
+        _append_unique(expanded["conditions"], "lung adenocarcinoma")
+        _append_unique(expanded["conditions"], "non-small cell lung cancer")
+        _append_unique(expanded["conditions"], "NSCLC")
+        if has_metastatic:
+            _append_unique(expanded["conditions"], "metastatic non-small cell lung cancer")
+
+    if "melanoma" in lowered:
+        _append_unique(expanded["conditions"], "melanoma")
+        if has_metastatic:
+            _append_unique(expanded["conditions"], "metastatic melanoma")
+
+    if re.search(r"\bstroke\b|\binfarct(?:ion)?\b|\bcerebral ischem|卒中|中风|脑梗|梗死", text, re.IGNORECASE):
+        _append_unique(expanded["conditions"], "stroke")
+        if re.search(r"\bpost[- ]stroke\b|\brehabilitation\b|\brecovery\b|康复|恢复", text, re.IGNORECASE):
+            _append_unique(expanded["conditions"], "post-stroke rehabilitation")
+            _append_unique(expanded["conditions"], "stroke rehabilitation")
+            _append_unique(expanded["treatment_context"], "post-stroke rehabilitation")
+    if re.search(r"\baphasia\b|失语", text, re.IGNORECASE):
+        _append_unique(expanded["conditions"], "aphasia")
+        _append_unique(expanded["treatment_context"], "post-stroke aphasia rehabilitation")
+    if re.search(r"\bapraxia\b|失用", text, re.IGNORECASE):
+        _append_unique(expanded["conditions"], "apraxia")
+        _append_unique(expanded["treatment_context"], "post-stroke apraxia rehabilitation")
+    if re.search(r"\btDCS\b|transcranial direct current stimulation|经颅直流电刺激", text, re.IGNORECASE):
+        _append_unique(expanded["treatments"], "tDCS")
+        _append_unique(expanded["treatments"], "transcranial direct current stimulation")
+        _append_unique(expanded["treatment_context"], "non-invasive brain stimulation")
+    if re.search(r"\brehabilitation training\b|\brehab(?:ilitation)? therapy\b|康复训练|康复治疗", text, re.IGNORECASE):
+        _append_unique(expanded["treatments"], "rehabilitation training")
+        _append_unique(expanded["treatment_context"], "neurorehabilitation")
+
+    if re.search(r"\bEGFR\b", text, re.IGNORECASE):
+        _append_unique(expanded["biomarkers"], "EGFR")
+        _append_unique(expanded["biomarkers"], "EGFR-mutant")
+        _append_unique(expanded["biomarkers"], "EGFR mutation")
+    if re.search(r"\bexon\s*19\b", text, re.IGNORECASE):
+        _append_unique(expanded["biomarkers"], "EGFR exon 19 deletion")
+    if re.search(r"\bBRAF\b", text, re.IGNORECASE):
+        _append_unique(expanded["biomarkers"], "BRAF")
+        _append_unique(expanded["biomarkers"], "BRAF-mutant")
+    if re.search(r"\bPD-?L1\b", text, re.IGNORECASE):
+        _append_unique(expanded["biomarkers"], "PD-L1")
+
+    if re.search(r"\bosimertinib\b", text, re.IGNORECASE):
+        _append_unique(expanded["treatments"], "osimertinib")
+        _append_unique(expanded["treatments"], "EGFR TKI")
+        if re.search(r"\bprogress(?:ed|ion|ing)?\b|\bafter\b|\bpost[- ]", text, re.IGNORECASE):
+            _append_unique(expanded["treatment_context"], "progression after osimertinib")
+            _append_unique(expanded["treatment_context"], "post-osimertinib")
+            _append_unique(expanded["treatment_context"], "EGFR TKI resistant")
+
+    for drug, drug_class in (
+        ("pembrolizumab", "PD-1 inhibitor"),
+        ("nivolumab", "PD-1 inhibitor"),
+        ("ipilimumab", "CTLA-4 inhibitor"),
+        ("amivantamab", "EGFR MET bispecific antibody"),
+        ("lazertinib", "EGFR TKI"),
+        ("warfarin", "anticoagulation"),
+        ("apixaban", "anticoagulation"),
+    ):
+        if re.search(rf"\b{re.escape(drug)}\b", text, re.IGNORECASE):
+            _append_unique(expanded["treatments"], drug)
+            _append_unique(expanded["treatments"], drug_class)
+
+    ecog_match = re.search(r"\bECOG\b\s*(?:performance status)?\s*[:=]?\s*([0-5])", text, re.IGNORECASE)
+    if ecog_match:
+        _append_unique(expanded["eligibility"], f"ECOG {ecog_match.group(1)}")
+    if re.search(r"\bbrain metast|\bCNS metast", text, re.IGNORECASE):
+        if re.search(r"\bstable\b|\btreated\b", text, re.IGNORECASE):
+            _append_unique(expanded["eligibility"], "stable treated brain metastases")
+        else:
+            _append_unique(expanded["eligibility"], "brain metastases")
+
+    for clause in re.split(r"[.;\n]+", text):
+        if not _NEGATION_CUE_PATTERN.search(clause):
+            continue
+        for cue in ("brain metastases", "cns metastases", "diabetes", "heart failure", "warfarin"):
+            if _is_term_negated_in_clause(clause, cue):
+                _append_unique(expanded["negative"], f"no {cue}")
+
+    return expanded
+
+
+def _compose_trial_retrieval_queries(
+    *,
+    case_payload: Mapping[str, Any],
+    source_terms: Mapping[str, list[str]],
+    expanded_terms: Mapping[str, list[str]],
+    fallback_query_text: str,
+) -> list[dict[str, Any]]:
+    queries: list[dict[str, Any]] = []
+
+    def append_query(name: str, text: Any, source_names: list[str]) -> None:
+        normalized = _normalize_whitespace(text)
+        if not normalized:
+            return
+        key = normalized.casefold()
+        if any(str(item.get("text") or "").casefold() == key for item in queries):
+            return
+        queries.append({"name": name, "text": normalized, "source_terms": list(source_names)})
+
+    condition_terms = list(expanded_terms.get("conditions") or [])
+    biomarker_terms = list(expanded_terms.get("biomarkers") or [])
+    treatment_terms = list(expanded_terms.get("treatments") or [])
+    treatment_context_terms = list(expanded_terms.get("treatment_context") or [])
+    eligibility_terms = list(expanded_terms.get("eligibility") or [])
+    problem_terms = list(source_terms.get("problem_list") or [])
+
+    summary = _normalize_whitespace(case_payload.get("case_summary"))
+    append_query("case_summary", summary or fallback_query_text, ["case_summary"])
+
+    condition_focus = " ".join(condition_terms[:3] or problem_terms[:2])
+    append_query("condition", f"{condition_focus} clinical trial", ["conditions", "problem_list"])
+
+    if biomarker_terms:
+        append_query(
+            "biomarker",
+            f"{' '.join(biomarker_terms[:3])} {condition_focus} clinical trial",
+            ["biomarkers", "conditions"],
+        )
+
+    if treatment_context_terms or treatment_terms:
+        append_query(
+            "treatment_context",
+            f"{' '.join([*treatment_context_terms[:3], *treatment_terms[:2]])} {condition_focus} trial",
+            ["treatment_context", "treatments", "conditions"],
+        )
+
+    if eligibility_terms:
+        append_query(
+            "eligibility",
+            f"{condition_focus} {' '.join(eligibility_terms[:3])} eligibility",
+            ["conditions", "eligibility"],
+        )
+
+    raw_fallback = _normalize_whitespace(case_payload.get("raw_text") or case_payload.get("raw_request") or fallback_query_text)
+    append_query("raw_fallback", raw_fallback[:500], ["raw_text"])
+    return queries
+
+
 def _term_match_flags(
     *,
     patterns: tuple[re.Pattern[str], ...],
@@ -272,15 +513,40 @@ def _term_match_flags(
         if not clauses:
             clauses = [str(fragment or "").strip()]
         for clause in clauses:
-            has_match = any(pattern.search(clause) for pattern in patterns)
-            if not has_match:
+            matches = [match for pattern in patterns for match in pattern.finditer(clause)]
+            if not matches:
                 continue
             referenced = True
-            if _NEGATION_CUE_PATTERN.search(clause) and not _QUESTION_STYLE_CUE_PATTERN.search(clause):
+            if any(_is_match_negated_in_clause(clause, match) for match in matches):
                 negative = True
             else:
                 positive = True
     return referenced, positive, negative
+
+
+def _is_match_negated_in_clause(clause: str, term_match: re.Match[str]) -> bool:
+    normalized_clause = str(clause or "")
+    if _QUESTION_STYLE_CUE_PATTERN.search(normalized_clause):
+        return False
+
+    for negation_match in _NEGATION_CUE_PATTERN.finditer(normalized_clause):
+        if negation_match.end() <= term_match.start():
+            scope_text = normalized_clause[negation_match.end() : term_match.start()]
+        elif term_match.end() <= negation_match.start():
+            scope_text = normalized_clause[term_match.end() : negation_match.start()]
+        else:
+            return True
+        if len(scope_text) <= 80 and not _NEGATION_SCOPE_BREAK_PATTERN.search(scope_text):
+            return True
+    return False
+
+
+def _is_term_negated_in_clause(clause: str, term: str) -> bool:
+    normalized_clause = str(clause or "")
+    term_match = re.search(rf"\b{re.escape(term)}\b", normalized_clause, re.IGNORECASE)
+    if not term_match:
+        return False
+    return _is_match_negated_in_clause(normalized_clause, term_match)
 
 
 def _infer_trial_focus_terms(
@@ -348,6 +614,19 @@ def build_protocol_trial_query_profile(
     combined_text = " ".join(text_fragments)
     problem_items = _coerce_text_list(case_payload.get("problem_list"))
     known_fact_items = _coerce_text_list(case_payload.get("known_facts"))
+    structured_input_payload = dict(case_payload.get("structured_inputs") or {})
+    trial_search_intent = _trial_search_intent_payload(case_payload)
+    source_terms = {
+        "problem_list": list(problem_items),
+        "known_facts": list(known_fact_items),
+        "structured_inputs": _flatten_structured_input_terms(structured_input_payload),
+    }
+    expanded_terms = _detect_lightweight_trial_terms(
+        combined_text=combined_text,
+        problem_items=problem_items,
+        known_fact_items=known_fact_items,
+        structured_inputs=structured_input_payload,
+    )
     patient_positive_terms: list[str] = []
     patient_negative_terms: list[str] = []
     referenced_intervention_terms: list[str] = []
@@ -383,6 +662,12 @@ def build_protocol_trial_query_profile(
         trial_intent_terms=trial_intent_terms,
         derivation_notes=derivation_notes,
     )
+    for item in list(expanded_terms.get("conditions") or []):
+        _append_unique(trial_condition_terms, item)
+    for item in list(expanded_terms.get("treatments") or []):
+        _append_unique(trial_intervention_terms, item)
+    for item in [*list(expanded_terms.get("treatment_context") or []), *list(expanded_terms.get("eligibility") or [])]:
+        _append_unique(referenced_intent_terms, item)
     fallback_condition_terms: list[str] = []
     for item in problem_items:
         _append_unique(fallback_condition_terms, item)
@@ -399,6 +684,20 @@ def build_protocol_trial_query_profile(
             _append_unique(fallback_intervention_terms, item)
     if not trial_intervention_terms and fallback_intervention_terms:
         trial_intervention_terms = list(fallback_intervention_terms)
+
+    intent_condition_terms = _intent_anchor_terms(trial_search_intent, "primary_conditions")
+    intent_intervention_terms = _intent_anchor_terms(trial_search_intent, "interventions_of_interest")
+    intent_terms = _coerce_text_list(trial_search_intent.get("trial_intents"))
+    if trial_search_intent:
+        trial_condition_terms = list(intent_condition_terms or trial_condition_terms)
+        trial_intervention_terms = list(intent_intervention_terms or trial_intervention_terms)
+        for item in intent_terms:
+            _append_unique(trial_intent_terms, item)
+        if intent_condition_terms or intent_intervention_terms:
+            _append_unique(
+                derivation_notes,
+                "Using protocol-entry trial_search_intent as the primary trial query profile source.",
+            )
 
     age_years = _extract_age_years(case_payload)
     gender = _extract_gender(case_payload)
@@ -431,6 +730,8 @@ def build_protocol_trial_query_profile(
             _append_unique(negative_profile_terms, "not currently on warfarin")
         else:
             _append_unique(negative_profile_terms, f"no {term}")
+    for term in list(expanded_terms.get("negative") or []):
+        _append_unique(negative_profile_terms, term)
 
     query_text = build_structured_query_text(
         raw_text=case_payload.get("raw_text") or case_payload.get("raw_request") or "",
@@ -445,6 +746,23 @@ def build_protocol_trial_query_profile(
         query_lines.append(query_text)
     if focus_terms:
         query_lines.append("trial focus hints: " + " ; ".join(focus_terms))
+    retrieval_queries = _compose_trial_retrieval_queries(
+        case_payload=case_payload,
+        source_terms=source_terms,
+        expanded_terms=expanded_terms,
+        fallback_query_text=query_text,
+    )
+    for item in _intent_query_variants(trial_search_intent):
+        text = _normalize_whitespace(item.get("text"))
+        if text and not any(str(existing.get("text") or "").casefold() == text.casefold() for existing in retrieval_queries):
+            retrieval_queries.insert(0, dict(item))
+    retrieval_query_texts = [
+        str(item.get("text") or "")
+        for item in retrieval_queries
+        if str(item.get("text") or "").strip() and str(item.get("name") or "") != "raw_fallback"
+    ]
+    if retrieval_query_texts:
+        query_lines.append("trial retrieval queries: " + " ; ".join(retrieval_query_texts[:5]))
     if positive_profile_terms:
         query_lines.append("patient profile: " + " ; ".join(positive_profile_terms))
     if negative_profile_terms:
@@ -505,6 +823,12 @@ def build_protocol_trial_query_profile(
     if gender:
         payload_filters["gender"] = gender
 
+    coarse_payload_filters: dict[str, Any] = {
+        "must": [],
+        "should": [],
+        "must_not": [],
+    }
+
     return {
         "query_text": query_text,
         "focus_terms": focus_terms,
@@ -518,7 +842,20 @@ def build_protocol_trial_query_profile(
         "age_years": age_years,
         "gender": gender,
         "payload_filters": payload_filters,
+        "coarse_payload_filters": coarse_payload_filters,
         "derivation_notes": derivation_notes,
+        "source_terms": source_terms,
+        "expanded_terms": expanded_terms,
+        "retrieval_queries": retrieval_queries,
+        "trial_search_intent": trial_search_intent,
+        "trial_retrieval_context": {
+            "raw_text": _normalize_whitespace(case_payload.get("raw_text") or case_payload.get("raw_request")),
+            "case_summary": _normalize_whitespace(case_payload.get("case_summary")),
+            "source_terms": source_terms,
+            "expanded_terms": expanded_terms,
+            "trial_search_intent": trial_search_intent,
+            "retrieval_queries": retrieval_queries,
+        },
     }
 
 
@@ -1216,11 +1553,109 @@ class TrialChunkRetrievalTool:
         return build_protocol_trial_query_profile(structured_case)
 
     @staticmethod
-    def _vector_retriever_options(query_profile: Mapping[str, Any]) -> dict[str, Any]:
-        payload_filters = dict(query_profile.get("payload_filters") or {})
+    def _soft_vector_retriever_options(query_profile: Mapping[str, Any]) -> dict[str, Any]:
+        del query_profile
+        return {}
+
+    @staticmethod
+    def _strict_vector_retriever_options(query_profile: Mapping[str, Any], *, stage: str = "fine") -> dict[str, Any]:
+        filter_key = "coarse_payload_filters" if str(stage or "").strip().lower() == "coarse" else "payload_filters"
+        payload_filters = dict(query_profile.get(filter_key) or {})
         if not payload_filters:
             return {}
+        if not any(payload_filters.get(clause_name) for clause_name in ("must", "should", "must_not")):
+            return {}
         return {"payload_filters": payload_filters}
+
+    @staticmethod
+    def _coarse_query_variants(query_profile: Mapping[str, Any]) -> list[str]:
+        queries: list[str] = []
+
+        def append_query(value: Any) -> None:
+            normalized = _normalize_whitespace(value)
+            if not normalized:
+                return
+            key = normalized.casefold()
+            if key in {item.casefold() for item in queries}:
+                return
+            queries.append(normalized)
+
+        append_query(query_profile.get("query_text"))
+        for item in list(query_profile.get("retrieval_queries") or []):
+            if isinstance(item, Mapping):
+                append_query(item.get("text"))
+        condition_terms = list(query_profile.get("trial_condition_terms") or [])
+        intervention_terms = list(query_profile.get("trial_intervention_terms") or [])
+        intent_terms = list(query_profile.get("trial_intent_terms") or [])
+        if condition_terms and intervention_terms:
+            append_query(
+                " ".join(
+                    [
+                        *[str(item) for item in condition_terms[:4]],
+                        *[str(item) for item in intervention_terms[:4]],
+                        "clinical trial",
+                    ]
+                )
+            )
+        if intervention_terms:
+            append_query(" ".join([*[str(item) for item in intervention_terms[:5]], "interventional trial"]))
+        if condition_terms:
+            append_query(" ".join([*[str(item) for item in condition_terms[:5]], "eligibility trial"]))
+        if intent_terms:
+            append_query(" ".join([*[str(item) for item in intent_terms[:4]], *[str(item) for item in condition_terms[:3]], "trial"]))
+        return queries[:_COARSE_MAX_QUERY_VARIANTS]
+
+    @staticmethod
+    def _merge_coarse_channel_rows(
+        channel_rows: list[tuple[str, str, list[dict[str, Any]]]],
+        *,
+        limit: int,
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        merged_by_chunk_id: dict[str, dict[str, Any]] = {}
+        diagnostics: list[dict[str, Any]] = []
+        for query_name, backend_name, rows in list(channel_rows or []):
+            diagnostics.append(
+                {
+                    "query_name": str(query_name or ""),
+                    "backend": str(backend_name or ""),
+                    "hit_count": len(list(rows or [])),
+                }
+            )
+            for rank, row in enumerate(list(rows or []), start=1):
+                chunk_id = str(row.get("chunk_id") or row.get("document_id") or "").strip()
+                if not chunk_id:
+                    continue
+                score_delta = 1.0 / float(_COARSE_RRF_K + rank)
+                merged_row = merged_by_chunk_id.setdefault(chunk_id, dict(row))
+                merged_row["document_id"] = str(merged_row.get("document_id") or chunk_id)
+                merged_row["chunk_id"] = chunk_id
+                merged_row["score"] = float(merged_row.get("score") or 0.0) + score_delta
+                merged_row["coarse_rrf_score"] = float(merged_row.get("coarse_rrf_score") or 0.0) + score_delta
+                merged_row["coarse_rank_sources"] = [
+                    *list(merged_row.get("coarse_rank_sources") or []),
+                    {
+                        "query_name": str(query_name or ""),
+                        "backend": str(backend_name or ""),
+                        "rank": int(rank),
+                        "rrf": float(score_delta),
+                    },
+                ]
+                merged_row["match_sources"] = sorted(
+                    {
+                        *list(merged_row.get("match_sources") or []),
+                        str(backend_name or ""),
+                    }
+                )
+
+        merged_rows = list(merged_by_chunk_id.values())
+        merged_rows.sort(
+            key=lambda row: (
+                -float(row.get("coarse_rrf_score") or row.get("score") or 0.0),
+                str(row.get("title") or "").lower(),
+                str(row.get("chunk_id") or row.get("document_id") or ""),
+            )
+        )
+        return merged_rows[: max(int(limit), 1)], diagnostics
 
     def _enrich_protocol_candidates(self, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         enriched: list[dict[str, Any]] = []
@@ -1392,7 +1827,7 @@ class TrialChunkRetrievalTool:
             top_k=max(int(top_k), 1),
             candidate_chunk_ids=candidate_chunk_ids,
             backend=resolved_backend,
-            retriever_options=self._vector_retriever_options(query_profile),
+            retriever_options=self._soft_vector_retriever_options(query_profile),
         )
         hits = self._hydrate_chunk_rows(list(payload.get("candidate_ranking") or []))
         return {
@@ -1444,7 +1879,7 @@ class TrialChunkRetrievalTool:
                 top_k=max(int(chunk_top_k), 1),
                 candidate_nct_ids=candidate_nct_ids,
                 backend="vector",
-                retriever_options=self._vector_retriever_options(query_profile),
+                retriever_options=self._soft_vector_retriever_options(query_profile),
             )
 
         candidate_ranking = self._aggregate_trials(
@@ -1495,19 +1930,66 @@ class TrialChunkRetrievalTool:
             for item in list(candidate_ids or [])
             if str(item).strip()
         } if candidate_ids is not None else None
-        coarse_backend = "vector" if self.vector_retriever is not None and resolved_backend != "bm25" else "bm25"
-        coarse_payload = self._retrieve_query_bundle(
-            query_text,
-            top_k=max(int(top_k) * 4, int(top_k), 1),
-            candidate_chunk_ids=self._resolve_candidate_chunk_ids(normalized_candidate_ids),
-            backend=coarse_backend,
-            retriever_options=self._vector_retriever_options(query_profile) if coarse_backend == "vector" else None,
+        candidate_chunk_ids = self._resolve_candidate_chunk_ids(normalized_candidate_ids)
+        coarse_top_k = max(int(top_k) * 4, int(top_k), 1)
+        coarse_queries = self._coarse_query_variants(query_profile) or [query_text]
+        channel_rows: list[tuple[str, str, list[dict[str, Any]]]] = []
+        used_backends: set[str] = set()
+        available_backends: list[str] = list(self.available_backends)
+        fallback_payload: dict[str, Any] = {}
+
+        for query_index, coarse_query in enumerate(coarse_queries, start=1):
+            query_name = f"q{query_index}"
+            if resolved_backend in {"bm25", "hybrid"}:
+                bm25_rows = self._channel_rows(
+                    coarse_query,
+                    top_k=coarse_top_k,
+                    candidate_nct_ids=normalized_candidate_ids,
+                    backend="bm25",
+                )
+                if bm25_rows:
+                    used_backends.add("bm25")
+                channel_rows.append((query_name, "bm25", bm25_rows))
+            if self.vector_retriever is not None and resolved_backend != "bm25":
+                vector_rows = self._channel_rows(
+                    coarse_query,
+                    top_k=coarse_top_k,
+                    candidate_nct_ids=normalized_candidate_ids,
+                    backend="vector",
+                    retriever_options=self._soft_vector_retriever_options(query_profile),
+                )
+                if vector_rows:
+                    used_backends.add("vector")
+                channel_rows.append((query_name, "vector", vector_rows))
+
+        chunk_rows, coarse_channel_diagnostics = self._merge_coarse_channel_rows(
+            channel_rows,
+            limit=coarse_top_k,
         )
-        actual_backend = str(coarse_payload.get("backend_used") or coarse_backend).strip() or coarse_backend
-        chunk_rows = [dict(row) for row in list(coarse_payload.get("candidate_ranking") or [])]
+        if not chunk_rows:
+            coarse_backend = "vector" if self.vector_retriever is not None and resolved_backend != "bm25" else "bm25"
+            fallback_payload = self._retrieve_query_bundle(
+                query_text,
+                top_k=coarse_top_k,
+                candidate_chunk_ids=candidate_chunk_ids,
+                backend=coarse_backend,
+                retriever_options=self._soft_vector_retriever_options(query_profile) if coarse_backend == "vector" else None,
+            )
+            fallback_backend = str(fallback_payload.get("backend_used") or coarse_backend).strip() or coarse_backend
+            if fallback_backend:
+                used_backends.add(fallback_backend)
+            available_backends = list(fallback_payload.get("available_backends") or available_backends)
+            chunk_rows = [dict(row) for row in list(fallback_payload.get("candidate_ranking") or [])]
+
+        if used_backends == {"bm25", "vector"}:
+            actual_backend = "hybrid"
+        elif used_backends:
+            actual_backend = sorted(used_backends)[0]
+        else:
+            actual_backend = "bm25" if resolved_backend == "bm25" or self.vector_retriever is None else "vector"
         coarse_ranked_rows = self._aggregate_trials(
-            bm25_rows=chunk_rows if actual_backend == "bm25" else [],
-            vector_rows=chunk_rows if actual_backend != "bm25" else [],
+            bm25_rows=chunk_rows,
+            vector_rows=[],
             limit=max(int(top_k), 1),
             query_profile=query_profile,
             stage="coarse",
@@ -1517,9 +1999,11 @@ class TrialChunkRetrievalTool:
             "query_text": query_text,
             "query_profile": query_profile,
             "backend_used": actual_backend,
-            "available_backends": list(coarse_payload.get("available_backends") or self.available_backends),
+            "available_backends": available_backends,
             "department_tags": list(case_payload.get("department_tags") or []),
             "fallback_to_full_catalog": False,
+            "coarse_query_count": len(coarse_queries),
+            "coarse_channel_diagnostics": coarse_channel_diagnostics,
             "candidate_ranking": [
                 {
                     "nct_id": str(row.get("nct_id") or ""),
@@ -1647,7 +2131,7 @@ class TrialChunkRetrievalTool:
                 top_k=max(int(chunk_top_k), 1),
                 candidate_nct_ids=coarse_candidate_ids,
                 backend="vector",
-                retriever_options=self._vector_retriever_options(query_profile),
+                retriever_options=self._soft_vector_retriever_options(query_profile),
             )
 
         bm25_top5 = self._enrich_protocol_candidates(
@@ -1865,6 +2349,19 @@ class TrialChunkRetrievalTool:
             payload = self._row_document_payload(source_row)
             if payload is None:
                 continue
+            if not payload.get("chunk_type"):
+                for raw_row in (raw_bundle.get("bm25_row"), raw_bundle.get("vector_row")):
+                    raw_chunk_type = _normalize_whitespace((raw_row or {}).get("chunk_type"))
+                    if raw_chunk_type:
+                        payload["chunk_type"] = raw_chunk_type
+                        break
+                if not payload.get("chunk_type"):
+                    chunk_type_match = re.search(
+                        r"::(?P<chunk_type>[A-Za-z0-9_]+)::\d+$",
+                        str(chunk_id),
+                    )
+                    if chunk_type_match:
+                        payload["chunk_type"] = chunk_type_match.group("chunk_type")
             grouped_records.setdefault(str(payload["nct_id"]), dict(payload.get("record") or {}))
             combined_score = float(normalized_bm25_scores.get(chunk_id) or 0.0) + float(
                 normalized_vector_scores.get(chunk_id) or 0.0
@@ -2014,8 +2511,12 @@ def create_trial_chunk_retrieval_tool(
         if cached is not None:
             return cached
 
-    explicit_qdrant_url = bool(qdrant_url and str(qdrant_url).strip())
-    use_qdrant_server = bool(explicit_qdrant_url and resolved_qdrant_url and not resolved_qdrant_path)
+    use_qdrant_server = bool(
+        normalized_vector_store == "qdrant"
+        and vector_retriever is None
+        and resolved_qdrant_url
+        and not resolved_qdrant_path
+    )
     normalized_backend = "vector" if use_qdrant_server and normalized_backend == "hybrid" else normalized_backend
     catalog = TrialChunkCatalog.from_output_root(
         resolved_root,

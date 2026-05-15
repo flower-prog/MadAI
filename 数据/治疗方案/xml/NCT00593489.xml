@@ -1,0 +1,1136 @@
+<clinical_study>
+  <!-- This xml conforms to an XML Schema at:
+    https://clinicaltrials.gov/ct2/html/images/info/public.xsd -->
+  <required_header>
+    <download_date>ClinicalTrials.gov processed this data on April 27, 2021</download_date>
+    <link_text>Link to the current ClinicalTrials.gov record.</link_text>
+    <url>https://clinicaltrials.gov/show/NCT00593489</url>
+  </required_header>
+  <id_info>
+    <org_study_id>R-06-851</org_study_id>
+    <secondary_id>Lantu-L-01961</secondary_id>
+    <nct_id>NCT00593489</nct_id>
+  </id_info>
+  <brief_title>Advancing Insulin Prescribing in General Practice</brief_title>
+  <acronym>AIM@GP</acronym>
+  <official_title>Advancing INSIGHT Methods in General Practice</official_title>
+  <sponsors>
+    <lead_sponsor>
+      <agency>Lawson Health Research Institute</agency>
+      <agency_class>Other</agency_class>
+    </lead_sponsor>
+    <collaborator>
+      <agency>Sanofi</agency>
+      <agency_class>Industry</agency_class>
+    </collaborator>
+  </sponsors>
+  <source>Lawson Health Research Institute</source>
+  <oversight_info>
+    <has_dmc>No</has_dmc>
+  </oversight_info>
+  <brief_summary>
+    <textblock>
+      Family Physicians, the subjects of this trial are reluctant to initiate insulin in patients&#xD;
+      with type 2 diabetes due to a lack of familiarity and comfort with this clinical strategy.&#xD;
+      This study will test the effectiveness of diabetes specialist consultation support, and&#xD;
+      community pharmacy insulin initiation support on the insulin prescribing behaviour of family&#xD;
+      physicians across Canada.&#xD;
+    </textblock>
+  </brief_summary>
+  <detailed_description>
+    <textblock>
+      The 2003 Canadian Diabetes Association clinical practice guidelines recommend early and&#xD;
+      sustained glycemic control targeting an glycosylated hemoglobin (A1C) &lt; 7%. The guideline&#xD;
+      target however is not achieved in 50% of patients with type 2 diabetes in the Canadian family&#xD;
+      practice setting. Family physicians are not comfortable initiating and managing insulin for&#xD;
+      their patients the Diabetes in Canada Evaluation (DICE) study found that only 12% of the 2473&#xD;
+      patients audited were prescribed insulin; 6% insulin alone and 6% in combination. Harris et.&#xD;
+      al. found 20% of patients prescribed insulin, 15% insulin alone and 5% in combination. A&#xD;
+      strategy to increase physicians' knowledge, skill and comfort with insulin prescription is&#xD;
+      needed to better achieve glycemic control for patients with type 2 diabetes in Canada.&#xD;
+&#xD;
+      Purpose - The purpose of AIM@GP is to increase family physicians clinical experience and&#xD;
+      comfort with insulin prescription and better achieve glycemic control for patients with type&#xD;
+      2 diabetes in Canada.&#xD;
+&#xD;
+      Primary Objective - To determine the effectiveness of a Basal Insulin Initiation strategy on&#xD;
+      family physician insulin prescribing behaviour. The strategy, using a multifaceted behaviour&#xD;
+      facilitation approach, includes diabetes specialist consultation support, and community&#xD;
+      pharmacy insulin initiation support.&#xD;
+&#xD;
+      Study Design - The study design is a stratified, parallel group, randomized control&#xD;
+      effectiveness study. All physicians will attend an insulin education workshop where they will&#xD;
+      receive a Diabetes Practice Profile and randomly allocated in a 1:1 manner into the&#xD;
+      intervention or control group.&#xD;
+    </textblock>
+  </detailed_description>
+  <overall_status>Completed</overall_status>
+  <start_date>July 2006</start_date>
+  <completion_date type="Actual">March 2010</completion_date>
+  <primary_completion_date type="Actual">March 2010</primary_completion_date>
+  <phase>N/A</phase>
+  <study_type>Interventional</study_type>
+  <has_expanded_access>No</has_expanded_access>
+  <study_design_info>
+    <allocation>Randomized</allocation>
+    <intervention_model>Parallel Assignment</intervention_model>
+    <primary_purpose>Other</primary_purpose>
+    <masking>None (Open Label)</masking>
+  </study_design_info>
+  <primary_outcome>
+    <measure>Insulin Prescription Rate - the Number of Insulin-eligible Patients Per 12 Months Who Are Prescribed Insulin in Each Family Physician (FP) Practice</measure>
+    <time_frame>12 months</time_frame>
+    <description>Insulin Prescription Rate (IPR) - the number of insulin-eligible patients per 12 months who are prescribed insulin in each family physician (FP) practice (Number of patients per year per FP). The IPR was analyzed using Poisson regression with the intervention group as a class effect and the mean HbA1c at baseline as a covariate.</description>
+  </primary_outcome>
+  <secondary_outcome>
+    <measure>Mean A1C of Insulin-eligible Patient Per Family Physician Post-Workshop</measure>
+    <time_frame>15 months</time_frame>
+    <description>mean A1C of insulin-eligible patient per family physician participant during the post-Workshop period</description>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Mean Fasting Blood Glucose of Insulin-eligible Patients</measure>
+    <time_frame>15 months</time_frame>
+    <description>mean fasting blood glucose (FBG) of insulin-eligible patient per family physician post-Workshop</description>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Percent of Insulin-eligible Patients With Intensification of Diabetes Management Per FP Post - Workshop</measure>
+    <time_frame>12 months</time_frame>
+    <description>Percent of insulin-eligible patients with intensification of diabetes management (increase dose of oral anti-diabetes drug (OAD) or insulin, OAD score, the addition of insulin) per FP post - Workshop</description>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Percentage of Patients at Target (A1C ≤ 7.0%) Per FP</measure>
+    <time_frame>15 months</time_frame>
+    <description>Percentage of patients at target (A1C ≤ 7.0%) per FP at time of the Workshop and post - Workshop</description>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Percent of Patients at Target (A1C ≤ 6.5%) Per FP</measure>
+    <time_frame>15 months</time_frame>
+    <description>Percent of patients at target (A1C ≤ 6.5%) per FP at time of the Workshop and post - Workshop</description>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Change in &quot;Insulin Prescription Rate&quot;</measure>
+    <time_frame>12 months</time_frame>
+    <description>change in &quot;Insulin Prescription Rate&quot; from baseline prior to the Workshop to 12 months post - Workshop</description>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Glycemic Control (A1C) at Insulin Initiation, 3 and 6 Months Post Initiation</measure>
+    <time_frame>15 months</time_frame>
+    <description>Glycemic control (A1C) at insulin initiation, 3 months post initiation and 6 months post initiation for those prescribed insulin per family physician</description>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Physician Score for Knowledge of Insulin Initiation &amp; Titration</measure>
+    <time_frame>12 months</time_frame>
+    <description>physician score for knowledge of insulin initiation &amp; titration minimum score of 0 maximum score of 17. The greater the score the greater the knowledge.</description>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Physician Score for Attitude Towards Insulin Initiation &amp; Titration</measure>
+    <time_frame>12 months</time_frame>
+    <description>physician score for attitude towards insulin initiation &amp; titration The minimum score is 11 and the maximum is 55 with a lower score indicating the ideal attitude.</description>
+  </secondary_outcome>
+  <secondary_outcome>
+    <measure>Physician Score for Self-efficacy of Insulin Initiation &amp; Titration</measure>
+    <time_frame>12 months</time_frame>
+    <description>physician score for self-efficacy of insulin initiation &amp; titration where the minimum value was 10 and the maximum was 50. A value of 50 indicated complete self efficacy to initiate and titrate insulin</description>
+  </secondary_outcome>
+  <number_of_arms>2</number_of_arms>
+  <enrollment type="Actual">154</enrollment>
+  <condition>Diabetes Mellitus</condition>
+  <arm_group>
+    <arm_group_label>Basal Insulin Initiation Strategy</arm_group_label>
+    <arm_group_type>Experimental</arm_group_type>
+    <description>Basal Insulin Initiation Strategy which includes:&#xD;
+support by community pharmacist&#xD;
+support by diabetes specialist</description>
+  </arm_group>
+  <arm_group>
+    <arm_group_label>Usual Practice</arm_group_label>
+    <arm_group_type>No Intervention</arm_group_type>
+    <description>The physicians randomized to this group proceeded with their usual practice</description>
+  </arm_group>
+  <intervention>
+    <intervention_type>Other</intervention_type>
+    <intervention_name>Basal Insulin Initiation Strategy</intervention_name>
+    <description>This multifaceted intervention consists of (1) Diabetes Specialist Consultation Support which entails specialists and educators providing consultation for insulin initiation and titration for the 12 months following the Workshop. Support will consist of prearranged and scheduled communications to review and advise for the first 2 months and will continue on an ad hoc basis for the remaining 10 months, with communication initiated by the physician (2)Community Pharmacy Insulin Initiation consists of trained community pharmacists providing patient education insulin initiation. Education will consist of one individual teaching session, one hour in duration, to review the insulin prescription protocol, insulin injection method, management of hypoglycemia, and self-monitoring of blood glucose.</description>
+    <arm_group_label>Basal Insulin Initiation Strategy</arm_group_label>
+    <other_name>Support by Specialist and Pharmacist</other_name>
+  </intervention>
+  <eligibility>
+    <criteria>
+      <textblock>
+        Inclusion Criteria:&#xD;
+&#xD;
+          -  Full time family physicians (FP) &gt;25 hours per week in office&#xD;
+&#xD;
+          -  Ability to generate a listing of patients with type 2 diabetes (T2DM) from their&#xD;
+             practice or billing records.&#xD;
+&#xD;
+          -  Generation of a practice list of patients with T2DM&#xD;
+&#xD;
+          -  A minimum of 50 patients with type 2 diabetes in their practice.&#xD;
+&#xD;
+          -  Support the generation of a Diabetes Practice Profile prior to the deadline&#xD;
+             established&#xD;
+&#xD;
+          -  A minimum of 6 insulin-eligible patients&#xD;
+&#xD;
+          -  Attendance at the scheduled Workshop (if unable to attend the Workshop must be&#xD;
+             available to be educated and trained by diabetes nurse educator(DNE) using a Workshop&#xD;
+             DVD)&#xD;
+&#xD;
+        Exclusion Criteria:&#xD;
+&#xD;
+          -  FP does not attend Workshop or complete educational training using Workshop DVD with&#xD;
+             DNE guidance&#xD;
+&#xD;
+          -  FPs who anticipate retiring within the post-intervention period, moving their practice&#xD;
+             to another city, or having locum coverage of their practice for more than 4 weeks&#xD;
+             during the post-intervention period&#xD;
+&#xD;
+          -  FPs currently participating in a diabetes behaviour-change intervention trial&#xD;
+&#xD;
+          -  FPs working in an academic environment&#xD;
+&#xD;
+          -  FPs unlikely to comply with protocol, (uncooperative attitude, unlikelihood of&#xD;
+             completing the study).&#xD;
+      </textblock>
+    </criteria>
+    <gender>All</gender>
+    <minimum_age>N/A</minimum_age>
+    <maximum_age>N/A</maximum_age>
+    <healthy_volunteers>Accepts Healthy Volunteers</healthy_volunteers>
+  </eligibility>
+  <overall_official>
+    <last_name>Stewart B. Harris, MD MPH FCFP</last_name>
+    <role>Principal Investigator</role>
+    <affiliation>Lawson Health Research Institute</affiliation>
+  </overall_official>
+  <location>
+    <facility>
+      <name>Lawson Health Research Institute</name>
+      <address>
+        <city>London</city>
+        <state>Ontario</state>
+        <zip>N6A 4G5</zip>
+        <country>Canada</country>
+      </address>
+    </facility>
+  </location>
+  <location_countries>
+    <country>Canada</country>
+  </location_countries>
+  <reference>
+    <citation>Harris SB, Stewart M, Brown JB, Wetmore S, Faulds C, Webster-Bogaert S, Porter S. Type 2 diabetes in family practice. Room for improvement. Can Fam Physician. 2003 Jun;49:778-85.</citation>
+    <PMID>12836867</PMID>
+  </reference>
+  <reference>
+    <citation>Harris, Stewart B., Ekoe, J. M., and Webster-Bogaert, M. S. The Diabetes in Canada Evaluation (DICE) Study: Are Primary Care Physicians Achieving Target A1c? Diabetes 52(Supplement 1), A499. 2003.</citation>
+  </reference>
+  <verification_date>November 2020</verification_date>
+  <study_first_submitted>January 4, 2008</study_first_submitted>
+  <study_first_submitted_qc>January 4, 2008</study_first_submitted_qc>
+  <study_first_posted type="Estimate">January 15, 2008</study_first_posted>
+  <results_first_submitted>April 9, 2014</results_first_submitted>
+  <results_first_submitted_qc>November 10, 2020</results_first_submitted_qc>
+  <results_first_posted type="Actual">December 3, 2020</results_first_posted>
+  <last_update_submitted>November 10, 2020</last_update_submitted>
+  <last_update_submitted_qc>November 10, 2020</last_update_submitted_qc>
+  <last_update_posted type="Actual">December 3, 2020</last_update_posted>
+  <responsible_party>
+    <responsible_party_type>Principal Investigator</responsible_party_type>
+    <investigator_affiliation>Lawson Health Research Institute</investigator_affiliation>
+    <investigator_full_name>Stewart Harris</investigator_full_name>
+    <investigator_title>Professor, Family Medicine</investigator_title>
+  </responsible_party>
+  <keyword>Insulin</keyword>
+  <keyword>Diabetes Mellitus</keyword>
+  <keyword>Practice Behaviour</keyword>
+  <keyword>Preceptor</keyword>
+  <keyword>Pharmacy</keyword>
+  <condition_browse>
+    <!-- CAUTION:  The following MeSH terms are assigned with an imperfect algorithm            -->
+    <mesh_term>Diabetes Mellitus</mesh_term>
+  </condition_browse>
+  <intervention_browse>
+    <!-- CAUTION:  The following MeSH terms are assigned with an imperfect algorithm            -->
+    <mesh_term>Insulin</mesh_term>
+  </intervention_browse>
+  <patient_data>
+    <sharing_ipd>No</sharing_ipd>
+    <ipd_description>There is no plan to make individual participant data available to other researchers</ipd_description>
+  </patient_data>
+
+  <clinical_results>
+
+    <participant_flow>
+      <group_list>
+        <group group_id="P1">
+          <title>Basal Insulin Strategy</title>
+          <description>Basal Insulin Strategy&#xD;
+Support by community pharmacist&#xD;
+Support by diabetes specialist</description>
+        </group>
+        <group group_id="P2">
+          <title>Usual Care</title>
+          <description>usual care - no intervention</description>
+        </group>
+      </group_list>
+      <period_list>
+        <period>
+          <title>Allocation</title>
+          <milestone_list>
+            <milestone>
+              <title>STARTED</title>
+              <participants_list>
+                <participants group_id="P1" count="75">allocated to intervention group to receive the intervention</participants>
+                <participants group_id="P2" count="79">allocated to usual care group</participants>
+              </participants_list>
+            </milestone>
+            <milestone>
+              <title>COMPLETED</title>
+              <participants_list>
+                <participants group_id="P1" count="73"/>
+                <participants group_id="P2" count="78"/>
+              </participants_list>
+            </milestone>
+            <milestone>
+              <title>NOT COMPLETED</title>
+              <participants_list>
+                <participants group_id="P1" count="2"/>
+                <participants group_id="P2" count="1"/>
+              </participants_list>
+            </milestone>
+          </milestone_list>
+          <drop_withdraw_reason_list>
+            <drop_withdraw_reason>
+              <title>did not attend workshop; allocation not</title>
+              <participants_list>
+                <participants group_id="P1" count="2"/>
+                <participants group_id="P2" count="1"/>
+              </participants_list>
+            </drop_withdraw_reason>
+          </drop_withdraw_reason_list>
+        </period>
+        <period>
+          <title>Analysis</title>
+          <milestone_list>
+            <milestone>
+              <title>STARTED</title>
+              <participants_list>
+                <participants group_id="P1" count="73">physician withdrawal (N=3) primary outcome set to 0</participants>
+                <participants group_id="P2" count="78">physician withdrawal (N=3) primary outcome set to 0</participants>
+              </participants_list>
+            </milestone>
+            <milestone>
+              <title>COMPLETED</title>
+              <participants_list>
+                <participants group_id="P1" count="73"/>
+                <participants group_id="P2" count="78"/>
+              </participants_list>
+            </milestone>
+            <milestone>
+              <title>NOT COMPLETED</title>
+              <participants_list>
+                <participants group_id="P1" count="0"/>
+                <participants group_id="P2" count="0"/>
+              </participants_list>
+            </milestone>
+          </milestone_list>
+        </period>
+      </period_list>
+    </participant_flow>
+
+    <baseline>
+      <population>Number of physicians randomized</population>
+      <group_list>
+        <group group_id="B1">
+          <title>Basal Insulin Strategy</title>
+          <description>Basal Insulin Strategy&#xD;
+Support by community pharmacist&#xD;
+Support by diabetes specialist</description>
+        </group>
+        <group group_id="B2">
+          <title>Usual Care</title>
+          <description>usual care - no intervention</description>
+        </group>
+        <group group_id="B3">
+          <title>Total</title>
+          <description>Total of all reporting groups</description>
+        </group>
+      </group_list>
+      <analyzed_list>
+        <analyzed>
+          <units>Participants</units>
+          <scope>Overall</scope>
+          <count_list>
+            <count group_id="B1" value="75"/>
+            <count group_id="B2" value="79"/>
+            <count group_id="B3" value="154"/>
+          </count_list>
+        </analyzed>
+      </analyzed_list>
+      <measure_list>
+        <measure>
+          <title>Age</title>
+          <units>years</units>
+          <param>Mean</param>
+          <dispersion>Standard Deviation</dispersion>
+          <class_list>
+            <class>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="B1" value="51.4" spread="8.81"/>
+                    <measurement group_id="B2" value="48.2" spread="9.06"/>
+                    <measurement group_id="B3" value="49.6" spread="9.12"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+          </class_list>
+        </measure>
+        <measure>
+          <title>Sex: Female, Male</title>
+          <description>The gender of the physician was ascertained by questionnaire and by direct communication</description>
+          <units>Participants</units>
+          <param>Count of Participants</param>
+          <class_list>
+            <class>
+              <category_list>
+                <category>
+                  <title>Female</title>
+                  <measurement_list>
+                    <measurement group_id="B1" value="22"/>
+                    <measurement group_id="B2" value="20"/>
+                    <measurement group_id="B3" value="42"/>
+                  </measurement_list>
+                </category>
+                <category>
+                  <title>Male</title>
+                  <measurement_list>
+                    <measurement group_id="B1" value="53"/>
+                    <measurement group_id="B2" value="59"/>
+                    <measurement group_id="B3" value="112"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+          </class_list>
+        </measure>
+      </measure_list>
+    </baseline>
+
+    <outcome_list>
+      <outcome>
+        <type>Primary</type>
+        <title>Insulin Prescription Rate - the Number of Insulin-eligible Patients Per 12 Months Who Are Prescribed Insulin in Each Family Physician (FP) Practice</title>
+        <description>Insulin Prescription Rate (IPR) - the number of insulin-eligible patients per 12 months who are prescribed insulin in each family physician (FP) practice (Number of patients per year per FP). The IPR was analyzed using Poisson regression with the intervention group as a class effect and the mean HbA1c at baseline as a covariate.</description>
+        <time_frame>12 months</time_frame>
+        <group_list>
+          <group group_id="O1">
+            <title>Basal Insulin Strategy</title>
+            <description>Basal Insulin Strategy&#xD;
+Support by community pharmacist&#xD;
+Support by diabetes specialist</description>
+          </group>
+          <group group_id="O2">
+            <title>Usual Care</title>
+            <description>usual care - no intervention</description>
+          </group>
+        </group_list>
+        <measure>
+          <title>Insulin Prescription Rate - the Number of Insulin-eligible Patients Per 12 Months Who Are Prescribed Insulin in Each Family Physician (FP) Practice</title>
+          <description>Insulin Prescription Rate (IPR) - the number of insulin-eligible patients per 12 months who are prescribed insulin in each family physician (FP) practice (Number of patients per year per FP). The IPR was analyzed using Poisson regression with the intervention group as a class effect and the mean HbA1c at baseline as a covariate.</description>
+          <units>patients per year</units>
+          <param>Mean</param>
+          <dispersion>Standard Error</dispersion>
+          <analyzed_list>
+            <analyzed>
+              <units>Participants</units>
+              <scope>Measure</scope>
+              <count_list>
+                <count group_id="O1" value="73"/>
+                <count group_id="O2" value="78"/>
+              </count_list>
+            </analyzed>
+          </analyzed_list>
+          <class_list>
+            <class>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="2.28" spread="0.27"/>
+                    <measurement group_id="O2" value="2.29" spread="0.25"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+          </class_list>
+        </measure>
+        <analysis_list>
+          <analysis>
+            <group_id_list>
+              <group_id>O1</group_id>
+              <group_id>O2</group_id>
+            </group_id_list>
+            <groups_desc>The IPR was analyzed using Poisson regression with the intervention group as a class effect and the mean HbA1c at baseline as a covariate</groups_desc>
+            <non_inferiority_type>Superiority</non_inferiority_type>
+            <p_value>0.96</p_value>
+            <method>Poisson Regression</method>
+            <param_type>Risk Ratio (RR)</param_type>
+            <param_value>0.99</param_value>
+            <ci_percent>95</ci_percent>
+            <ci_n_sides>2-Sided</ci_n_sides>
+            <ci_lower_limit>0.8</ci_lower_limit>
+            <ci_upper_limit>1.24</ci_upper_limit>
+          </analysis>
+        </analysis_list>
+      </outcome>
+      <outcome>
+        <type>Secondary</type>
+        <title>Mean A1C of Insulin-eligible Patient Per Family Physician Post-Workshop</title>
+        <description>mean A1C of insulin-eligible patient per family physician participant during the post-Workshop period</description>
+        <time_frame>15 months</time_frame>
+        <population>The analysis of secondary data was based on available data</population>
+        <group_list>
+          <group group_id="O1">
+            <title>Basal Insulin Strategy</title>
+            <description>Basal Insulin Strategy&#xD;
+Support by community pharmacist&#xD;
+Support by diabetes specialist</description>
+          </group>
+          <group group_id="O2">
+            <title>Usual Care</title>
+            <description>usual care - no intervention</description>
+          </group>
+        </group_list>
+        <measure>
+          <title>Mean A1C of Insulin-eligible Patient Per Family Physician Post-Workshop</title>
+          <description>mean A1C of insulin-eligible patient per family physician participant during the post-Workshop period</description>
+          <population>The analysis of secondary data was based on available data</population>
+          <units>Mean % glycolyslated hemoglobin per FP</units>
+          <param>Mean</param>
+          <dispersion>Standard Deviation</dispersion>
+          <analyzed_list>
+            <analyzed>
+              <units>Participants</units>
+              <scope>Measure</scope>
+              <count_list>
+                <count group_id="O1" value="73"/>
+                <count group_id="O2" value="76"/>
+              </count_list>
+            </analyzed>
+          </analyzed_list>
+          <class_list>
+            <class>
+              <title>Workshop</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="7.12" spread="0.42"/>
+                    <measurement group_id="O2" value="7.20" spread="0.52"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+            <class>
+              <title>End of Study</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="7.09" spread="0.41"/>
+                    <measurement group_id="O2" value="7.15" spread="0.51"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+          </class_list>
+        </measure>
+      </outcome>
+      <outcome>
+        <type>Secondary</type>
+        <title>Mean Fasting Blood Glucose of Insulin-eligible Patients</title>
+        <description>mean fasting blood glucose (FBG) of insulin-eligible patient per family physician post-Workshop</description>
+        <time_frame>15 months</time_frame>
+        <population>The analysis of secondary data was based on available data</population>
+        <group_list>
+          <group group_id="O1">
+            <title>Basal Insulin Strategy</title>
+            <description>Basal Insulin Strategy&#xD;
+Support by community pharmacist&#xD;
+Support by diabetes specialist</description>
+          </group>
+          <group group_id="O2">
+            <title>Usual Care</title>
+            <description>usual care - no intervention</description>
+          </group>
+        </group_list>
+        <measure>
+          <title>Mean Fasting Blood Glucose of Insulin-eligible Patients</title>
+          <description>mean fasting blood glucose (FBG) of insulin-eligible patient per family physician post-Workshop</description>
+          <population>The analysis of secondary data was based on available data</population>
+          <units>mean mmol/L per physician</units>
+          <param>Mean</param>
+          <dispersion>Standard Deviation</dispersion>
+          <analyzed_list>
+            <analyzed>
+              <units>Participants</units>
+              <scope>Measure</scope>
+              <count_list>
+                <count group_id="O1" value="71"/>
+                <count group_id="O2" value="70"/>
+              </count_list>
+            </analyzed>
+          </analyzed_list>
+          <class_list>
+            <class>
+              <title>Workshop</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="7.86" spread="0.67"/>
+                    <measurement group_id="O2" value="7.89" spread="0.69"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+            <class>
+              <title>End of Study</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="7.78" spread="0.68"/>
+                    <measurement group_id="O2" value="7.82" spread="0.68"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+          </class_list>
+        </measure>
+      </outcome>
+      <outcome>
+        <type>Secondary</type>
+        <title>Percent of Insulin-eligible Patients With Intensification of Diabetes Management Per FP Post - Workshop</title>
+        <description>Percent of insulin-eligible patients with intensification of diabetes management (increase dose of oral anti-diabetes drug (OAD) or insulin, OAD score, the addition of insulin) per FP post - Workshop</description>
+        <time_frame>12 months</time_frame>
+        <population>The analysis of secondary data was based on available data</population>
+        <group_list>
+          <group group_id="O1">
+            <title>Basal Insulin Strategy</title>
+            <description>Basal Insulin Strategy&#xD;
+Support by community pharmacist&#xD;
+Support by diabetes specialist</description>
+          </group>
+          <group group_id="O2">
+            <title>Usual Care</title>
+            <description>usual care - no intervention</description>
+          </group>
+        </group_list>
+        <measure>
+          <title>Percent of Insulin-eligible Patients With Intensification of Diabetes Management Per FP Post - Workshop</title>
+          <description>Percent of insulin-eligible patients with intensification of diabetes management (increase dose of oral anti-diabetes drug (OAD) or insulin, OAD score, the addition of insulin) per FP post - Workshop</description>
+          <population>The analysis of secondary data was based on available data</population>
+          <units>% of pts with intensification per FP</units>
+          <param>Mean</param>
+          <dispersion>Standard Deviation</dispersion>
+          <analyzed_list>
+            <analyzed>
+              <units>Participants</units>
+              <scope>Measure</scope>
+              <count_list>
+                <count group_id="O1" value="73"/>
+                <count group_id="O2" value="76"/>
+              </count_list>
+            </analyzed>
+          </analyzed_list>
+          <class_list>
+            <class>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="31.59" spread="14.17"/>
+                    <measurement group_id="O2" value="32.80" spread="14.91"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+          </class_list>
+        </measure>
+      </outcome>
+      <outcome>
+        <type>Secondary</type>
+        <title>Percentage of Patients at Target (A1C ≤ 7.0%) Per FP</title>
+        <description>Percentage of patients at target (A1C ≤ 7.0%) per FP at time of the Workshop and post - Workshop</description>
+        <time_frame>15 months</time_frame>
+        <population>The analysis of secondary data was based on available data</population>
+        <group_list>
+          <group group_id="O1">
+            <title>Basal Insulin Strategy</title>
+            <description>Basal Insulin Strategy&#xD;
+Support by community pharmacist&#xD;
+Support by diabetes specialist</description>
+          </group>
+          <group group_id="O2">
+            <title>Usual Care</title>
+            <description>usual care - no intervention</description>
+          </group>
+        </group_list>
+        <measure>
+          <title>Percentage of Patients at Target (A1C ≤ 7.0%) Per FP</title>
+          <description>Percentage of patients at target (A1C ≤ 7.0%) per FP at time of the Workshop and post - Workshop</description>
+          <population>The analysis of secondary data was based on available data</population>
+          <units>percentage of patients per physician</units>
+          <param>Mean</param>
+          <dispersion>Standard Deviation</dispersion>
+          <analyzed_list>
+            <analyzed>
+              <units>Participants</units>
+              <scope>Measure</scope>
+              <count_list>
+                <count group_id="O1" value="73"/>
+                <count group_id="O2" value="76"/>
+              </count_list>
+            </analyzed>
+          </analyzed_list>
+          <class_list>
+            <class>
+              <title>Workshop</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="58.4" spread="16.20"/>
+                    <measurement group_id="O2" value="55.95" spread="15.65"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+            <class>
+              <title>End of Study</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="58.68" spread="15.40"/>
+                    <measurement group_id="O2" value="57.58" spread="16.12"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+          </class_list>
+        </measure>
+      </outcome>
+      <outcome>
+        <type>Secondary</type>
+        <title>Percent of Patients at Target (A1C ≤ 6.5%) Per FP</title>
+        <description>Percent of patients at target (A1C ≤ 6.5%) per FP at time of the Workshop and post - Workshop</description>
+        <time_frame>15 months</time_frame>
+        <population>The analysis of secondary data was based on available data</population>
+        <group_list>
+          <group group_id="O1">
+            <title>Basal Insulin Strategy</title>
+            <description>Basal Insulin Strategy&#xD;
+Support by community pharmacist&#xD;
+Support by diabetes specialist</description>
+          </group>
+          <group group_id="O2">
+            <title>Usual Care</title>
+            <description>usual care - no intervention</description>
+          </group>
+        </group_list>
+        <measure>
+          <title>Percent of Patients at Target (A1C ≤ 6.5%) Per FP</title>
+          <description>Percent of patients at target (A1C ≤ 6.5%) per FP at time of the Workshop and post - Workshop</description>
+          <population>The analysis of secondary data was based on available data</population>
+          <units>percent of patients per physician</units>
+          <param>Mean</param>
+          <dispersion>Standard Deviation</dispersion>
+          <analyzed_list>
+            <analyzed>
+              <units>Participants</units>
+              <scope>Measure</scope>
+              <count_list>
+                <count group_id="O1" value="70"/>
+                <count group_id="O2" value="73"/>
+              </count_list>
+            </analyzed>
+          </analyzed_list>
+          <class_list>
+            <class>
+              <title>At time of Workshop</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="36.76" spread="14.95"/>
+                    <measurement group_id="O2" value="36.62" spread="12.55"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+            <class>
+              <title>15 months post Workshop</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="36.13" spread="15.06"/>
+                    <measurement group_id="O2" value="36.61" spread="14.28"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+          </class_list>
+        </measure>
+      </outcome>
+      <outcome>
+        <type>Secondary</type>
+        <title>Change in &quot;Insulin Prescription Rate&quot;</title>
+        <description>change in &quot;Insulin Prescription Rate&quot; from baseline prior to the Workshop to 12 months post - Workshop</description>
+        <time_frame>12 months</time_frame>
+        <population>In an updated version of the statistical analysis plan this variable was not calculated from the data set and not included in the analysis</population>
+        <group_list>
+          <group group_id="O1">
+            <title>Basal Insulin Initiation Strategy</title>
+            <description>Basal Insulin Initiation Strategy which includes:&#xD;
+support by community pharmacist&#xD;
+support by diabetes specialist&#xD;
+Basal Insulin Initiation Strategy: This multifaceted intervention consists of (1) Diabetes Specialist Consultation Support which entails specialists and educators providing consultation for insulin initiation and titration for the 12 months following the Workshop. Support will consist of prearranged and scheduled communications to review and advise for the first 2 months and will continue on an ad hoc basis for the remaining 10 months, with communication initiated by the physician (2)Community Pharmacy Insulin Initiation consists of trained community pharmacists providing patient education insulin initiation. Education will consist of one individual teaching session, one hour in duration, to review the insulin prescription protocol, insulin injection method, management of hypoglycemia, and self-monitoring of blood glucose.</description>
+          </group>
+          <group group_id="O2">
+            <title>Usual Practice</title>
+            <description>The physicians randomized to this group proceeded with their usual practice</description>
+          </group>
+        </group_list>
+        <measure>
+          <title>Change in &quot;Insulin Prescription Rate&quot;</title>
+          <description>change in &quot;Insulin Prescription Rate&quot; from baseline prior to the Workshop to 12 months post - Workshop</description>
+          <population>In an updated version of the statistical analysis plan this variable was not calculated from the data set and not included in the analysis</population>
+          <analyzed_list>
+            <analyzed>
+              <units>Participants</units>
+              <scope>Measure</scope>
+              <count_list>
+                <count group_id="O1" value="0"/>
+                <count group_id="O2" value="0"/>
+              </count_list>
+            </analyzed>
+          </analyzed_list>
+        </measure>
+      </outcome>
+      <outcome>
+        <type>Secondary</type>
+        <title>Glycemic Control (A1C) at Insulin Initiation, 3 and 6 Months Post Initiation</title>
+        <description>Glycemic control (A1C) at insulin initiation, 3 months post initiation and 6 months post initiation for those prescribed insulin per family physician</description>
+        <time_frame>15 months</time_frame>
+        <population>The analysis of secondary data was based on available data</population>
+        <group_list>
+          <group group_id="O1">
+            <title>Basal Insulin Initiation Strategy</title>
+            <description>Basal Insulin Initiation Strategy which includes:&#xD;
+support by community pharmacist&#xD;
+support by diabetes specialist&#xD;
+Basal Insulin Initiation Strategy: This multifaceted intervention consists of (1) Diabetes Specialist Consultation Support which entails specialists and educators providing consultation for insulin initiation and titration for the 12 months following the Workshop. Support will consist of prearranged and scheduled communications to review and advise for the first 2 months and will continue on an ad hoc basis for the remaining 10 months, with communication initiated by the physician (2)Community Pharmacy Insulin Initiation consists of trained community pharmacists providing patient education insulin initiation. Education will consist of one individual teaching session, one hour in duration, to review the insulin prescription protocol, insulin injection method, management of hypoglycemia, and self-monitoring of blood glucose.</description>
+          </group>
+          <group group_id="O2">
+            <title>Usual Practice</title>
+            <description>The physicians randomized to this group proceeded with their usual practice</description>
+          </group>
+        </group_list>
+        <measure>
+          <title>Glycemic Control (A1C) at Insulin Initiation, 3 and 6 Months Post Initiation</title>
+          <description>Glycemic control (A1C) at insulin initiation, 3 months post initiation and 6 months post initiation for those prescribed insulin per family physician</description>
+          <population>The analysis of secondary data was based on available data</population>
+          <units>Mean % glycosylated hemoglobin per FP</units>
+          <param>Mean</param>
+          <dispersion>Standard Deviation</dispersion>
+          <analyzed_list>
+            <analyzed>
+              <units>Participants</units>
+              <scope>Measure</scope>
+              <count_list>
+                <count group_id="O1" value="39"/>
+                <count group_id="O2" value="44"/>
+              </count_list>
+            </analyzed>
+          </analyzed_list>
+          <class_list>
+            <class>
+              <title>Initiation</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="8.82" spread="1.098"/>
+                    <measurement group_id="O2" value="9.37" spread="1.354"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+            <class>
+              <title>3 months post initiation</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="8.32" spread="1.24"/>
+                    <measurement group_id="O2" value="9.05" spread="1.344"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+            <class>
+              <title>6 months post initiation</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="7.97" spread="1.003"/>
+                    <measurement group_id="O2" value="8.57" spread="1.382"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+          </class_list>
+        </measure>
+      </outcome>
+      <outcome>
+        <type>Secondary</type>
+        <title>Physician Score for Knowledge of Insulin Initiation &amp; Titration</title>
+        <description>physician score for knowledge of insulin initiation &amp; titration minimum score of 0 maximum score of 17. The greater the score the greater the knowledge.</description>
+        <time_frame>12 months</time_frame>
+        <population>The analysis of secondary data was based on available data</population>
+        <group_list>
+          <group group_id="O1">
+            <title>Basal Insulin Initiation Strategy</title>
+            <description>Basal Insulin Initiation Strategy which includes:&#xD;
+support by community pharmacist&#xD;
+support by diabetes specialist&#xD;
+Basal Insulin Initiation Strategy: This multifaceted intervention consists of (1) Diabetes Specialist Consultation Support which entails specialists and educators providing consultation for insulin initiation and titration for the 12 months following the Workshop. Support will consist of prearranged and scheduled communications to review and advise for the first 2 months and will continue on an ad hoc basis for the remaining 10 months, with communication initiated by the physician (2)Community Pharmacy Insulin Initiation consists of trained community pharmacists providing patient education insulin initiation. Education will consist of one individual teaching session, one hour in duration, to review the insulin prescription protocol, insulin injection method, management of hypoglycemia, and self-monitoring of blood glucose.</description>
+          </group>
+          <group group_id="O2">
+            <title>Usual Practice</title>
+            <description>The physicians randomized to this group proceeded with their usual practice</description>
+          </group>
+        </group_list>
+        <measure>
+          <title>Physician Score for Knowledge of Insulin Initiation &amp; Titration</title>
+          <description>physician score for knowledge of insulin initiation &amp; titration minimum score of 0 maximum score of 17. The greater the score the greater the knowledge.</description>
+          <population>The analysis of secondary data was based on available data</population>
+          <units>units on a scale</units>
+          <param>Mean</param>
+          <dispersion>Standard Deviation</dispersion>
+          <analyzed_list>
+            <analyzed>
+              <units>Participants</units>
+              <scope>Measure</scope>
+              <count_list>
+                <count group_id="O1" value="59"/>
+                <count group_id="O2" value="59"/>
+              </count_list>
+            </analyzed>
+          </analyzed_list>
+          <class_list>
+            <class>
+              <title>Pre-Workshop</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="15.5" spread="2.2"/>
+                    <measurement group_id="O2" value="15.5" spread="2.5"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+            <class>
+              <title>Post-Workshop</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="16.3" spread="1.9"/>
+                    <measurement group_id="O2" value="16.9" spread="1.9"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+          </class_list>
+        </measure>
+      </outcome>
+      <outcome>
+        <type>Secondary</type>
+        <title>Physician Score for Attitude Towards Insulin Initiation &amp; Titration</title>
+        <description>physician score for attitude towards insulin initiation &amp; titration The minimum score is 11 and the maximum is 55 with a lower score indicating the ideal attitude.</description>
+        <time_frame>12 months</time_frame>
+        <population>The analysis of secondary data was based on available data&quot;</population>
+        <group_list>
+          <group group_id="O1">
+            <title>Basal Insulin Initiation Strategy</title>
+            <description>Basal Insulin Initiation Strategy which includes:&#xD;
+support by community pharmacist&#xD;
+support by diabetes specialist&#xD;
+Basal Insulin Initiation Strategy: This multifaceted intervention consists of (1) Diabetes Specialist Consultation Support which entails specialists and educators providing consultation for insulin initiation and titration for the 12 months following the Workshop. Support will consist of prearranged and scheduled communications to review and advise for the first 2 months and will continue on an ad hoc basis for the remaining 10 months, with communication initiated by the physician (2)Community Pharmacy Insulin Initiation consists of trained community pharmacists providing patient education insulin initiation. Education will consist of one individual teaching session, one hour in duration, to review the insulin prescription protocol, insulin injection method, management of hypoglycemia, and self-monitoring of blood glucose.</description>
+          </group>
+          <group group_id="O2">
+            <title>Usual Practice</title>
+            <description>The physicians randomized to this group proceeded with their usual practice</description>
+          </group>
+        </group_list>
+        <measure>
+          <title>Physician Score for Attitude Towards Insulin Initiation &amp; Titration</title>
+          <description>physician score for attitude towards insulin initiation &amp; titration The minimum score is 11 and the maximum is 55 with a lower score indicating the ideal attitude.</description>
+          <population>The analysis of secondary data was based on available data&quot;</population>
+          <units>units on a scale</units>
+          <param>Mean</param>
+          <dispersion>Standard Deviation</dispersion>
+          <analyzed_list>
+            <analyzed>
+              <units>Participants</units>
+              <scope>Measure</scope>
+              <count_list>
+                <count group_id="O1" value="59"/>
+                <count group_id="O2" value="59"/>
+              </count_list>
+            </analyzed>
+          </analyzed_list>
+          <class_list>
+            <class>
+              <title>Pre-Workshop</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="28.9" spread="4.9"/>
+                    <measurement group_id="O2" value="29.7" spread="5.3"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+            <class>
+              <title>Post-Workshop</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="26.1" spread="4.1"/>
+                    <measurement group_id="O2" value="27.3" spread="5.3"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+          </class_list>
+        </measure>
+      </outcome>
+      <outcome>
+        <type>Secondary</type>
+        <title>Physician Score for Self-efficacy of Insulin Initiation &amp; Titration</title>
+        <description>physician score for self-efficacy of insulin initiation &amp; titration where the minimum value was 10 and the maximum was 50. A value of 50 indicated complete self efficacy to initiate and titrate insulin</description>
+        <time_frame>12 months</time_frame>
+        <population>The analysis of secondary data was based on available data</population>
+        <group_list>
+          <group group_id="O1">
+            <title>Basal Insulin Initiation Strategy</title>
+            <description>Basal Insulin Initiation Strategy which includes:&#xD;
+support by community pharmacist&#xD;
+support by diabetes specialist&#xD;
+Basal Insulin Initiation Strategy: This multifaceted intervention consists of (1) Diabetes Specialist Consultation Support which entails specialists and educators providing consultation for insulin initiation and titration for the 12 months following the Workshop. Support will consist of prearranged and scheduled communications to review and advise for the first 2 months and will continue on an ad hoc basis for the remaining 10 months, with communication initiated by the physician (2)Community Pharmacy Insulin Initiation consists of trained community pharmacists providing patient education insulin initiation. Education will consist of one individual teaching session, one hour in duration, to review the insulin prescription protocol, insulin injection method, management of hypoglycemia, and self-monitoring of blood glucose.</description>
+          </group>
+          <group group_id="O2">
+            <title>Usual Practice</title>
+            <description>The physicians randomized to this group proceeded with their usual practice</description>
+          </group>
+        </group_list>
+        <measure>
+          <title>Physician Score for Self-efficacy of Insulin Initiation &amp; Titration</title>
+          <description>physician score for self-efficacy of insulin initiation &amp; titration where the minimum value was 10 and the maximum was 50. A value of 50 indicated complete self efficacy to initiate and titrate insulin</description>
+          <population>The analysis of secondary data was based on available data</population>
+          <units>score on a scale</units>
+          <param>Mean</param>
+          <dispersion>Standard Deviation</dispersion>
+          <analyzed_list>
+            <analyzed>
+              <units>Participants</units>
+              <scope>Measure</scope>
+              <count_list>
+                <count group_id="O1" value="59"/>
+                <count group_id="O2" value="59"/>
+              </count_list>
+            </analyzed>
+          </analyzed_list>
+          <class_list>
+            <class>
+              <title>Pre Workshop</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="35.8" spread="4.67"/>
+                    <measurement group_id="O2" value="35.7" spread="3.94"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+            <class>
+              <title>Post Workshop</title>
+              <category_list>
+                <category>
+                  <measurement_list>
+                    <measurement group_id="O1" value="40.6" spread="3.73"/>
+                    <measurement group_id="O2" value="39.6" spread="4.0"/>
+                  </measurement_list>
+                </category>
+              </category_list>
+            </class>
+          </class_list>
+        </measure>
+      </outcome>
+    </outcome_list>
+
+    <reported_events>
+      <desc>ClinicalTrials.gov definition of adverse event (AE) is not applicable as the intervention was directed towards changing physician behaviour.&#xD;
+Non-systematic Assessment was chosen Collection Approach for Table Default because it was a required field&#xD;
+AE information was not gathered so zeros were entered for Numbers of Patients Affected and Numbers of Participants at Risk of AE. Zero was entered into Frequency Threshold for Reporting Other Adverse Events because it required a response.</desc>
+      <group_list>
+        <group group_id="E1">
+          <title>Basal Insulin Strategy</title>
+          <description>Basal Insulin Strategy&#xD;
+Support by community pharmacist&#xD;
+Support by diabetes specialist</description>
+        </group>
+        <group group_id="E2">
+          <title>Usual Care</title>
+          <description>usual care used as the control</description>
+        </group>
+      </group_list>
+      <serious_events>
+        <category_list>
+          <category>
+            <title>Total</title>
+            <event_list>
+              <event>
+                <sub_title>Total, serious adverse events</sub_title>
+                <counts group_id="E1" subjects_affected="0" subjects_at_risk="0"/>
+                <counts group_id="E2" subjects_affected="0" subjects_at_risk="0"/>
+              </event>
+            </event_list>
+          </category>
+        </category_list>
+      </serious_events>
+      <other_events>
+        <frequency_threshold>0</frequency_threshold>
+        <category_list>
+          <category>
+            <title>Total</title>
+            <event_list>
+              <event>
+                <sub_title>Total, other adverse events</sub_title>
+                <counts group_id="E1" subjects_affected="0" subjects_at_risk="0"/>
+                <counts group_id="E2" subjects_affected="0" subjects_at_risk="0"/>
+              </event>
+            </event_list>
+          </category>
+        </category_list>
+      </other_events>
+    </reported_events>
+
+    <certain_agreements>
+      <pi_employee>Principal Investigators are NOT employed by the organization sponsoring the study.</pi_employee>
+      <restrictive_agreement>There is NOT an agreement between Principal Investigators and the Sponsor (or its agents) that restricts the PI's rights to discuss or publish trial results after the trial is completed. </restrictive_agreement>
+    </certain_agreements>
+    <limitations_and_caveats>The estimated sample size of 89 physicians/group was not achieved hence the final results may have been under-powered</limitations_and_caveats>
+    <point_of_contact>
+      <name_or_title>Dr. Stewart Harris</name_or_title>
+      <organization>Lawson Research Institute</organization>
+      <phone>519 858-5028</phone>
+      <email>sharris1@uwo.ca</email>
+    </point_of_contact>
+  </clinical_results>
+</clinical_study>

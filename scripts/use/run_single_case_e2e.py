@@ -15,6 +15,7 @@ sys.path.insert(0, PROJECT_ROOT_STR)
 
 from agent.config.env import load_dotenv_if_present
 from agent.retrieval.trial_chunks import resolve_trial_vector_output_root
+from agent.tools import create_live_medical_knowledge_retriever
 from agent.tools.trial_vector_retrieval_tools import create_trial_chunk_retrieval_tool
 from agent.workflow import run_workflow
 from scripts.try_single_case_workflow import (
@@ -132,6 +133,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Let the workflow resolve trial retrieval on its own instead of injecting a prebuilt retriever.",
     )
     parser.add_argument(
+        "--live-medical-knowledge",
+        action="store_true",
+        help="Inject a live PubMed/Wikidata medical knowledge retriever for the protocol stage.",
+    )
+    parser.add_argument(
+        "--llm-eligibility-judge",
+        action="store_true",
+        help="Enable protocol LLM eligibility judging using the OpenAI-compatible .env configuration.",
+    )
+    parser.add_argument(
         "--output",
         default=str(DEFAULT_OUTPUT_FILE),
         help="Path to save the full workflow result JSON.",
@@ -188,6 +199,19 @@ def _build_trial_tool_registry(args: argparse.Namespace) -> tuple[dict[str, obje
     return {"trial_retriever": retriever}, config_summary
 
 
+def _build_medical_knowledge_tool_registry(args: argparse.Namespace) -> tuple[dict[str, object], dict[str, str]]:
+    if not args.live_medical_knowledge:
+        return {}, {}
+    retriever = create_live_medical_knowledge_retriever()
+    return (
+        {"medical_knowledge_retriever": retriever},
+        {
+            "medical_knowledge_retriever": retriever.__class__.__name__,
+            "medical_knowledge_sources": ",".join(source.__class__.__name__ for source in retriever.sources),
+        },
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     load_dotenv_if_present(PROJECT_ROOT / ".env")
@@ -196,6 +220,10 @@ def main(argv: list[str] | None = None) -> int:
     case_text, case_source = resolve_case_text(args)
     snapshot_dir = _resolve_optional_path(args.snapshot_dir)
     tool_registry, trial_config = _build_trial_tool_registry(args)
+    knowledge_registry, knowledge_config = _build_medical_knowledge_tool_registry(args)
+    tool_registry.update(knowledge_registry)
+    if args.llm_eligibility_judge:
+        tool_registry["protocol_config"] = {"enable_llm_eligibility_judge": True}
 
     result = run_workflow(
         case_text=case_text,
@@ -223,6 +251,10 @@ def main(argv: list[str] | None = None) -> int:
         print("Injected trial retriever:", json.dumps(trial_config, ensure_ascii=False))
     else:
         print("Injected trial retriever: disabled")
+    if knowledge_config:
+        print("Injected medical knowledge retriever:", json.dumps(knowledge_config, ensure_ascii=False))
+    else:
+        print("Injected medical knowledge retriever: disabled")
     print("Result JSON:", output_path)
     if snapshot_dir:
         print("Snapshot dir:", snapshot_dir)

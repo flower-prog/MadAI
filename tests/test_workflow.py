@@ -13,6 +13,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from agent import workflow as workflow_module
+from agent.case_structuring import build_structured_case_payload
 
 
 class _FakeGraph:
@@ -37,6 +38,33 @@ class WorkflowTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         workflow_module.graph = self.original_graph
+
+    def test_structured_case_payload_merges_seed_and_patient_inputs(self) -> None:
+        payload = build_structured_case_payload(
+            seeded_structured_case={
+                "case_summary": "seed summary",
+                "known_facts": ["known"],
+                "structured_inputs": {"age": 62},
+                "interval_inputs": {"baseline": {"value": 1}},
+            },
+            source_mode="patient_note",
+            raw_request="request",
+            raw_text="raw",
+            case_summary="final summary",
+            problem_list=["melanoma"],
+            department="肿瘤科",
+            department_tags=["肿瘤科"],
+            data_readiness={"status": "partial"},
+            structured_inputs={"sex": "Male"},
+            reporter_feedback=["retry"],
+        )
+
+        self.assertEqual(payload["case_summary"], "final summary")
+        self.assertEqual(payload["problem_list"], ["melanoma"])
+        self.assertEqual(payload["known_facts"], ["known"])
+        self.assertEqual(payload["structured_inputs"], {"age": 62, "sex": "Male"})
+        self.assertEqual(payload["interval_inputs"], {"baseline": {"value": 1}})
+        self.assertEqual(payload["reporter_feedback"], ["retry"])
 
     def test_run_agent_workflow_builds_state_and_invokes_graph(self) -> None:
         result = workflow_module.run_agent_workflow(
